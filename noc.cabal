@@ -4,11 +4,12 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bec5ab8e23f38a64a34bc2ce997df1725e77fac1f53d65df2336dad5bcce28f8
+-- hash: 98a5fef8dd2f467eb45891f57da2a7afc3b38332c4bb571431381407abeee91c
 
 name:           noc
 version:        0.1.0.0
-description:    Concatenative language made to learning more about PLT.
+synopsis:       User-friendly stack-based concatenative language,
+category:       Language
 homepage:       https://github.com/mortim1/noc#readme
 bug-reports:    https://github.com/mortim1/noc/issues
 author:         mortim
@@ -19,7 +20,6 @@ license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    ChangeLog.md
 
 source-repository head
   type: git
@@ -27,13 +27,16 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Language.Noc.Eval
+      Language.Noc.Internal
+      Language.Noc.Parser
   other-modules:
       Paths_noc
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , parsec
   default-language: Haskell2010
 
 executable noc-language
@@ -46,6 +49,7 @@ executable noc-language
   build-depends:
       base >=4.7 && <5
     , noc
+    , parsec
   default-language: Haskell2010
 
 test-suite noc-test
@@ -59,4 +63,5 @@ test-suite noc-test
   build-depends:
       base >=4.7 && <5
     , noc
+    , parsec
   default-language: Haskell2010
