@@ -7,54 +7,34 @@ module Language.Noc.Parser
   )
 where
 
--- Noc Grammar
--- <word> ::= [A-Za-z-_]+
--- <numbers> ::= [0-9]+
--- <quote> ::= "[" (<number> | <word> | <quote> |)+ "]"
--- <stack> ::= (<word> | <quote>)*
-
+-- Modules
 import Text.Parsec
 import Text.Parsec.String (Parser, parseFromFile)
+import Language.Noc.Lexer
 
--- Noc AST
-data Atom = QuoteAtom Stack | WordAtom String | FloatAtom Float deriving (Show, Eq)
-
+-- AST
+data Atom = QuoteAtom Stack | WordAtom String | FloatAtom Double deriving (Show, Eq)
 type Stack = [Atom]
 
------------------------
-opSpaces :: Parser ()
-opSpaces = (optional $ spaces)
-
-spaces' :: Parser Atom -> Parser Atom
-spaces' p = between opSpaces opSpaces p
-
-operator :: Parser Char
-operator = oneOf "+-/*"
-
-readDigit :: Parser String -> Parser Float
-readDigit p = (\x -> read x :: Float) <$> p
-
------------------------
+-------- Parser combinators ------------
 word :: Parser Atom
-word = spaces' $ (many1 (alphaNum <|> operator) <|> string ".") >>= (pure . WordAtom)
+word = WordAtom <$> identifier
 
 number :: Parser Atom
-number = spaces' $ (readDigit $ many1 digit) >>= (pure . FloatAtom)
+number = do
+          content <- naturalOrFloat
+          pure $ case content of
+            Left i -> FloatAtom $ (read (show i) :: Double)
+            Right f -> FloatAtom f
 
 quote :: Parser Atom
-quote = do
-  char '['
-  content <- stack
-  char ']'
-  opSpaces
-  pure $ QuoteAtom content
-
------------------------------------------------------
+quote = QuoteAtom <$> between (symbol "[") (symbol "]") stack
+----------------------------------------
 stack :: Parser Stack
-stack = opSpaces >> sepBy (try number <|> word <|> quote) spaces
+stack = many $ lexeme (try number <|> word <|> quote)
 
 parseNoc :: String -> Either ParseError Stack
-parseNoc expr = parse stack "" expr
+parseNoc expr = parse (whiteSpace *> stack <* eof) "" expr
 
 parseNocFile :: String -> IO (Either ParseError Stack)
-parseNocFile path = parseFromFile stack path
+parseNocFile path = parseFromFile (whiteSpace *> stack <* eof) path
