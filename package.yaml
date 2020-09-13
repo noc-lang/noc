@@ -21,12 +21,14 @@ category:            Language
 dependencies:
 - base >= 4.7 && < 5
 - parsec
+- ansi-terminal
+- optparse-applicative
 
 library:
   source-dirs: src
 
 executables:
-  noc-language:
+  noc:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

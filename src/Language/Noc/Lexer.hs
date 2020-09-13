@@ -39,3 +39,6 @@ lexeme = P.lexeme lexer
 
 symbol :: Stream s m Char => String -> ParsecT s u m String
 symbol = P.symbol lexer
+
+reserved :: Stream s m Char => String -> ParsecT s u m ()
+reserved = P.reserved lexer
