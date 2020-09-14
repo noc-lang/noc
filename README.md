@@ -14,9 +14,19 @@ You can check all commands here.
 $ noc --help
 ```
 
-You can also run REPL, like this:
+You can also run Noc REPL, like this:
 ```
 $ noc
 ```
 
+---
+
+### Noc grammar
+That's Noc grammar with BNF notation.
+```bnf
+-- <word> ::= [A-Za-z-_]+
+-- <numbers> ::= [0-9]+ | [0-9]+.[0-9]+
+-- <quote> ::= "[" (<numbers> | <word> | <quote>)+ "]"
+-- <stack> ::= (<numbers> | <word> | <quote>)*
+```
 

@@ -1,4 +1,0 @@
--- <word> ::= [A-Za-z-_]+
--- <numbers> ::= [0-9]+ | [0-9]+.[0-9]+
--- <quote> ::= "[" (<numbers> | <word> | <quote>)+ "]"
--- <stack> ::= (<numbers> | <word> | <quote>)*
