@@ -1,5 +1,7 @@
 # noc
 
+<img src="/assets/icon.png" alt="Noc icon" align=right width="128" />
+
 User-friendly stack-based concatenative programming language.
 
 ### Installing noc
