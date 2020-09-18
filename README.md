@@ -1,6 +1,6 @@
 # noc
 
-<img src="/assets/icon.png" alt="Noc icon" align=right width="128" />
+<img src="/assets/images/icon.png" alt="Noc icon" align=right width="128" />
 
 User-friendly stack-based concatenative programming language.
 
