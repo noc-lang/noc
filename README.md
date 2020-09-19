@@ -21,14 +21,19 @@ You can also run Noc REPL, like this:
 $ noc
 ```
 
----
-
 ### Noc grammar
 That's Noc grammar with BNF notation.
 ```bnf
--- <word> ::= [A-Za-z-_]+
--- <numbers> ::= [0-9]+ | [0-9]+.[0-9]+
+-- <reserved> ::= "def"
+-- <alpha> ::= [A-Za-z-_]
+-- <num> ::= [0-9]
+
+-- <word> ::= (<alpha>)+
+-- <numbers> ::= (<num>)+ | (<num>)+.(<num>)+
 -- <quote> ::= "[" (<numbers> | <word> | <quote>)+ "]"
 -- <stack> ::= (<numbers> | <word> | <quote>)*
+
+-- <declaration> ::= <reserved> "=" "{" (stack) "}"
+-- <program> ::= (<declaration>)*
 ```
 
