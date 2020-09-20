@@ -1,0 +1,10 @@
+# Noc language
+
+def square = {
+    dup *
+}
+
+def main = {
+    # 2² = 4
+    2 square
+}

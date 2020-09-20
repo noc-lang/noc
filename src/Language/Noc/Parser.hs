@@ -21,17 +21,13 @@ word :: Parser Atom
 word = WordAtom <$> identifier
 
 number :: Parser Atom
-number = do
-          content <- naturalOrFloat
-          pure $ case content of
-            Left i -> FloatAtom $ (read (show i) :: Double)
-            Right f -> FloatAtom f
+number = FloatAtom . either fromIntegral id <$> naturalOrFloat
 
 quote :: Parser Atom
-quote = QuoteAtom <$> between (symbol "[") (symbol "]") stack
+quote = QuoteAtom <$> (brackets stack)
 
 stack :: Parser Stack
-stack = many $ lexeme (try number <|> word <|> quote)
+stack = many $ lexeme (quote <|> number <|> word)
 
 ----------------------- Declaration Parser ------------------------------------------
 data Declaration = Declaration {declName :: String, declVal :: [Stack]} deriving Show
@@ -39,10 +35,10 @@ type Program = [Declaration]
 
 function :: Parser Declaration
 function = do
-            lexeme $ string "def"
+            lexeme $ reserved "def"
             name <- lexeme $ manyTill alphaNum (whiteSpace >> symbol "=")
-            content <- (lexeme $ symbol "{" >> manyTill (whiteSpace *> stack) (symbol "}"))
-            pure $ Declaration name content
+            content <- (lexeme $ braces $ (whiteSpace *> stack))
+            pure $ Declaration name [content]
 
 program :: Parser Program
 program = whiteSpace *> (many function) <* eof

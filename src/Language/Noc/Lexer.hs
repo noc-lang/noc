@@ -19,7 +19,7 @@ lexer = P.makeTokenParser $ P.LanguageDef {
   P.identLetter = alphaNum <|> oneOf "+-/*",
   P.opStart = (noneOf ""),
   P.opLetter = (noneOf ""),
-  P.reservedNames = [],
+  P.reservedNames = ["def"],
   P.reservedOpNames = [],
   P.caseSensitive = False
 }
@@ -27,6 +27,12 @@ lexer = P.makeTokenParser $ P.LanguageDef {
 -- Lexer functions
 naturalOrFloat :: Stream s m Char => ParsecT s u m (Either Integer Double)
 naturalOrFloat = P.naturalOrFloat lexer
+
+brackets :: Stream s m Char => ParsecT s u m a -> ParsecT s u m a 
+brackets = P.brackets lexer
+
+braces :: Stream s m Char => ParsecT s u m a -> ParsecT s u m a 
+braces = P.braces lexer
 
 identifier :: Stream s m Char => ParsecT s u m String
 identifier = P.identifier lexer
