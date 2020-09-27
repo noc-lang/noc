@@ -1,0 +1,7 @@
+def square = {
+    dup *
+}
+
+def main = {
+    4 square
+}

@@ -4,7 +4,8 @@ module Language.Noc.Parser
     ParseError,
     Stack,
     Atom (QuoteAtom, WordAtom, FloatAtom),
-    Program
+    Program,
+    Declaration(..)
   )
 where
 
@@ -14,7 +15,7 @@ import Text.Parsec.String (Parser, parseFromFile)
 import Language.Noc.Lexer
 
 ----------------------- Atoms Parser ----------------------------------------------
-data Atom = QuoteAtom Stack | WordAtom String | FloatAtom Double deriving (Show, Eq)
+data Atom = QuoteAtom Stack | WordAtom String | FloatAtom Double deriving (Show,Eq)
 type Stack = [Atom]
 
 word :: Parser Atom
@@ -30,7 +31,7 @@ stack :: Parser Stack
 stack = many $ lexeme (quote <|> number <|> word)
 
 ----------------------- Declaration Parser ------------------------------------------
-data Declaration = Declaration {declName :: String, declVal :: [Stack]} deriving Show
+data Declaration = Declaration {declName :: String, declVal :: [Stack]} deriving (Show,Eq)
 type Program = [Declaration]
 
 function :: Parser Declaration

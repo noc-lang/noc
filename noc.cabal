@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a1b44e07fca2d0c625a466f03714bbb273065781f99fd101df353ab9dfa49f46
+-- hash: 051fe2f9c33100c23c884e7dfb45d8a51f16fe0489fb1bb2680d1ffddb9df246
 
 name:           noc
 version:        0.1.0.0
@@ -63,13 +63,16 @@ test-suite noc-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ParserTests
       Paths_noc
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ansi-terminal
+      QuickCheck
+    , ansi-terminal
     , base >=4.7 && <5
+    , hspec
     , noc
     , optparse-applicative
     , parsec
