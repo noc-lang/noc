@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 25c1de4d15043eafd14919bbb5a404045934dc77bf75550b455a347758399061
+-- hash: bffd480998348db06bbacc652a496a00dc0de336ead2aea16c9890b311ad9e72
 
 name:           noc
 version:        0.1.0.0
@@ -27,14 +27,10 @@ source-repository head
 
 library
   exposed-modules:
-      CLI.CLI
-      CLI.Commands
-      Language.Noc.Eval
-      Language.Noc.Internal
-      Language.Noc.Lexer
-      Language.Noc.Parser
-      REPL.Commands
-      REPL.REPL
+      Language.Noc.Runtime.Eval
+      Language.Noc.Runtime.Internal
+      Language.Noc.Syntax.AST
+      Language.Noc.Syntax.Lexer
   other-modules:
       Paths_noc
   hs-source-dirs:
@@ -49,6 +45,10 @@ library
 executable noc
   main-is: Main.hs
   other-modules:
+      CLI.CLI
+      CLI.Commands
+      REPL.Commands
+      REPL.REPL
       Paths_noc
   hs-source-dirs:
       app

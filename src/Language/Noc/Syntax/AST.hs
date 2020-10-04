@@ -1,4 +1,4 @@
-module Language.Noc.Parser
+module Language.Noc.Syntax.AST
   ( parseNoc,
     parseNocFile,
     ParseError,
@@ -6,13 +6,13 @@ module Language.Noc.Parser
     Atom (QuoteAtom, WordAtom, FloatAtom,StringAtom),
     Program,
     Declaration (..),
-    REPLInput (Decl, Expression),
+    REPLInput (Decl, Expression)
   )
 where
 
 ----------------------- Modules --------------------------------------------------
 
-import Language.Noc.Lexer
+import Language.Noc.Syntax.Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser, parseFromFile)
 

@@ -2,8 +2,8 @@ module CLI.CLI where
 
 import CLI.Commands
 import Data.List (foldl')
-import Language.Noc.Eval
-import Language.Noc.Parser (parseNoc, parseNocFile)
+import Language.Noc.Runtime.Eval
+import Language.Noc.Syntax.AST (parseNoc, parseNocFile)
 import Options.Applicative
 import REPL.REPL (nocREPL)
 

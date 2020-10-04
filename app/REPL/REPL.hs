@@ -1,8 +1,8 @@
 module REPL.REPL where
 
-import Language.Noc.Eval 
-import Language.Noc.Internal (Values)
-import Language.Noc.Parser (parseNoc)
+import Language.Noc.Runtime.Eval 
+import Language.Noc.Runtime.Internal (Values)
+import Language.Noc.Syntax.AST (parseNoc)
 import REPL.Commands
 import System.IO (hFlush, stdout)
 

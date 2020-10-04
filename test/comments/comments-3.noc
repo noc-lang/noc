@@ -1,8 +1,0 @@
-/*
-Output: ["Hello,World"]
-*/
-
-def main = {
-    # Printing Hello,World
-    "Hello,World" print
-}

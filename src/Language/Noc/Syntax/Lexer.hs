@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Language.Noc.Lexer where
+module Language.Noc.Syntax.Lexer where
 
 -- Modules
 
