@@ -1,7 +1,11 @@
+/*
+Output: [4]
+*/
+
 def square = {
     dup *
 }
 
 def main = {
-    4 square
+    2 square
 }

@@ -1,0 +1,7 @@
+/*
+Output: ["Hello,World"]
+*/
+
+def main = {
+    "Hello,World" print
+}

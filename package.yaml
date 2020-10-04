@@ -1,6 +1,6 @@
 name:                noc
 version:             0.1.0.0
-github:              "mortim1/noc"
+github:              "mortim1/noc-lang/noc"
 license:             BSD3
 author:              "mortim"
 maintainer:          "mortim1@protonmail.com"

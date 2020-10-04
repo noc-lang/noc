@@ -4,14 +4,14 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 051fe2f9c33100c23c884e7dfb45d8a51f16fe0489fb1bb2680d1ffddb9df246
+-- hash: 25c1de4d15043eafd14919bbb5a404045934dc77bf75550b455a347758399061
 
 name:           noc
 version:        0.1.0.0
 synopsis:       User-friendly stack-based concatenative language,
 category:       Language
-homepage:       https://github.com/mortim1/noc#readme
-bug-reports:    https://github.com/mortim1/noc/issues
+homepage:       https://github.com/mortim1/noc-lang#readme
+bug-reports:    https://github.com/mortim1/noc-lang/issues
 author:         mortim
 maintainer:     mortim1@protonmail.com
 copyright:      2020 mortim
@@ -22,13 +22,15 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/mortim1/noc
+  location: https://github.com/mortim1/noc-lang
+  subdir: noc
 
 library
   exposed-modules:
       CLI.CLI
       CLI.Commands
       Language.Noc.Eval
+      Language.Noc.Internal
       Language.Noc.Lexer
       Language.Noc.Parser
       REPL.Commands
@@ -63,7 +65,6 @@ test-suite noc-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      ParserTests
       Paths_noc
   hs-source-dirs:
       test

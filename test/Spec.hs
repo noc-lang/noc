@@ -1,6 +1,2 @@
-import ParserTests
-
 main :: IO ()
-main = do
-        testParser
-        putStrLn "\nTesting Noc eval: ..."
+main = putStrLn "Test suite not yet implemented"

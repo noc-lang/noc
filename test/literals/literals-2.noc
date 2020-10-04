@@ -1,0 +1,9 @@
+/*
+Output: [This is some text which we escape
+    and unescape to keep writing]
+*/
+
+def main = {
+    "This is some text which we escape \
+      \   and unescape to keep writing" print
+}

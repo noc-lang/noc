@@ -1,0 +1,13 @@
+/*
+Output: [200]
+*/
+
+def main = {
+    [
+        [5 5 +] unquote
+        [10 2 *] unquote
+    ] unquote * 
+    print
+}
+
+

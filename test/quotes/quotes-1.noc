@@ -1,0 +1,10 @@
+/*
+Output: [10]
+*/
+
+def main = {
+    [
+        5 5 +
+    ] unquote
+    print
+}

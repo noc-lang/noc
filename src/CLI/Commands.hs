@@ -1,21 +1,25 @@
 module CLI.Commands where
 
-import Options.Applicative
 import Data.Semigroup ((<>))
+import Options.Applicative
 
 type Filepath = String
+
 data Command = Version | Exec Filepath | Repl
 
 cmdFuncs :: [Parser Command]
-cmdFuncs = [exec,repl,version]
+cmdFuncs = [exec, repl, version]
 
 ------------------------------------------------
 exec :: Parser Command
-exec = Exec <$> strOption
-    ( long "file"
-    <> short 'f'
-    <> metavar "FILENAME"
-    <> help "Running Noc file." )
+exec =
+  Exec
+    <$> strOption
+      ( long "file"
+          <> short 'f'
+          <> metavar "FILENAME"
+          <> help "Running Noc file."
+      )
 
 --------------------------------------------------
 repl :: Parser Command

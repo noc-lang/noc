@@ -1,7 +1,0 @@
-def double = {
-    dup +
-}
-
-def main = {
-    2 double
-}

@@ -1,18 +1,19 @@
 module CLI.CLI where
 
-import REPL.REPL (nocREPL)
-import Language.Noc.Eval (eval)
-import Language.Noc.Parser (parseNocFile, parseNoc)
 import CLI.Commands
 import Data.List (foldl')
-import Options.Applicative 
+import Language.Noc.Eval
+import Language.Noc.Parser (parseNoc, parseNocFile)
+import Options.Applicative
+import REPL.REPL (nocREPL)
 
 opts = info (cmd <**> helper) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
+
 ---------------------------------------------------
 run :: Command -> IO ()
-run Version = putStrLn "Noc v0.1"
-run (Exec path) = (parseNocFile path) >>= eval
-run Repl = nocREPL
+run Version = putStrLn "Noc v0.1 https://github.com/noc-lang/noc"
+run (Exec path) = (parseNocFile path) >>= print
+run Repl = nocREPL []
 
 cmd :: Parser Command
 cmd = foldl' (<|>) empty cmdFuncs
