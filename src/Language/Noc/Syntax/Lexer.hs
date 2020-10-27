@@ -2,12 +2,15 @@
 
 module Language.Noc.Syntax.Lexer where
 
--- Modules
+----------------------- Modules --------------------------------------------------
 
 import Control.Applicative ((<|>))
 import Text.Parsec (alphaNum, noneOf, oneOf)
 import Text.Parsec.Prim (ParsecT, Stream)
+
 import qualified Text.Parsec.Token as P
+
+----------------------------------------------------------------------------------
 
 -- Lexer definition
 lexer :: Stream s m Char => P.GenTokenParser s u m
@@ -18,8 +21,8 @@ lexer =
         P.commentEnd = "*/",
         P.commentLine = "#",
         P.nestedComments = False,
-        P.identStart = alphaNum <|> oneOf "+-/*",
-        P.identLetter = alphaNum <|> oneOf "+-/*",
+        P.identStart = alphaNum <|> oneOf "+-/*|.",
+        P.identLetter = alphaNum <|> oneOf "+-/*|.",
         P.opStart = (noneOf ""),
         P.opLetter = (noneOf ""),
         P.reservedNames = ["def"],

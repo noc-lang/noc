@@ -1,6 +1,6 @@
 module Main where
 
-import CLI.CLI (opts, run)
+import Interpreter.CLI (opts, run)
 import Options.Applicative (execParser)
 
 main :: IO ()

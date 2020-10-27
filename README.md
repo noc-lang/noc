@@ -36,4 +36,3 @@ That's Noc grammar with BNF notation.
 -- <declaration> ::= <reserved> "=" "{" (stack) "}"
 -- <program> ::= (<declaration>)*
 ```
-

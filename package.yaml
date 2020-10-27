@@ -23,6 +23,9 @@ dependencies:
 - parsec
 - ansi-terminal
 - optparse-applicative
+- hashmap
+- mtl
+- containers
 
 library:
   source-dirs: src

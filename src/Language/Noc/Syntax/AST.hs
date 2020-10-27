@@ -2,24 +2,24 @@ module Language.Noc.Syntax.AST
   ( parseNoc,
     parseNocFile,
     ParseError,
-    Stack,
+    Expr,
     Atom (QuoteAtom, WordAtom, FloatAtom,StringAtom),
     Program,
     Declaration (..),
-    REPLInput (Decl, Expression)
+    REPLInput (DeclInput, ExprInput),
+    REPLProgram
   )
 where
 
 ----------------------- Modules --------------------------------------------------
-
 import Language.Noc.Syntax.Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser, parseFromFile)
 
 ----------------------- Atoms Parser ----------------------------------------------
-data Atom = QuoteAtom Stack | WordAtom String | FloatAtom Double | StringAtom String deriving (Show, Eq)
+data Atom = QuoteAtom Expr | WordAtom String | FloatAtom Double | StringAtom String deriving (Show, Eq)
 
-type Stack = [Atom]
+type Expr = [Atom]
 
 word :: Parser Atom
 word = WordAtom <$> identifier
@@ -33,11 +33,11 @@ number = FloatAtom . either fromIntegral id <$> naturalOrFloat
 quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
 
-stack :: Parser Stack
+stack :: Parser Expr
 stack = many $ lexeme (quote <|> number <|> strLiteral <|> word)
 
 ----------------------- Declaration Parser ------------------------------------------
-data Declaration = Declaration {declName :: String, declVal :: Stack} deriving (Show, Eq)
+data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (Show, Eq)
 
 type Program = [Declaration]
 
@@ -52,13 +52,15 @@ program :: Parser Program
 program = whiteSpace *> (many function) <* eof
 
 ----------------------- REPL Parser -------------------------------------------------
-data REPLInput = Decl Declaration | Expression Stack deriving (Show)
+data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show,Eq)
+
+type REPLProgram = [REPLInput]
 
 replFunction :: Parser REPLInput
-replFunction = function >>= (pure . Decl)
+replFunction = function >>= (pure . DeclInput)
 
 replExpression :: Parser REPLInput
-replExpression = (whiteSpace *> stack) >>= (pure . Expression)
+replExpression = (whiteSpace *> stack) >>= (pure . ExprInput)
 
 ----------------------- Parse Functions ----------------------------------------------
 parseNoc :: String -> Either ParseError REPLInput
@@ -66,6 +68,4 @@ parseNoc expr = parse (try replFunction <|> replExpression) "" expr
 
 parseNocFile :: String -> IO (Either ParseError Program)
 parseNocFile path = parseFromFile program path
-
-
 

@@ -1,4 +1,4 @@
-module REPL.Commands where
+module Interactive.Commands where
 
 import System.Console.ANSI (clearScreen)
 import System.Exit (exitSuccess)
@@ -28,8 +28,16 @@ help =
   REPLCommands
     { name = "help",
       args = [],
-      action = putStrLn "Commands available from the prompt:\n\n :quit                       Exit REPL.\n :load [filepath]            Load Noc file.\n :reload [filepath]          Reload Noc file\n :clear                      Clear terminal.\n :reset                      Resetting global stack."
+      action = putStrLn $ unlines [
+        "Commands available from the prompt:\n", 
+        ":quit | Exit REPL.",
+        ":load [filepath] | Load Noc file.",
+        ":reload [filepath] | Reload Noc file.",
+        ":clear | Clear terminal.",
+        ":reset | Resetting global stack."
+        ]
     }
+      
 
 ----------------------------------------------------
 
