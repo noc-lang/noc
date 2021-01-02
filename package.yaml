@@ -1,10 +1,10 @@
 name:                noc
 version:             0.1.0.0
-github:              "mortim1/noc-lang/noc"
+github:              "kaoulad/noc-lang/noc"
 license:             BSD3
-author:              "mortim"
-maintainer:          "mortim1@protonmail.com"
-copyright:           "2020 mortim"
+author:              "kaoulad"
+maintainer:          "kaoulad@pm.me"
+copyright:           "2020 kaoulad"
 
 extra-source-files:
 - README.md
@@ -23,7 +23,6 @@ dependencies:
 - parsec
 - ansi-terminal
 - optparse-applicative
-- hashmap
 - mtl
 - containers
 
