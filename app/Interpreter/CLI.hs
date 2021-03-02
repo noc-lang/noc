@@ -13,7 +13,7 @@ opts = info (cmd <**> helper) (fullDesc <> header "noc - User-friendly stack-bas
 
 ---------------------------------------------------
 run :: Command -> IO ()
-run Version = putStrLn "Noc v0.1 github.com/noc-lang/noc"
+run Version = putStrLn "Noc version 1.0"
 run Repl = nocREPL [] []
 run (Exec path) = (parseNocFile path) >>= (either print (print . eval))
 
