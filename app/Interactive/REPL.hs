@@ -6,10 +6,11 @@ import Language.Noc.Syntax.AST (parseNoc,REPLProgram)
 import Interactive.Commands
 import System.IO (hFlush, stdout)
 
+type Stack = [String]
 type Env = [String]
 
 --------------- Utils ----------------------------------
-nocREPL :: String -> Env -> IO ()
+nocREPL :: Stack -> Env -> IO ()
 nocREPL stack env = prompt >>= (repl stack env)
 
 -- flushing stdout buffer before calling getLine
@@ -22,13 +23,13 @@ cmd name funcs = action
                 where (Just f) = lookup name funcs
                       (REPLCommands _ _ action) = f
 
-run :: String -> [(String, REPLCommands)] -> String -> Env -> IO ()
+run :: String -> [(String, REPLCommands)] -> Stack -> Env -> IO ()
 run name funcs stack env = case name `elem` (map fst funcs) of
                             True  -> cmd name funcs
                             False -> putStrLn ("Unknown command '" ++ name ++ "' or lack of arguments")
 
 ----------------- REPL function ---------------------------
-repl :: String -> Env -> [String] -> IO ()
+repl :: Stack -> Env -> [String] -> IO ()
 repl stack env [] = nocREPL stack env
 repl stack env  [(':' : cmd)] = (run cmd singleCommands stack env) >> nocREPL stack env
 repl stack env ((':':cmd):args) = (run cmd (commandsArgs args) stack env) >> nocREPL stack env

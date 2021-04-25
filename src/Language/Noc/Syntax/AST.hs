@@ -41,10 +41,13 @@ data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (S
 
 type Program = [Declaration]
 
+manyTill1 :: Parser Char -> Parser String -> Parser String
+manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
+               
 function :: Parser Declaration
 function = do
   lexeme $ reserved "def"
-  name <- lexeme $ manyTill alphaNum (whiteSpace >> symbol "=")
+  name <- lexeme $ manyTill1 (alphaNum <|> char '\'') (whiteSpace >> symbol "=")
   content <- (lexeme $ braces $ (whiteSpace *> stack))
   pure $ Declaration name content
 
@@ -57,15 +60,14 @@ data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show,Eq)
 type REPLProgram = [REPLInput]
 
 replFunction :: Parser REPLInput
-replFunction = function >>= (pure . DeclInput)
+replFunction = (function <* eof) >>= (pure . DeclInput)
 
 replExpression :: Parser REPLInput
 replExpression = (whiteSpace *> stack) >>= (pure . ExprInput)
 
 ----------------------- Parse Functions ----------------------------------------------
 parseNoc :: String -> Either ParseError REPLInput
-parseNoc expr = parse (try replFunction <|> replExpression) "" expr
+parseNoc expr = parse (replFunction <|> replExpression) "" expr
 
 parseNocFile :: String -> IO (Either ParseError Program)
 parseNocFile path = parseFromFile program path
-

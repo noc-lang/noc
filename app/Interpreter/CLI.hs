@@ -9,7 +9,7 @@ import Options.Applicative
 import Interactive.REPL (nocREPL)
 
 -----------------------------------------------------------------------------------
-opts = info (cmd <**> helper) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
+opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
 
 ---------------------------------------------------
 run :: Command -> IO ()

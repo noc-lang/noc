@@ -1,10 +1,10 @@
 name:                noc
 version:             0.1.0.0
-github:              "kaoulad/noc-lang/noc"
+github:              "mortim/noc-lang"
 license:             BSD3
-author:              "kaoulad"
-maintainer:          "kaoulad@pm.me"
-copyright:           "2020 kaoulad"
+author:              "mortim"
+maintainer:          "aouladkarim010@gmail.com"
+copyright:           "2020 mortim"
 
 extra-source-files:
 - README.md
@@ -50,5 +50,3 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - noc
-    - QuickCheck
-    - hspec

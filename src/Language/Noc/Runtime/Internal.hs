@@ -1,4 +1,4 @@
 module Language.Noc.Runtime.Internal where
 
------------------------ Modules --------------------------------------------------
+----------------------- Modules -------------------------
 import Language.Noc.Syntax.AST
