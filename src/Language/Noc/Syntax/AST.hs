@@ -47,7 +47,7 @@ manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
 function :: Parser Declaration
 function = do
   lexeme $ reserved "def"
-  name <- lexeme $ manyTill1 (alphaNum <|> char '\'') (whiteSpace >> symbol "=")
+  name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill1 (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
   content <- (lexeme $ braces $ (whiteSpace *> stack))
   pure $ Declaration name content
 
