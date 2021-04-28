@@ -6,7 +6,7 @@ import Data.Maybe (fromMaybe)
 import Control.Monad.IO.Class (MonadIO)
 import Language.Noc.Runtime.Eval 
 import Language.Noc.Runtime.Internal
-import Language.Noc.Syntax.AST (parseNoc,REPLProgram)
+import Language.Noc.Syntax.AST (parseNoc,REPLProgram,REPLInput (..))
 import Interactive.Commands
 import System.IO (hFlush, stdout)
 
@@ -47,7 +47,10 @@ repl stack env [] = nocREPL stack env
 repl stack env  [(':' : cmd)] = (run cmd singleCommands stack env) >> nocREPL stack env
 repl stack env ((':':cmd):args) = (run cmd (commandsArgs args) stack env) >> nocREPL stack env
 repl stack env code = do
-                    let parsed = parseNoc $ unwords $ code
+                    let expression = unwords $ code
+                    let parsed = parseNoc $ expression
                     case parsed of
                         (Left err) -> (print err) >> nocREPL stack env
-                        (Right succ) -> (print succ) >> nocREPL stack env
+                        (Right succ) -> case succ of
+                                            (ExprInput []) -> (putStrLn ("Noc doesn't recognize '" ++ expression ++ "' expression.")) >> nocREPL stack env
+                                            _ -> (print succ) >> nocREPL stack env
