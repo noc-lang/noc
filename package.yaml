@@ -21,7 +21,8 @@ category:            Language
 dependencies:
 - base >= 4.7 && < 5
 - parsec
-- ansi-terminal
+- haskeline
+- directory
 - optparse-applicative
 - mtl
 - containers

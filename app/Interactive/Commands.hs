@@ -1,13 +1,14 @@
 module Interactive.Commands where
 
-import System.Console.ANSI (clearScreen)
+import System.Directory (getXdgDirectory, XdgDirectory (..))
+import System.Console.Haskeline.History (writeHistory, emptyHistory)
 import System.Exit (exitSuccess)
 
 ----------------------------------------------------
 data REPLCommands = REPLCommands {name :: String, args :: [String], action :: IO ()}
 
 singleCommands :: [(String, REPLCommands)]
-singleCommands = [("quit", quit), ("help", help), ("clear", clear), ("reset", reset)]
+singleCommands = [("quit", quit), ("help", help), ("reset", reset)]
 
 commandsArgs :: [String] -> [(String, REPLCommands)]
 commandsArgs args = [("load", load args), ("reload", reload args)]
@@ -18,9 +19,13 @@ quit =
   REPLCommands
     { name = "quit",
       args = [],
-      action = putStrLn "Leaving Noc REPL." >> exitSuccess
+      action = do 
+                putStrLn "Leaving Noc REPL."
+                path <- getXdgDirectory XdgCache ".noc_history"
+                writeHistory path emptyHistory
+                exitSuccess
     }
-
+        
 ----------------------------------------------------
 
 help :: REPLCommands
@@ -33,7 +38,6 @@ help =
         ":quit | Exit REPL.",
         ":load [filepath] | Load Noc file.",
         ":reload [filepath] | Reload Noc file.",
-        ":clear | Clear terminal.",
         ":reset | Resetting global stack."
         ]
     }
@@ -57,16 +61,6 @@ reload arg =
     { name = "reload",
       args = arg,
       action = putStrLn ("'" ++ (unwords arg) ++ "' reloaded.")
-    }
-
-----------------------------------------------------
-
-clear :: REPLCommands
-clear =
-  REPLCommands
-    { name = "clear",
-      args = [],
-      action = clearScreen
     }
 
 ----------------------------------------------------

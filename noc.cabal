@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 587d224e9f8a2cfe02c008112abe32b75d62a62ad8cf6b256bebbc1d73386f2e
+-- hash: a6260bf91ac1a207130fd6c4f7533f2d16f8a70a9b5c40ebb84be92f3e17e3ee
 
 name:           noc
 version:        0.1.0.0
@@ -35,9 +35,10 @@ library
   hs-source-dirs:
       src
   build-depends:
-      ansi-terminal
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , directory
+    , haskeline
     , mtl
     , optparse-applicative
     , parsec
@@ -55,9 +56,10 @@ executable noc
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ansi-terminal
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , directory
+    , haskeline
     , mtl
     , noc
     , optparse-applicative
@@ -73,9 +75,10 @@ test-suite noc-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ansi-terminal
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , directory
+    , haskeline
     , mtl
     , noc
     , optparse-applicative

@@ -1,5 +1,9 @@
 module Interactive.REPL where
 
+import System.Console.Haskeline
+import System.Directory (getXdgDirectory, XdgDirectory (..))
+import Data.Maybe (fromMaybe)
+import Control.Monad.IO.Class (MonadIO)
 import Language.Noc.Runtime.Eval 
 import Language.Noc.Runtime.Internal
 import Language.Noc.Syntax.AST (parseNoc,REPLProgram)
@@ -13,9 +17,18 @@ type Env = [String]
 nocREPL :: Stack -> Env -> IO ()
 nocREPL stack env = prompt >>= (repl stack env)
 
--- flushing stdout buffer before calling getLine
+defaultSettings' :: MonadIO m => FilePath -> Settings m 
+defaultSettings' path = Settings {
+    complete = completeFilename,
+    historyFile = Just path,
+    autoAddHistory = True
+}
+
 prompt :: IO [String]
-prompt = putStr "noc> " >> hFlush stdout >> (getLine >>= (return . words))
+prompt = do
+            path <- getXdgDirectory XdgCache ".noc_history"
+            input <- runInputT (defaultSettings' path) (getInputLine "noc> ")
+            return $ words $ fromMaybe "" input
 
 ---------------------------------------------------------
 cmd :: String -> [(String, REPLCommands)] -> IO ()
