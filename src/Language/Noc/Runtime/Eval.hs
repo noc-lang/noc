@@ -7,7 +7,7 @@ import Language.Noc.Syntax.AST
 -----------------------------------------------------------------------------------
 
 eval :: Program -> Program
-eval ast = ast 
+eval ast = ast
 
 evalREPL :: REPLInput -> REPLInput -> REPLInput
 evalREPL stack ast = ast

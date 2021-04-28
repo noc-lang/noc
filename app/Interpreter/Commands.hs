@@ -16,7 +16,7 @@ cmdFuncs = [exec, repl, version]
 ------------ Function commands -------------------
 exec :: Parser Command
 exec = Exec <$> strArgument (metavar "FILENAME" <> help "Running Noc file.")
-    
+
 repl :: Parser Command
 repl = flag Repl Repl (long "repl" <> short 'r' <> help "Running Noc REPL.")
 

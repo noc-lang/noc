@@ -7,7 +7,6 @@ module Language.Noc.Syntax.Lexer where
 import Control.Applicative ((<|>))
 import Text.Parsec (alphaNum, noneOf, oneOf)
 import Text.Parsec.Prim (ParsecT, Stream)
-
 import qualified Text.Parsec.Token as P
 
 ----------------------------------------------------------------------------------

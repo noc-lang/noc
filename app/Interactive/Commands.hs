@@ -1,7 +1,7 @@
 module Interactive.Commands where
 
-import System.Directory (getXdgDirectory, XdgDirectory (..))
-import System.Console.Haskeline.History (writeHistory, emptyHistory)
+import System.Console.Haskeline.History (emptyHistory, writeHistory)
+import System.Directory (XdgDirectory (..), getXdgDirectory)
 import System.Exit (exitSuccess)
 
 ----------------------------------------------------
@@ -19,13 +19,13 @@ quit =
   REPLCommands
     { name = "quit",
       args = [],
-      action = do 
-                putStrLn "Leaving Noc REPL."
-                path <- getXdgDirectory XdgCache ".noc_history"
-                writeHistory path emptyHistory
-                exitSuccess
+      action = do
+        putStrLn "Leaving Noc REPL."
+        path <- getXdgDirectory XdgCache ".noc_history"
+        writeHistory path emptyHistory
+        exitSuccess
     }
-        
+
 ----------------------------------------------------
 
 help :: REPLCommands
@@ -33,15 +33,16 @@ help =
   REPLCommands
     { name = "help",
       args = [],
-      action = putStrLn $ unlines [
-        "Commands available from the prompt:\n", 
-        ":quit | Exit REPL.",
-        ":load [filepath] | Load Noc file.",
-        ":reload [filepath] | Reload Noc file.",
-        ":reset | Resetting global stack."
-        ]
+      action =
+        putStrLn $
+          unlines
+            [ "Commands available from the prompt:\n",
+              ":quit | Exit REPL.",
+              ":load [filepath] | Load Noc file.",
+              ":reload [filepath] | Reload Noc file.",
+              ":reset | Resetting global stack."
+            ]
     }
-      
 
 ----------------------------------------------------
 

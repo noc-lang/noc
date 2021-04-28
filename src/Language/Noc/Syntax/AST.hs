@@ -3,7 +3,7 @@ module Language.Noc.Syntax.AST
     parseNocFile,
     ParseError,
     Expr,
-    Atom (QuoteAtom, WordAtom, FloatAtom,StringAtom),
+    Atom (QuoteAtom, WordAtom, FloatAtom, StringAtom),
     Program,
     Declaration (..),
     REPLInput (DeclInput, ExprInput),
@@ -42,7 +42,7 @@ type Program = [Declaration]
 
 manyTill1 :: Parser Char -> Parser String -> Parser String
 manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
-               
+
 function :: Parser Declaration
 function = do
   lexeme $ reserved "def"
@@ -54,7 +54,7 @@ program :: Parser Program
 program = whiteSpace *> (many function) <* eof
 
 ----------------------- REPL Parser -------------------------------------------------
-data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show,Eq)
+data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show, Eq)
 
 replFunction :: Parser REPLInput
 replFunction = (function <* eof) >>= (pure . DeclInput)

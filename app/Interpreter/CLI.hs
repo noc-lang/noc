@@ -1,12 +1,13 @@
 module Interpreter.CLI where
 
 ----------------------- Modules --------------------------------------------------
-import Interpreter.Commands
+
 import Data.List (foldl')
+import Interactive.REPL (nocREPL)
+import Interpreter.Commands
 import Language.Noc.Runtime.Eval
 import Language.Noc.Syntax.AST (parseNoc, parseNocFile)
 import Options.Applicative
-import Interactive.REPL (nocREPL)
 
 -----------------------------------------------------------------------------------
 opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
