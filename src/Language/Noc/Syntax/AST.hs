@@ -7,7 +7,6 @@ module Language.Noc.Syntax.AST
     Program,
     Declaration (..),
     REPLInput (DeclInput, ExprInput),
-    REPLProgram
   )
 where
 
@@ -56,8 +55,6 @@ program = whiteSpace *> (many function) <* eof
 
 ----------------------- REPL Parser -------------------------------------------------
 data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show,Eq)
-
-type REPLProgram = [REPLInput]
 
 replFunction :: Parser REPLInput
 replFunction = (function <* eof) >>= (pure . DeclInput)

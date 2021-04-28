@@ -14,7 +14,7 @@ opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-base
 ---------------------------------------------------
 run :: Command -> IO ()
 run Version = putStrLn "Noc version 1.0"
-run Repl = nocREPL [] []
+run Repl = nocREPL
 run (Exec path) = (parseNocFile path) >>= (either print (print . eval))
 
 cmd :: Parser Command
