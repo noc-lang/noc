@@ -4,14 +4,12 @@ module Language.Noc.Syntax.Lexer where
 
 ----------------------- Modules --------------------------------------------------
 
-import Control.Applicative ((<|>))
-import Text.Parsec (alphaNum, noneOf, oneOf)
+import Text.Parsec (alphaNum, noneOf, oneOf, (<|>))
 import Text.Parsec.Prim (ParsecT, Stream)
 import qualified Text.Parsec.Token as P
 
-----------------------------------------------------------------------------------
+----------------- Lexer definition ------------------------------------------------
 
--- Lexer definition
 lexer :: Stream s m Char => P.GenTokenParser s u m
 lexer =
   P.makeTokenParser $
@@ -29,7 +27,7 @@ lexer =
         P.caseSensitive = False
       }
 
--- Lexer functions
+----------------- Lexer functions --------------------------------------------------
 naturalOrFloat :: Stream s m Char => ParsecT s u m (Either Integer Double)
 naturalOrFloat = P.naturalOrFloat lexer
 

@@ -1,10 +1,13 @@
 module Interactive.Commands where
 
+----------------Modules -----------------------------
+
 import System.Console.Haskeline.History (emptyHistory, writeHistory)
 import System.Directory (XdgDirectory (..), getXdgDirectory)
 import System.Exit (exitSuccess)
 
 ----------------------------------------------------
+
 data REPLCommands = REPLCommands {name :: String, args :: [String], action :: IO ()}
 
 singleCommands :: [(String, REPLCommands)]
@@ -14,6 +17,7 @@ commandsArgs :: [String] -> [(String, REPLCommands)]
 commandsArgs args = [("load", load args), ("reload", reload args)]
 
 ----------------------------------------------------
+
 quit :: REPLCommands
 quit =
   REPLCommands

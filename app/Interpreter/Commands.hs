@@ -1,6 +1,7 @@
 module Interpreter.Commands where
 
------------------------ Modules --------------------------------------------------
+----------------Modules --------------------------
+
 import Data.Semigroup ((<>))
 import Options.Applicative
 
@@ -13,7 +14,8 @@ data Command = Version | Exec Filepath | Repl
 cmdFuncs :: [Parser Command]
 cmdFuncs = [exec, repl, version]
 
------------- Function commands -------------------
+------------ Command's function ------------------
+
 exec :: Parser Command
 exec = Exec <$> strArgument (metavar "FILENAME" <> help "Running Noc file.")
 
