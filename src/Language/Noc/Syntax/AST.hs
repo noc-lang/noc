@@ -12,6 +12,9 @@ data Atom = QuoteAtom Expr | WordAtom String | FloatAtom Double | StringAtom Str
 
 type Expr = [Atom]
 
+sign :: Parser (Double -> Double)
+sign = (char '-' >> return negate) <|> return id
+
 word :: Parser Atom
 word = WordAtom <$> identifier
 
@@ -19,13 +22,20 @@ strLiteral :: Parser Atom
 strLiteral = StringAtom <$> stringLiteral
 
 number :: Parser Atom
-number = FloatAtom . either fromIntegral id <$> naturalOrFloat
+number = do
+  f <- lexeme sign
+  n <- naturalOrFloat
+  pure $
+    FloatAtom $
+      f $ case n of
+        Left (int) -> fromInteger int
+        Right (fl) -> fl
 
 quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
 
 stack :: Parser Expr
-stack = many $ lexeme (quote <|> number <|> strLiteral <|> word)
+stack = many $ lexeme (quote <|> (try number) <|> strLiteral <|> word)
 
 -------------------- Function declaration -----------------
 data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (Show, Eq)
