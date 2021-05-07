@@ -11,7 +11,7 @@ import System.Exit (exitSuccess)
 data REPLCommands = REPLCommands {name :: String, args :: [String], action :: IO ()}
 
 singleCommands :: [(String, REPLCommands)]
-singleCommands = [("quit", quit), ("help", help), ("reset", reset)]
+singleCommands = [("quit", quit), ("help", help)]
 
 commandsArgs :: [String] -> [(String, REPLCommands)]
 commandsArgs args = [("load", load args), ("reload", reload args)]
@@ -44,7 +44,8 @@ help =
               ":quit | Exit REPL.",
               ":load [filepath] | Load Noc file.",
               ":reload [filepath] | Reload Noc file.",
-              ":reset | Resetting global stack."
+              ":reset | Resetting global stack.",
+              ":env | Show environment."
             ]
     }
 
@@ -66,14 +67,4 @@ reload arg =
     { name = "reload",
       args = arg,
       action = putStrLn ("'" ++ (unwords arg) ++ "' reloaded.")
-    }
-
-----------------------------------------------------
-
-reset :: REPLCommands
-reset =
-  REPLCommands
-    { name = "reset",
-      args = [],
-      action = putStrLn "Resetting global stack..."
     }

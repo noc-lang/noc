@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a6260bf91ac1a207130fd6c4f7533f2d16f8a70a9b5c40ebb84be92f3e17e3ee
+-- hash: 04040593bdd2b03fa5271cc9affd8f0a85e6b96813c45d360708dbb10ae265f1
 
 name:           noc
 version:        0.1.0.0
@@ -26,6 +26,7 @@ source-repository head
 
 library
   exposed-modules:
+      Language.Noc.PrettyPrinter
       Language.Noc.Runtime.Eval
       Language.Noc.Runtime.Internal
       Language.Noc.Syntax.AST
@@ -42,6 +43,7 @@ library
     , mtl
     , optparse-applicative
     , parsec
+    , text
   default-language: Haskell2010
 
 executable noc
@@ -64,6 +66,7 @@ executable noc
     , noc
     , optparse-applicative
     , parsec
+    , text
   default-language: Haskell2010
 
 test-suite noc-test
@@ -83,4 +86,5 @@ test-suite noc-test
     , noc
     , optparse-applicative
     , parsec
+    , text
   default-language: Haskell2010

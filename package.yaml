@@ -26,6 +26,7 @@ dependencies:
 - optparse-applicative
 - mtl
 - containers
+- text
 
 library:
   source-dirs: src

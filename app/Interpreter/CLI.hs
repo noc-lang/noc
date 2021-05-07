@@ -2,15 +2,15 @@ module Interpreter.CLI where
 
 ----------------------- Modules ------------------------
 
+import Data.List (foldl')
+import qualified Data.Map as M (empty)
+import Interactive.REPL (nocREPL)
 import Interpreter.Commands
 import Language.Noc.Syntax.AST
 import Language.Noc.Syntax.Lexer
-import Interactive.REPL (nocREPL)
------
-import Data.List (foldl')
-import Text.Parsec (ParseError,eof,many)
+import Options.Applicative (Parser, empty, fullDesc, header, helper, info, (<|>))
+import Text.Parsec (ParseError, eof, many)
 import qualified Text.Parsec.String as P
-import Options.Applicative (info,helper,fullDesc,header,(<|>),empty,Parser)
 
 ---------------- Interpreter's parser -------------------
 
@@ -26,7 +26,7 @@ opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-base
 
 run :: Command -> IO ()
 run Version = putStrLn "Noc version 1.0"
-run Repl = nocREPL
+run Repl = nocREPL [] (M.empty)
 run (Exec path) = (parseNocFile path) >>= (either print print)
 
 cmd :: Parser Command
