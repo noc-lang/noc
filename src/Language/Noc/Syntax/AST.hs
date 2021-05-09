@@ -23,7 +23,7 @@ strLiteral = StringAtom <$> stringLiteral
 
 number :: Parser Atom
 number = do
-  f <- lexeme sign
+  f <- sign
   n <- naturalOrFloat
   pure $
     FloatAtom $
