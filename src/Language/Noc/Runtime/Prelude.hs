@@ -8,27 +8,35 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Syntax.AST
 import Control.Monad.Except (throwError)
 import qualified Data.Text as T (pack,unpack,Text)
-import qualified Data.Map as M (fromList)
+import qualified Data.Map as M (fromList,keys)
 import Control.Exception (try, SomeException)
-import qualified Data.Text.IO as TIO (readFile)
+import qualified Data.Text.IO as TIO (readFile,getLine)
+import System.IO
 
 ----------------------------------------------------
 
 prelude :: Env 
 prelude = M.fromList [
+  -- Combinators 
   (T.pack "dup", Constant $ PrimVal builtinDup),
   (T.pack "pop", Constant $ PrimVal builtinPop),
   (T.pack "popr", Constant $ PrimVal builtinPopr),
   (T.pack "zap", Constant $ PrimVal builtinZap),
   (T.pack "cat", Constant $ PrimVal builtinCat),
+  (T.pack "rotN", Constant $ PrimVal builtinRotN),
+  -- Arithmetic operators
   (T.pack "+", Constant $ PrimVal $ builtinOp (+)),
   (T.pack "-", Constant $ PrimVal $ builtinOp (-)),
   (T.pack "*", Constant $ PrimVal $ builtinOp (*)),
   (T.pack "/", Constant $ PrimVal $ builtinDiv),
-  (T.pack "rotN", Constant $ PrimVal builtinRotN),
-  (T.pack "unquote", Constant $ PrimVal builtinUnquote),
+  -- I/O
   (T.pack "print", Constant $ PrimVal builtinPrint),
-  (T.pack "read", Constant $ PrimVal builtinReadFile)]
+  (T.pack "putstr", Constant $ PrimVal builtinPutStr),
+  (T.pack "read", Constant $ PrimVal builtinReadFile),
+  (T.pack "input", Constant $ PrimVal builtinInput),
+  -- Other
+  (T.pack "unquote", Constant $ PrimVal builtinUnquote)
+  ]
 
 ----------------------------------------------------
 
@@ -58,7 +66,6 @@ builtinDiv = do
         ((IntVal v1'),(IntVal v2')) -> operateDiv (fromIntegral v1') (fromIntegral v2')
         ((FloatVal v1'),(IntVal v2')) -> operateDiv v1' (fromIntegral v2') 
         ((IntVal v1'),(FloatVal v2')) -> operateDiv (fromIntegral v1') v2'
-
         _ -> throwError $ TypeError "cannot operate with different types."
     
 ----------------------------------------------------
@@ -97,11 +104,12 @@ builtinRotN :: Eval ()
 builtinRotN = do
     n <- pop
     case n of
-        (FloatVal x) -> do
+        (IntVal x) -> do
             stack <- get
-            let rot = take (truncate x) $ reverse stack
-            put $ (initN (truncate x) stack) <> rot
-        _ -> throwError $ TypeError "the parameter isn't a float."
+            let n = fromIntegral x
+            let rot = take n $ reverse stack
+            put $ (initN n stack) <> rot
+        _ -> throwError $ TypeError "the parameter isn't an int."
 
 ----------------------------------------------------
 
@@ -137,6 +145,15 @@ builtinPrint = do
 
 ----------------------------------------------------
 
+builtinPutStr :: Eval ()
+builtinPutStr = do
+    v <- pop
+    case v of
+        (StringVal x) -> (liftIO $ putStr $ T.unpack $ x) >> return ()
+        _ -> throwError $ TypeError "can only putstr with strings."
+
+----------------------------------------------------
+
 builtinReadFile :: Eval ()
 builtinReadFile = do
     path <- pop
@@ -147,4 +164,17 @@ builtinReadFile = do
                                 (Left err) -> throwError $ FileNotFoundError "the file does not exist (no such file or directory)"
                                 (Right succ) -> (push $ StringVal succ) >> return () 
         _ -> throwError $ TypeError "the parameter is not string."
-    
+
+----------------------------------------------------
+
+builtinInput :: Eval ()
+builtinInput = do
+    msg <- pop
+    case msg of
+        (StringVal x) -> do
+            liftIO $ putStr $ T.unpack x
+            liftIO $ hFlush stdout
+            inp <- liftIO $ TIO.getLine
+            push $ StringVal inp
+            return ()
+        _ -> throwError $ TypeError "the parameter is not string."
