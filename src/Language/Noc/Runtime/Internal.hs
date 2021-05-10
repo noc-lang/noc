@@ -1,3 +1,6 @@
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes #-}
+
 module Language.Noc.Runtime.Internal where
 
 import Control.Monad.Except
@@ -19,9 +22,9 @@ type Eval a = RWST Env () Stack (ExceptT EvalError IO) a
 type DeclEval = StateT Env (Except EvalError)
 
 ------
-data Value = QuoteVal Expr | FloatVal Double | StringVal String | PrimVal (Eval ())
+data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal String | PrimVal (Eval ())
 
-data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String deriving Show
+data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String |  String deriving Show
 
 --- Utils ---------------------
 
@@ -32,8 +35,12 @@ initN n l = initN (n-1) (init l)
 
 readValue :: Atom -> Value
 readValue (FloatAtom x) = FloatVal x
+readValue (IntAtom x) = IntVal x
 readValue (StringAtom x) = StringVal x
 readValue (QuoteAtom l) = QuoteVal l
+
+filterProg :: (String -> String -> Bool) -> [Declaration] -> [Declaration]
+filterProg pred prog = filter (\(Declaration name expr) -> pred name "main") prog
 
 -------------------------------
 

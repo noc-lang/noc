@@ -8,11 +8,11 @@ import Text.Parsec
 import Text.Parsec.String (Parser)
 
 ----------------------- Atoms --------------------------
-data Atom = QuoteAtom Expr | WordAtom String | FloatAtom Double | StringAtom String deriving (Show, Eq)
+data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String deriving (Show, Eq)
 
 type Expr = [Atom]
 
-sign :: Parser (Double -> Double)
+sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
 word :: Parser Atom
@@ -21,21 +21,23 @@ word = WordAtom <$> identifier
 strLiteral :: Parser Atom
 strLiteral = StringAtom <$> stringLiteral
 
+int :: Parser Atom
+int = do
+  f <- sign
+  n <- natural
+  pure $ IntAtom $ f n
+
 number :: Parser Atom
 number = do
   f <- sign
-  n <- naturalOrFloat
-  pure $
-    FloatAtom $
-      f $ case n of
-        Left (int) -> fromInteger int
-        Right (fl) -> fl
+  n <- float
+  pure $ FloatAtom $ f n
 
 quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
 
 stack :: Parser Expr
-stack = many $ lexeme (quote <|> (try number) <|> strLiteral <|> word)
+stack = many $ lexeme (quote <|> (try number) <|> (try int) <|> strLiteral <|> word)
 
 -------------------- Function declaration -----------------
 data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (Show, Eq)

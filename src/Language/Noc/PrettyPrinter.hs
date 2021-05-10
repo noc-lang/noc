@@ -18,6 +18,7 @@ comma content = content <> (pack ", ")
 
 pprintVal :: Value -> Text
 pprintVal (FloatVal f) = pack $ show f
+pprintVal (IntVal i) = pack $ show i
 pprintVal (StringVal s) = pack $ show s
 pprintVal (QuoteVal l) = parens $ showEnv l
 
@@ -32,6 +33,7 @@ displayStack s = unpack $ pack "=> " <> (parens $ showStack s)
 
 pprintEnv :: Atom -> Text
 pprintEnv (FloatAtom f) = pack $ show f
+pprintEnv (IntAtom i) = pack $ show i
 pprintEnv (StringAtom s) = pack $ show s
 pprintEnv (WordAtom w) = pack w
 pprintEnv (QuoteAtom l) = parens $ showEnv l

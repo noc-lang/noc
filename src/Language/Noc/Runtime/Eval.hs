@@ -7,6 +7,7 @@ import Control.Monad.Reader (ask)
 import qualified Data.Map as M (empty,fromList,union,lookup,delete,keys)
 import qualified Data.Text as T (pack,unpack)
 import Control.Monad.Except (throwError)
+import Data.Foldable (traverse_)
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude
 import Language.Noc.Syntax.AST
@@ -22,6 +23,16 @@ eval expr = do
     (1,[WordAtom w]) -> evalWord w env
     (1,[expr']) -> push (readValue expr')
     _ -> evalExpr expr 
+
+-------------------------------
+
+evalFile :: [Declaration] -> Eval ()
+evalFile mainfunc = do
+  env <- ask
+  case (length mainfunc > 1, mainfunc, env) of
+    (_, [],_) -> throwError $ MainError $ "the main function not found."
+    (True, _, _) -> throwError $ MainError $ "there are multiple main functions."
+    (False,[Declaration name expr],otherf) -> evalExpr expr
 
 -------------------------------
 

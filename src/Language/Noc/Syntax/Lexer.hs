@@ -28,8 +28,11 @@ lexer =
       }
 
 ----------------- Lexer functions --------------------------------------------------
-naturalOrFloat :: Stream s m Char => ParsecT s u m (Either Integer Double)
-naturalOrFloat = P.naturalOrFloat lexer
+float :: Stream s m Char => ParsecT s u m Double
+float = P.float lexer
+
+natural :: Stream s m Char => ParsecT s u m Integer
+natural = P.natural lexer 
 
 brackets :: Stream s m Char => ParsecT s u m a -> ParsecT s u m a
 brackets = P.brackets lexer
