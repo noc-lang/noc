@@ -19,7 +19,7 @@ comma content = content <> (pack ", ")
 pprintVal :: Value -> Text
 pprintVal (FloatVal f) = pack $ show f
 pprintVal (IntVal i) = pack $ show i
-pprintVal (StringVal s) = pack $ show s
+pprintVal (StringVal s) = pack $ show $ unpack s
 pprintVal (QuoteVal l) = parens $ showEnv l
 
 showStack :: Stack -> Text

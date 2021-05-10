@@ -7,7 +7,7 @@ import Control.Monad.State
 import Language.Noc.Runtime.Internal
 import Language.Noc.Syntax.AST
 import Control.Monad.Except (throwError)
-import qualified Data.Text as T (pack,Text)
+import qualified Data.Text as T (pack,unpack,Text)
 import qualified Data.Map as M (fromList)
 import Control.Exception (try, SomeException)
 import qualified Data.Text.IO as TIO (readFile)
@@ -142,9 +142,9 @@ builtinReadFile = do
     path <- pop
     case path of
         (StringVal x) -> do
-                            content <- liftIO (try $ TIO.readFile x :: IO (Either SomeException T.Text))
+                            content <- liftIO (try $ TIO.readFile (T.unpack x) :: IO (Either SomeException T.Text))
                             case content of
                                 (Left err) -> throwError $ FileNotFoundError "the file does not exist (no such file or directory)"
-                                (Right succ) -> (liftIO $ print succ) >> return () 
+                                (Right succ) -> (push $ StringVal succ) >> return () 
         _ -> throwError $ TypeError "the parameter is not string."
     

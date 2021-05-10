@@ -22,7 +22,7 @@ type Eval a = RWST Env () Stack (ExceptT EvalError IO) a
 type DeclEval = StateT Env (Except EvalError)
 
 ------
-data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal String | PrimVal (Eval ())
+data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal Text | PrimVal (Eval ())
 
 data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String |  String deriving Show
 
@@ -36,7 +36,7 @@ initN n l = initN (n-1) (init l)
 readValue :: Atom -> Value
 readValue (FloatAtom x) = FloatVal x
 readValue (IntAtom x) = IntVal x
-readValue (StringAtom x) = StringVal x
+readValue (StringAtom x) = StringVal $ pack x
 readValue (QuoteAtom l) = QuoteVal l
 
 filterProg :: (String -> String -> Bool) -> [Declaration] -> [Declaration]
