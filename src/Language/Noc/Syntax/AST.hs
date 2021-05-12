@@ -8,7 +8,7 @@ import Text.Parsec
 import Text.Parsec.String (Parser)
 
 ----------------------- Atoms --------------------------
-data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String deriving (Show, Eq)
+data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | BoolAtom Bool deriving (Show, Eq)
 
 type Expr = [Atom]
 
@@ -33,11 +33,18 @@ number = do
   n <- float
   pure $ FloatAtom $ f n
 
+bool :: Parser Atom
+bool = do
+  v <- (string "True" <|> string "False")
+  case v of
+    "True" -> pure $ BoolAtom True
+    "False" -> pure $ BoolAtom False
+
 quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
 
 stack :: Parser Expr
-stack = many $ lexeme (quote <|> (try number) <|> (try int) <|> strLiteral <|> word)
+stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLiteral <|> word)
 
 -------------------- Function declaration -----------------
 data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (Show, Eq)

@@ -20,6 +20,7 @@ pprintVal :: Value -> Text
 pprintVal (FloatVal f) = pack $ show f
 pprintVal (IntVal i) = pack $ show i
 pprintVal (StringVal s) = pack $ show $ unpack s
+pprintVal (BoolVal b) = pack $ show b
 pprintVal (QuoteVal l) = parens $ showEnv l
 
 showStack :: Stack -> Text
@@ -36,6 +37,7 @@ pprintEnv (FloatAtom f) = pack $ show f
 pprintEnv (IntAtom i) = pack $ show i
 pprintEnv (StringAtom s) = pack $ show s
 pprintEnv (WordAtom w) = pack w
+pprintEnv (BoolAtom b) = pack $ show b
 pprintEnv (QuoteAtom l) = parens $ showEnv l
 
 showEnv :: Expr -> Text

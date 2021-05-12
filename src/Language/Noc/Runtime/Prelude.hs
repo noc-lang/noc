@@ -53,10 +53,6 @@ builtinOp operator = do
 
 ----------------------------------------------------
 
-operateDiv v1 v2 = case v1 of
-    0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
-    _ -> push $ FloatVal $ (/) v2 v1
-
 builtinDiv :: Eval ()
 builtinDiv = do
     v1 <- pop
@@ -67,6 +63,9 @@ builtinDiv = do
         ((FloatVal v1'),(IntVal v2')) -> operateDiv v1' (fromIntegral v2') 
         ((IntVal v1'),(FloatVal v2')) -> operateDiv (fromIntegral v1') v2'
         _ -> throwError $ TypeError "cannot operate with different types."
+    where operateDiv v1 v2 = case v1 of
+                        0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
+                        _ -> push $ FloatVal $ (/) v2 v1
     
 ----------------------------------------------------
 
@@ -141,7 +140,8 @@ builtinPrint = do
         (StringVal x) -> (liftIO $ print x) >> return ()
         (FloatVal x) -> (liftIO $ print x) >> return ()
         (IntVal x) -> (liftIO $ print x) >> return ()
-        _ -> throwError $ TypeError "can only print with strings,floats."
+        (BoolVal x) -> (liftIO $ print x) >> return ()
+        _ -> throwError $ TypeError "can only print with strings,floats,integers,bool."
 
 ----------------------------------------------------
 
