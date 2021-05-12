@@ -6,10 +6,9 @@ import Control.Monad.Except
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS
 import Control.Monad.State (runStateT)
-import qualified Data.Map as M (empty, toList)
 import Data.Maybe (fromMaybe)
 import Interactive.Commands
-import Language.Noc.PrettyPrinter (displayEnv,displayStack)
+import Language.Noc.PrettyPrinter (displayStack)
 import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Runtime.Eval
 import Language.Noc.Runtime.Internal
@@ -42,10 +41,7 @@ funcREPL decl env = runExcept $ runStateT (evalFunc decl) env
 exprREPL :: Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))
 exprREPL expr stack env = runExceptT $ runRWST (eval expr) (prelude <> env) stack
 
------------------------ Utils -----------------------------------
-nocREPL :: Stack -> Env -> IO ()
-nocREPL stack env = prompt >>= repl stack env
-
+----------------------- REPL Session -----------------------------
 defaultSettings' :: MonadIO m => FilePath -> Settings m
 defaultSettings' path =
   Settings
@@ -60,25 +56,23 @@ prompt = do
   input <- runInputT (defaultSettings' path) (getInputLine "noc> ")
   return $ words $ fromMaybe "" input
 
-cmd :: String -> [(String, REPLCommands)] -> IO ()
-cmd name funcs = action
-  where
-    (Just f) = lookup name funcs
-    (REPLCommands _ _ action) = f
+nocREPL :: Stack -> Env -> IO ()
+nocREPL stack env = prompt >>= repl stack env
 
-run :: String -> [(String, REPLCommands)] -> IO ()
-run name funcs = case name `elem` (map fst funcs) of
-  True -> cmd name funcs
-  False -> putStrLn ("Unknown command '" ++ name ++ "' or lack of arguments")
+----------------- REPL Commands  -----------------------------------
 
------------------ REPL function -------------------------------------
+run :: String -> [(String, REPLCommands)] -> Stack -> Env -> IO ()
+run name funcs stack env = case name `elem` (map fst funcs) of
+  True -> do
+    let (Just f) = lookup name funcs
+    let (REPLCommands _ _ action) = f
+    action
+  False -> (putStrLn ("Unknown command '" ++ name ++ "' or lack of arguments")) >> (nocREPL stack env)
+
 
 repl :: Stack -> Env -> [String] -> IO ()
 repl stack env [] = nocREPL stack env
-repl stack env [":env"] = (putStrLn $ foldl (\acc (name, Function expr) -> (displayEnv name expr) <> acc) "" (M.toList env)) >> nocREPL stack env
-repl stack env [":reset"] = (putStrLn "Resetting stack and env...") >> nocREPL [] (M.empty)
-repl stack env [(':' : cmd)] = (run cmd singleCommands) >> nocREPL stack env
-repl stack env ((':' : cmd) : args) = (run cmd (commandsArgs args)) >> nocREPL stack env
+repl stack env ((':' : cmd) : args) = run cmd (commands args stack env nocREPL) stack env
 repl stack env code = do
   let expression = unwords code
   let parsed = parseREPL expression

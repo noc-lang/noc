@@ -53,3 +53,6 @@ function = do
   name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill1 (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
   content <- (lexeme $ braces $ (whiteSpace *> stack))
   pure $ Declaration name content
+
+program :: Parser Program
+program = whiteSpace *> (many function) <* eof

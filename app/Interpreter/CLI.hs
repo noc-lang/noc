@@ -22,9 +22,6 @@ import qualified Text.Parsec.String as P
 
 ---------------- Interpreter's parser -------------------
 
-program :: P.Parser Program
-program = whiteSpace *> (many function) <* eof
-
 parseNocFile :: String -> IO (Either ParseError Program)
 parseNocFile path = P.parseFromFile program path
 
