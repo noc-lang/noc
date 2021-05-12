@@ -7,7 +7,7 @@ import Control.Monad.Except
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M
-import Data.Text (Text,pack)
+import Data.Text (Text,pack,unpack)
 import Language.Noc.Syntax.AST
 
 type Stack = [Value]
@@ -32,6 +32,13 @@ initN :: Int -> Stack -> Stack
 initN _ [] = []
 initN 0 l = l
 initN n l = initN (n-1) (init l) 
+
+readAtom :: Value -> Atom
+readAtom (FloatVal x) = FloatAtom x
+readAtom (IntVal x) = IntAtom x
+readAtom (StringVal x) = StringAtom $ unpack x
+readAtom (BoolVal x) = BoolAtom x 
+readAtom (QuoteVal l) = QuoteAtom l
 
 readValue :: Atom -> Value
 readValue (FloatAtom x) = FloatVal x

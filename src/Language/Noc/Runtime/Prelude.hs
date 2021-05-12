@@ -21,6 +21,7 @@ prelude = M.fromList [
   (T.pack "dup", Constant $ PrimVal builtinDup),
   (T.pack "pop", Constant $ PrimVal builtinPop),
   (T.pack "popr", Constant $ PrimVal builtinPopr),
+  (T.pack "pushr", Constant $ PrimVal builtinPushr),
   (T.pack "zap", Constant $ PrimVal builtinZap),
   (T.pack "cat", Constant $ PrimVal builtinCat),
   (T.pack "rotN", Constant $ PrimVal builtinRotN),
@@ -34,9 +35,10 @@ prelude = M.fromList [
   (T.pack "putstr", Constant $ PrimVal builtinPutStr),
   (T.pack "read", Constant $ PrimVal builtinReadFile),
   (T.pack "input", Constant $ PrimVal builtinInput),
+  (T.pack "write", Constant $ PrimVal builtinWrite),
   -- Other
-  (T.pack "unquote", Constant $ PrimVal builtinUnquote)
-  ]
+  (T.pack "unquote", Constant $ PrimVal builtinUnquote),
+  (T.pack "id", Constant $ PrimVal builtinId)]
 
 ----------------------------------------------------
 
@@ -141,6 +143,7 @@ builtinPrint = do
         (FloatVal x) -> (liftIO $ print x) >> return ()
         (IntVal x) -> (liftIO $ print x) >> return ()
         (BoolVal x) -> (liftIO $ print x) >> return ()
+        (QuoteVal x) -> (liftIO $ print x) >> return ()
         _ -> throwError $ TypeError "can only print with strings,floats,integers,bool."
 
 ----------------------------------------------------
@@ -162,7 +165,7 @@ builtinReadFile = do
                             content <- liftIO (try $ TIO.readFile (T.unpack x) :: IO (Either SomeException T.Text))
                             case content of
                                 (Left err) -> throwError $ FileNotFoundError "the file does not exist (no such file or directory)"
-                                (Right succ) -> (push $ StringVal succ) >> return () 
+                                (Right succ) -> push $ StringVal succ
         _ -> throwError $ TypeError "the parameter is not string."
 
 ----------------------------------------------------
@@ -176,5 +179,34 @@ builtinInput = do
             liftIO $ hFlush stdout
             inp <- liftIO $ TIO.getLine
             push $ StringVal inp
-            return ()
         _ -> throwError $ TypeError "the parameter is not string."
+
+----------------------------------------------------
+
+builtinPushr :: Eval ()
+builtinPushr = do
+    v <- pop
+    l <- pop
+    case l of
+        (QuoteVal l') -> push $ QuoteVal (l' <> [readAtom v])
+        _ -> throwError $ TypeError "can only pushr with a quotation."
+
+----------------------------------------------------
+
+builtinWrite :: Eval ()
+builtinWrite = do
+    content <- pop
+    path <- pop
+    case path of
+        (StringVal p) -> case content of
+            (StringVal c) -> liftIO $ writeFile (T.unpack p) (T.unpack c)
+            _ -> throwError $ TypeError "the first parameter is not string."
+        _ -> throwError $ TypeError "the second parameter is not string."
+
+----------------------------------------------------
+
+builtinId :: Eval ()
+builtinId = do
+    v <- pop
+    push v
+

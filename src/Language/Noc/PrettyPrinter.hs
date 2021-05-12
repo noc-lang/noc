@@ -14,7 +14,7 @@ parens content = (pack "[") <> content <> (pack "]")
 comma :: Text -> Text
 comma content = content <> (pack ", ")
 
----- Expression pretty printer ----
+---- Pretty printer expression ----
 
 pprintVal :: Value -> Text
 pprintVal (FloatVal f) = pack $ show f
