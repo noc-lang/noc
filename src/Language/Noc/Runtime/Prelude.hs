@@ -12,6 +12,7 @@ import qualified Data.Map as M (fromList,keys)
 import Control.Exception (try, SomeException)
 import qualified Data.Text.IO as TIO (readFile,getLine)
 import System.IO
+import Data.Fixed (mod')
 
 ----------------------------------------------------
 
@@ -29,6 +30,7 @@ prelude = M.fromList [
   (T.pack "+", Constant $ PrimVal $ builtinOp (+)),
   (T.pack "-", Constant $ PrimVal $ builtinOp (-)),
   (T.pack "*", Constant $ PrimVal $ builtinOp (*)),
+  (T.pack "%", Constant $ PrimVal $ builtinMod),
   (T.pack "/", Constant $ PrimVal $ builtinDiv),
   -- I/O
   (T.pack "print", Constant $ PrimVal builtinPrint),
@@ -69,6 +71,22 @@ builtinDiv = do
                         0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
                         _ -> push $ FloatVal $ (/) v2 v1
     
+
+builtinMod :: Eval ()
+builtinMod = do
+    v1 <- pop
+    v2 <- pop
+    case (v1,v2) of
+        ((FloatVal v1'),(FloatVal v2')) -> operateMod v1' v2'
+        ((IntVal v1'),(IntVal v2')) -> operateMod (fromIntegral v1') (fromIntegral v2')
+        ((FloatVal v1'),(IntVal v2')) -> operateMod v1' (fromIntegral v2') 
+        ((IntVal v1'),(FloatVal v2')) -> operateMod (fromIntegral v1') v2'
+        _ -> throwError $ TypeError "cannot operate with different types."
+    where operateMod v1 v2 = case v1 of
+                        0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
+                        _ -> push $ FloatVal $ v2 `mod'` v1
+        
+
 ----------------------------------------------------
 
 builtinDup :: Eval ()

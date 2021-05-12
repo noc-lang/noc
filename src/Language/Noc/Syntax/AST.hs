@@ -15,8 +15,11 @@ type Expr = [Atom]
 sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
+operators :: Parser String
+operators = string "+" <|> string "-" <|> string "/" <|> string "*" <|> string "%"
+
 word :: Parser Atom
-word = WordAtom <$> identifier
+word = WordAtom <$> (identifier <|> operators)
 
 strLiteral :: Parser Atom
 strLiteral = StringAtom <$> stringLiteral
