@@ -1,17 +1,40 @@
-# noc-lang
+<div align="center">
 
-<img src="/assets/images/icon.png" alt="Noc icon" align=right width="128" />
+# noc
+
+<img src="./assets/images/icon.png" alt="Noc icon" width="128" />
 
 User-friendly stack-based concatenative programming language.
 
-### Installing noc
-This command builds project and copies binary in **~/.local/bin** for GNU/Linux system or in **%APPDATA%\local\bin** for Windows system.
+![stars](https://img.shields.io/github/stars/mortim/noc?style=for-the-badge&logo=appveyor&color=9cf)
+
+![forks](https://img.shields.io/github/forks/mortim/noc?style=for-the-badge&logo=appveyor&color=9cf)
+
+</div>
+
+---
+
+
+## Getting started
+
+### Installation
+
+Pre-requisite:
+- Haskell toolchain
+- Stack
+
+This command builds project and copies binary in:
+- **~/.local/bin** (GNU/Linux system)
+- **%APPDATA%\local\bin** (Windows system)
+
 ```
 stack install
 ```
 
+---
+
 ### Usage
-You can check all the commands here.
-```
-$ noc --help
-```
+
+To learn Noc language, check the [Noc book](./docs/noc-book.md).
+
+
