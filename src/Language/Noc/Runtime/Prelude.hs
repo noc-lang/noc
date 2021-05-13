@@ -13,6 +13,7 @@ import Control.Exception (try, SomeException)
 import qualified Data.Text.IO as TIO (readFile,getLine)
 import System.IO
 import Data.Fixed (mod')
+import Text.Read (readMaybe)
 
 ----------------------------------------------------
 
@@ -21,8 +22,6 @@ prelude = M.fromList [
   -- Combinators 
   (T.pack "dup", Constant $ PrimVal builtinDup),
   (T.pack "pop", Constant $ PrimVal builtinPop),
-  (T.pack "popr", Constant $ PrimVal builtinPopr),
-  (T.pack "pushr", Constant $ PrimVal builtinPushr),
   (T.pack "zap", Constant $ PrimVal builtinZap),
   (T.pack "cat", Constant $ PrimVal builtinCat),
   (T.pack "rotN", Constant $ PrimVal builtinRotN),
@@ -30,17 +29,23 @@ prelude = M.fromList [
   (T.pack "+", Constant $ PrimVal $ builtinOp (+)),
   (T.pack "-", Constant $ PrimVal $ builtinOp (-)),
   (T.pack "*", Constant $ PrimVal $ builtinOp (*)),
-  (T.pack "%", Constant $ PrimVal $ builtinMod),
   (T.pack "/", Constant $ PrimVal $ builtinDiv),
+  (T.pack "%", Constant $ PrimVal $ builtinMod),
   -- I/O
   (T.pack "print", Constant $ PrimVal builtinPrint),
   (T.pack "putstr", Constant $ PrimVal builtinPutStr),
   (T.pack "read", Constant $ PrimVal builtinReadFile),
   (T.pack "input", Constant $ PrimVal builtinInput),
   (T.pack "write", Constant $ PrimVal builtinWrite),
-  -- Other
+  -- Quote
   (T.pack "unquote", Constant $ PrimVal builtinUnquote),
-  (T.pack "id", Constant $ PrimVal builtinId)]
+  (T.pack "pushr", Constant $ PrimVal builtinPushr),
+  (T.pack "popr", Constant $ PrimVal builtinPopr),
+  -- Other
+  (T.pack "id", Constant $ PrimVal builtinId),
+  (T.pack "str", Constant $ PrimVal builtinStr),
+  (T.pack "int", Constant $ PrimVal builtinInt),
+  (T.pack "float", Constant $ PrimVal builtinFloat)]
 
 ----------------------------------------------------
 
@@ -228,3 +233,39 @@ builtinId = do
     v <- pop
     push v
 
+----------------------------------------------------
+
+builtinStr :: Eval ()
+builtinStr = do
+    v <- pop
+    case v of
+        (StringVal x) -> push $ StringVal x
+        (FloatVal x) -> push $ StringVal $ T.pack $ show x
+        (IntVal x) -> push $ StringVal $ T.pack $ show x
+        (BoolVal x) -> push $ StringVal $ T.pack $ show x
+        _ -> throwError $ TypeError "can only str with str,float,int,bool"
+    
+----------------------------------------------------
+
+builtinInt :: Eval ()
+builtinInt = do
+    v <- pop
+    case v of
+        (IntVal x) -> push $ IntVal x
+        (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
+            (Just v) -> push $ IntVal v
+            Nothing -> throwError $ ValueError "the value is not a integer."
+        _ -> throwError $ TypeError "can only int with int,str"
+
+----------------------------------------------------
+
+builtinFloat :: Eval ()
+builtinFloat = do
+    v <- pop
+    case v of
+        (IntVal x) -> push $ FloatVal $ fromIntegral x
+        (FloatVal x) -> push $ FloatVal x
+        (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Double of
+            (Just v) -> push $ FloatVal v
+            Nothing -> throwError $ ValueError "the value is not a integer."
+        _ -> throwError $ TypeError "can only float with int,float,str"

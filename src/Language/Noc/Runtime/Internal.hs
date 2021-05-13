@@ -24,7 +24,7 @@ type DeclEval = StateT Env (Except EvalError)
 ------
 data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal Text | BoolVal Bool | PrimVal (Eval ())
 
-data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String deriving Show
+data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String | ValueError String deriving Show
 
 --- Utils ---------------------
 
