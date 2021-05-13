@@ -1,13 +1,13 @@
 <div align="center">
 
-# noc
+# Noc
 
 <img src="./assets/images/icon.png" alt="Noc icon" width="128" />
 
 User-friendly stack-based concatenative programming language.
 
-![stars](https://img.shields.io/github/stars/mortim/noc?style=for-the-badge&logo=appveyor&color=9cf)
 
+![stars](https://img.shields.io/github/stars/mortim/noc?style=for-the-badge&logo=appveyor&color=9cf)
 ![forks](https://img.shields.io/github/forks/mortim/noc?style=for-the-badge&logo=appveyor&color=9cf)
 
 </div>
