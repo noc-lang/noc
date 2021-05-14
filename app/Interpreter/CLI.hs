@@ -17,12 +17,13 @@ import Language.Noc.Runtime.Eval (evalFile)
 import Options.Applicative (Parser, empty, fullDesc, header, helper, info, (<|>))
 import Language.Noc.PrettyPrinter (displayStack)
 import Text.Parsec (ParseError, eof, many)
-import Data.Text (pack)
+import Data.Text (Text, pack)
+import Data.Map (Map,toList)
 import qualified Text.Parsec.String as P
 
 ---------------- Interpreter's parser -------------------
 
-parseNocFile :: String -> IO (Either ParseError Program)
+parseNocFile :: String -> IO (Either ParseError Module)
 parseNocFile path = P.parseFromFile program path
 
 ----------------- CLI Parser ----------------------------
@@ -37,11 +38,16 @@ run (Exec path) = do
     case parseFile of
         (Left err) -> print err
         (Right succ) -> do
-            let otherFuncs = filterProg (/=) succ
-            let otherFuncsMap = M.fromList $ map (\(Declaration name expr) -> (pack name, Function expr)) otherFuncs
-            let mainFunction = filterProg (==) succ
+            let (Module imports decls) = succ
+            let succ' = toList decls
+            ---
+            let otherFuncs = filterProg (/=) succ'
+            let mainFunction = filterProg (==) succ'
+            ---
+            let otherFuncsMap = M.fromList $ map (\(k,v) -> (k, Function v)) otherFuncs
+            ---
             evalFile' <- runExceptT $ runRWST (evalFile mainFunction) (prelude <> otherFuncsMap) []
-
+            ---
             case evalFile' of
                 (Left err') -> print err'
                 (Right _) -> return ()

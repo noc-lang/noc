@@ -19,10 +19,12 @@ import System.Directory (XdgDirectory (..), getXdgDirectory)
 import System.IO (hFlush, stdout)
 import Text.Parsec (ParseError, eof, parse, (<|>))
 import Text.Parsec.String (Parser)
+import Data.Map (Map,toList)
+import Data.Text (Text,pack)
 
 ----------------------- REPL Parser -------------------------------
 
-data REPLInput = DeclInput Declaration | ExprInput Expr deriving (Show, Eq)
+data REPLInput = DeclInput (Map Text Expr) | ExprInput Expr deriving (Show, Eq)
 
 replFunction :: Parser REPLInput
 replFunction = (function <* eof) >>= (pure . DeclInput)
@@ -35,8 +37,10 @@ parseREPL expr = parse (replFunction <|> replExpression) "" expr
 
 ----------------------- REPL Eval -------------------------------
 
-funcREPL :: Declaration -> Env -> Either EvalError ((), Env)
-funcREPL decl env = runExcept $ runStateT (evalFunc decl) env
+funcREPL :: (Map Text Expr) -> Env -> Either EvalError ((), Env)
+funcREPL func env = do
+  let func' = toList func
+  runExcept $ runStateT (evalFunc func') env
 
 exprREPL :: Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))
 exprREPL expr stack env = runExceptT $ runRWST (eval expr) (prelude <> env) stack
@@ -81,11 +85,11 @@ repl stack env code = do
     (Right succ) -> case succ of
       ---
       (ExprInput []) -> (putStrLn ("Noc doesn't recognize '" ++ expression ++ "' expression.")) >> nocREPL stack env
-      (DeclInput func) -> case funcREPL func env of
-          ---
-          (Left err') -> print err' >> nocREPL stack env
-          (Right ((), newenv)) -> nocREPL stack newenv
-          ---
+      (DeclInput decl) -> case funcREPL decl env of
+        ---
+        (Left err') -> print err' >> nocREPL stack env
+        (Right ((), newenv)) -> nocREPL stack newenv
+        ---
       (ExprInput expr) -> do
           eval' <- exprREPL expr stack env
           case eval' of

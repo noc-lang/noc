@@ -6,6 +6,8 @@ import Language.Noc.Syntax.Lexer
 -----
 import Text.Parsec
 import Text.Parsec.String (Parser)
+import Data.Map (Map,fromList)
+import Data.Text (Text,pack)
 
 ----------------------- Atoms --------------------------
 data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | BoolAtom Bool deriving (Show, Eq)
@@ -49,20 +51,26 @@ quote = QuoteAtom <$> (brackets stack)
 stack :: Parser Expr
 stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLiteral <|> word)
 
--------------------- Function declaration -----------------
-data Declaration = Declaration {declName :: String, declVal :: Expr} deriving (Show, Eq)
+-------------------- Module -----------------
 
-type Program = [Declaration]
+data Module = Module { imports :: [FilePath], decls :: Map Text Expr }
 
 manyTill1 :: Parser Char -> Parser String -> Parser String
 manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
 
-function :: Parser Declaration
+function :: Parser (Map Text Expr)
 function = do
   lexeme $ reserved "def"
   name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill1 (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
   content <- (lexeme $ braces $ (whiteSpace *> stack))
-  pure $ Declaration name content
+  pure $ fromList [(pack name, content)]
 
-program :: Parser Program
-program = whiteSpace *> (many function) <* eof
+program :: Parser Module
+program = do
+  whiteSpace
+  v <- many function
+  case v of
+    [] -> eof >> (pure $ Module [] (fromList []))
+    (x:xs) -> eof >> (pure $ Module [] (foldl (<>) x xs))
+
+   

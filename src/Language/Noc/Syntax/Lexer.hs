@@ -22,7 +22,7 @@ lexer =
         P.identLetter = alphaNum,
         P.opStart = (noneOf ""),
         P.opLetter = (noneOf ""),
-        P.reservedNames = ["def"],
+        P.reservedNames = ["def", "load"],
         P.reservedOpNames = [],
         P.caseSensitive = False
       }

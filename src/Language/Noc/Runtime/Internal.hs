@@ -47,8 +47,8 @@ readValue (StringAtom x) = StringVal $ pack x
 readValue (BoolAtom x) = BoolVal x 
 readValue (QuoteAtom l) = QuoteVal l
 
-filterProg :: (String -> String -> Bool) -> [Declaration] -> [Declaration]
-filterProg pred prog = filter (\(Declaration name expr) -> pred name "main") prog
+filterProg :: (Text -> Text -> Bool) -> [(Text, Expr)] -> [(Text, Expr)]
+filterProg pred prog = filter (\(k,v) -> pred k (pack "main")) prog
 
 popN :: Integer -> Eval ()
 popN 0 = return ()
