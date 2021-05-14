@@ -7,13 +7,14 @@ import System.Directory (XdgDirectory (..), getXdgDirectory)
 import Language.Noc.Runtime.Internal
 import Language.Noc.Syntax.AST (program, Declaration (..), Program)
 import Control.Monad.RWS
+import Language.Noc.Runtime.Prelude (prelude)
 import Control.Monad.Except
 import qualified Data.Map as M (empty, toList)
 import Language.Noc.PrettyPrinter (displayEnv)
 import Text.Parsec (ParseError)
 import Text.Parsec.String (parseFromFile)
 import Data.Text (pack)
-import qualified Data.Map as M (fromList)
+import qualified Data.Map as M (fromList,keys)
 import Control.Exception (try,SomeException)
 
 ----------------------------------------------------
@@ -75,9 +76,24 @@ load arg stack env repl =
               print err'
               repl stack env
             (Right succ') -> do
-              let succMap = M.fromList $ map (\(Declaration name expr) -> (pack name, Function expr)) succ'
-              putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")
-              repl stack (env <> succMap)
+              let succMap l = M.fromList $ map (\(Declaration name expr) -> (pack name, Function expr)) l
+              ---
+              let names = map (\(Declaration name _) -> pack name) succ' 
+              ---
+              let envFiltered = filter (\(Declaration name _) -> pack name `elem` M.keys env) succ'
+              let preludeFiltered = filter (\(Declaration name _) -> pack name `elem` M.keys prelude) succ'
+              ---
+              case (length preludeFiltered >= 1,length envFiltered >= 1) of
+                (True,_) -> do
+                  let (Declaration funcName _) = head preludeFiltered
+                  (print $ "cannot declare the function with " <> funcName <> " name. (reserved to prelude)") >> repl stack env
+                (False,True) -> do
+                  let otherFuncs = filter (\(Declaration name _) -> not $ pack name `elem` M.keys env) succ'
+                  putStrLn ("'" ++ (unwords arg) ++ "' is reloaded.")
+                  repl stack (succMap otherFuncs <> succMap envFiltered)
+                (False,False) -> do
+                      putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")
+                      repl stack (env <> succMap succ')
     }
 
 ----------------------------------------------------
