@@ -45,7 +45,10 @@ prelude = M.fromList [
   (T.pack "id", Constant $ PrimVal builtinId),
   (T.pack "str", Constant $ PrimVal builtinStr),
   (T.pack "int", Constant $ PrimVal builtinInt),
-  (T.pack "float", Constant $ PrimVal builtinFloat)]
+  (T.pack "float", Constant $ PrimVal builtinFloat),
+  (T.pack "case", Constant $ PrimVal builtinCase),
+  (T.pack "_", Constant $ PrimVal builtinAnyMatch)
+  ]
 
 ----------------------------------------------------
 
@@ -166,7 +169,6 @@ builtinPrint = do
         (FloatVal x) -> (liftIO $ print x) >> return ()
         (IntVal x) -> (liftIO $ print x) >> return ()
         (BoolVal x) -> (liftIO $ print x) >> return ()
-        (QuoteVal x) -> (liftIO $ print x) >> return ()
         _ -> throwError $ TypeError "can only print with strings,floats,integers,bool."
 
 ----------------------------------------------------
@@ -269,3 +271,52 @@ builtinFloat = do
             (Just v) -> push $ FloatVal v
             Nothing -> throwError $ ValueError "the value is not a integer."
         _ -> throwError $ TypeError "can only float with int,float,str"
+
+----------------------------------------------------
+
+builtinAnyMatch :: Eval ()
+builtinAnyMatch = push $ QuoteVal [WordAtom "_"]
+
+cases :: Value -> Integer -> Eval ()
+cases _ 0 = throwError $ ValueError "Non-exhaustive patterns in case"
+cases case' n = do
+    pattern' <- pop
+    case pattern' of
+        (QuoteVal [QuoteAtom p, QuoteAtom exprs]) -> do
+            evalExpr p
+            pat <- pop
+            case (case', pat) of
+                (StringVal a, StringVal b) -> runCase a b exprs       
+                (IntVal a, IntVal b) -> runCase a b exprs
+                (FloatVal a, FloatVal b) -> runCase a b exprs
+                (BoolVal a, BoolVal b) -> runCase a b exprs
+                --
+                (_, QuoteVal [WordAtom "_"]) -> push case' >> evalExpr exprs
+                (StringVal a, _) -> cases case' (n-1)         
+                (IntVal a, _)-> cases case' (n-1)
+                (FloatVal a, _) -> cases case' (n-1)
+                (BoolVal a, _) -> cases case' (n-1)
+                _ -> popN (n-1)
+        _ ->  throwError $ TypeError "lack of quotes in one of the cases."
+    where runCase a b exprs = if a == b then popN (n-1) >> evalExpr exprs else cases case' (n-1)
+
+
+builtinCase :: Eval ()
+builtinCase = do
+    patterns <- pop
+    toCase <- pop
+    case toCase of
+        (QuoteVal x) -> case patterns of
+            (QuoteVal y) -> do
+                let lenPatterns = fromIntegral $ length y
+                -- case
+                evalExpr x
+                caseVal <- pop
+                --- match case with one of the patterns
+                evalExpr y
+                (push $ IntVal lenPatterns) >> builtinRotN
+                -- evaluate case
+                cases caseVal lenPatterns
+
+            _ -> throwError $ TypeError "the patterns are not quote."
+        _ -> throwError $ TypeError "the value to case is not quote."

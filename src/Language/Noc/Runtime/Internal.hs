@@ -50,6 +50,10 @@ readValue (QuoteAtom l) = QuoteVal l
 filterProg :: (String -> String -> Bool) -> [Declaration] -> [Declaration]
 filterProg pred prog = filter (\(Declaration name expr) -> pred name "main") prog
 
+popN :: Integer -> Eval ()
+popN 0 = return ()
+popN n = pop >> popN (n-1)
+
 -------------------------------
 
 pop :: Eval Value
