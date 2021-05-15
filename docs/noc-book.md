@@ -157,8 +157,9 @@ TypeError "cannot operate with different types."
 | Integer | An arbitrary precision integers, relative number | 15 or -86
 | Float | Double-precision floating point numbers (real numbers) | 1.5 or -3.9
 | String | UTF8 string | "Hello,World!"
-| Bool | Boolean value | True or False
-| Quote | Anonymous stack containing instuctions | [5 5 +]
+| Bool | Boolean type | True or False
+| Word | Word type | dup
+| Quote | Anonymous stack containing instuctions | [5 5 +] [1 2 3] [["a" 1] ["b" 2] ["c" 3]]
 </div>
 
 ---
