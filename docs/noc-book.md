@@ -14,10 +14,14 @@
   - [Advanced Topic](#advanced-topic)
     - [Quotes](#quotes)
       - [List](#list)
-    - [Control Flow](#control-flow)
-    - [Modules](#modules)
-      - [Load Noc files](#load-noc-files)
-      - [Standard Library](#std)
+      - [Dict](#)
+    - [Macros](#)
+    - [Control Flow](#)
+      - [Case statement](#)
+      - [If statement](#)
+    - [Modules](#)
+      - [Load Noc files](#)
+      - [Standard Library](#)
 
 ---
 
@@ -153,7 +157,7 @@ TypeError "cannot operate with different types."
 | Integer | An arbitrary precision integers, relative number | 15 or -86
 | Float | Double-precision floating point numbers (real numbers) | 1.5 or -3.9
 | String | UTF8 string | "Hello,World!"
-| Primitive | Native operators or functions | dup
+| Bool | Boolean value | True or False
 | Quote | Anonymous stack containing instuctions | [5 5 +]
 </div>
 
@@ -352,94 +356,6 @@ noc> [square]
 noc> unquote
 => [4]
 ```
-
-<div id="list">
-
-### List
-
-
-</div>
-
----
-
-
-<div id="control-flow">
-
-## Control Flow
-
-The control flow is implemented in Noc, with the case function.
-```
-[to_case]
-[
-  [[pattern1] [exprs]]
-  [[pattern2] [exprs]]
-  ...
-  [[_] [exprs]]  (# it's the 'otherwise', you can acces to 'to_case' value in exprs for the 'otherwise' pattern)
-]
-case
-```
-
-Example:
-```scala
-def swap = { 2 rotN }
-
-def fact = {
-    [
-        [[0] [1]]
-        [[_] [dup 1 - [] swap pushr fact *]]
-    ] case
-}
-
-def main = {
-    [5] fact print
-}
-```
-Output
-```scala
-120
-```
-
-'eq' implementation with the case function
-```scala
-def eq = { 
-    quote quote
-    swap
-    quote
-    swap
-    [True] pushr quote
-    [[_] [pop False]] quote
-    cat case
-}
-
-def main = {
-  /* False */
-  "1" 1 eq print 
-  /* True */
-  "hello" "hello" eq print
-}
-```
-
-</div>
-
----
-
-<div id="modules">
-
-## Modules
-
-<div id="load-noc-files">
-
-### Load Noc files
-
-</div>
-
----
-
-<div id="std">
-
-### Standard Library
-
-</div>
 
 </div>
 
