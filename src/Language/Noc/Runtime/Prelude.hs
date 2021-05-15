@@ -35,7 +35,7 @@ prelude = M.fromList [
   (T.pack "print", Constant $ PrimVal builtinPrint),
   (T.pack "putstr", Constant $ PrimVal builtinPutStr),
   (T.pack "read", Constant $ PrimVal builtinReadFile),
-  (T.pack "input", Constant $ PrimVal builtinInput),
+  (T.pack "ask", Constant $ PrimVal builtinAsk),
   (T.pack "write", Constant $ PrimVal builtinWrite),
   -- Quote
   (T.pack "unquote", Constant $ PrimVal builtinUnquote),
@@ -195,8 +195,8 @@ builtinReadFile = do
 
 ----------------------------------------------------
 
-builtinInput :: Eval ()
-builtinInput = do
+builtinAsk :: Eval ()
+builtinAsk = do
     msg <- pop
     case msg of
         (StringVal x) -> do
