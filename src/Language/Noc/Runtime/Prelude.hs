@@ -30,7 +30,6 @@ prelude = M.fromList [
   (T.pack "-", Constant $ PrimVal $ builtinOp (-)),
   (T.pack "*", Constant $ PrimVal $ builtinOp (*)),
   (T.pack "/", Constant $ PrimVal $ builtinDiv),
-  (T.pack "%", Constant $ PrimVal $ builtinMod),
   -- I/O
   (T.pack "print", Constant $ PrimVal builtinPrint),
   (T.pack "putstr", Constant $ PrimVal builtinPutStr),
@@ -41,7 +40,7 @@ prelude = M.fromList [
   (T.pack "unquote", Constant $ PrimVal builtinUnquote),
   (T.pack "pushr", Constant $ PrimVal builtinPushr),
   (T.pack "popr", Constant $ PrimVal builtinPopr),
-  -- Other
+  -- Misc
   (T.pack "id", Constant $ PrimVal builtinId),
   (T.pack "str", Constant $ PrimVal builtinStr),
   (T.pack "int", Constant $ PrimVal builtinInt),
@@ -77,22 +76,6 @@ builtinDiv = do
                         0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
                         _ -> push $ FloatVal $ (/) v2 v1
     
-
-builtinMod :: Eval ()
-builtinMod = do
-    v1 <- pop
-    v2 <- pop
-    case (v1,v2) of
-        ((FloatVal v1'),(FloatVal v2')) -> operateMod v1' v2'
-        ((IntVal v1'),(IntVal v2')) -> operateMod (fromIntegral v1') (fromIntegral v2')
-        ((FloatVal v1'),(IntVal v2')) -> operateMod v1' (fromIntegral v2') 
-        ((IntVal v1'),(FloatVal v2')) -> operateMod (fromIntegral v1') v2'
-        _ -> throwError $ TypeError "cannot operate with different types."
-    where operateMod v1 v2 = case v1 of
-                        0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
-                        _ -> push $ FloatVal $ v2 `mod'` v1
-        
-
 ----------------------------------------------------
 
 builtinDup :: Eval ()

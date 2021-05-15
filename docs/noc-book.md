@@ -22,6 +22,7 @@
     - [Modules](#)
       - [Load Noc files](#)
       - [Standard Library](#)
+  - [Prelude Functions](#prelude-functions)
 
 ---
 
@@ -111,9 +112,9 @@ noc> /
 ```
 The equivalent in infix notation is: ``(5+6) * 2 / 10``, the reverse polish notation implements operator precedence.
 
-We saw some "primitive operators" (the native operators of the interpreter) but it's obviously possible to combine with the native functions, called "primitive functions". These operators,functions are grouped in one module name Prelude.
+We saw some "primitive operators" (the native operators of the interpreter) but it's obviously possible to combine with the native functions, called "primitive functions". These operators,functions are grouped in one module name Prelude. 
 
-We can access to the documentation of the all primitive functions,operators [here](#).
+We can access to the documentation of the all primitive functions,operators [here](#prelude-functions).
 
 Example: 
 ```scala
@@ -362,4 +363,164 @@ noc> unquote
 
 ---
 
-To explore all functions, we can check the [STD documentation](#).
+<div id="prelude-functions">
+
+# Prelude Functions
+
+The documentation of all Prelude functions (native functions):
+
+Source code: [here](https://github.com/mortim/noc/blob/master/src/Language/Noc/Runtime/Prelude.hs)
+
+---
+
+### Stack-shufflers
+
+##### dup
+> Duplicate the top-stack element
+
+```
+stack: [1 2] 
+dup => [1 2 2]
+```
+
+##### pop
+> Remove the top-stack element
+```
+stack: [1 2]
+pop => [1]
+```
+
+##### zap
+> Clear all the stack
+```
+stack: [1 2 3]
+zap => []
+```
+
+##### cat
+> Concatenate 2 values (string and quotes)
+```
+[1] [2] cat => [1 2]
+"Hello, " "World!" cat => "Hello, World!"
+```
+
+##### rotN
+> Rotate the stack N elements
+```
+stack: [1 2 3]
+2 rotN => [1,3,2]
+```
+
+---
+
+### Arithmetic operators
+
+##### +
+> Sum of the 2 top-stack elements
+```
+stack: [5 6]
++ => [11]
+```
+
+##### -
+> Difference of the 2 top-stack elements
+```
+stack: [10 9]
+- => [1]
+```
+
+##### *
+> Product of the 2 top-stack elements
+```
+stack: [20 0.5]
+* => [10.0]
+```
+
+##### /
+> Quotient of the 2 top-stack elements
+```
+stack: [10 2]
+/ => [5.0]
+```
+
+---
+
+### I/O
+
+##### print
+> Output a value (Standard output)
+```
+"Hello, World!" print => "Hello, World!"
+=> []
+```
+
+##### putstr
+> Output a string value (Standard output)
+```
+"Hello!" putstr => Hello!
+=> []
+```
+
+##### read
+> Open a file and read the content
+```
+"file.txt" read => ["A file containing text!"]
+```
+
+##### ask
+> Read line from the standard input
+```
+"Your name: " ask
+Your name: john 
+=> ["john"]
+```
+
+##### write
+> Write text into a file
+```
+"file.txt" "Hello!" write 
+=> []
+```
+
+---
+
+## Quote
+
+##### unquote
+> Evaluate instruction into a quote
+```
+[[5 5 +] 5 5 +] unquote => [[5 5 +] 10]
+```
+
+##### pushr
+> Push a value into a quote
+```
+[5] 5 pushr => [[5 5]]
+```
+
+##### popr
+> Get out the top-element in the quote
+```
+[1 2] popr => [[1] 2]
+```
+
+--- 
+
+## Misc
+
+##### id
+> Get the top-stack element (does nothing)
+```
+stack: [5]
+id => [5]
+```
+
+##### str, int, float
+> Type conversion 
+```
+5 str => ["5"]
+"10" int => [10]
+"10.5" float => [10.5]
+```
+
+</div>
