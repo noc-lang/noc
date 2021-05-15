@@ -54,13 +54,10 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 data Module = Module {imports :: [FilePath], decls :: Map Text Expr}
 
-manyTill1 :: Parser Char -> Parser String -> Parser String
-manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
-
 function :: Parser (Map Text Expr)
 function = do
   lexeme $ reserved "def"
-  name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill1 (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
+  name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
   content <- (lexeme $ braces $ (whiteSpace *> stack))
   pure $ fromList [(pack name, content)]
 

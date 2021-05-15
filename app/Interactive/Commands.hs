@@ -52,9 +52,9 @@ help arg stack env repl =
         putStrLn $
           unlines
             [ "Commands available from the prompt:\n",
-              ":quit | Exit REPL.",
+              ":quit | Exit REPL and clear the .noc_history file",
               ":load [filepath] | Load Noc file.",
-              ":reset | Resetting global stack.",
+              ":reset | Reset stack and env.",
               ":env | Show environment."
             ]
         repl stack env

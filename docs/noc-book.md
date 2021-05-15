@@ -213,18 +213,13 @@ There are some commands in the REPL:
 noc> :help
 Commands available from the prompt:
 
-:quit | Exit REPL.
+:quit | Exit REPL and clear the .noc_history file.
 :load [filepath] | Load Noc file.
-:reset | Resetting global stack.
+:reset | Reset the stack and the env.
 :env | Show environment.
 ```
 
 We will show the 'load' command in [Modules](#modules) topic.
-
-| Name | Description 
-| ----------- | ----------- |
-:quit | Quit REPL and clear the .noc_history file
-:reset | Reset the stack and the env (declared functions)
 
 </div>
 
