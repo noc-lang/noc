@@ -6,12 +6,14 @@ import Control.Monad.Except
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS
 import Control.Monad.State (runStateT)
+import Data.Map (Map, toList)
 import Data.Maybe (fromMaybe)
+import Data.Text (Text, pack)
 import Interactive.Commands
 import Language.Noc.PrettyPrinter (displayStack)
-import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Runtime.Eval
 import Language.Noc.Runtime.Internal
+import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Syntax.AST
 import Language.Noc.Syntax.Lexer
 import System.Console.Haskeline
@@ -19,8 +21,6 @@ import System.Directory (XdgDirectory (..), getXdgDirectory)
 import System.IO (hFlush, stdout)
 import Text.Parsec (ParseError, eof, parse, (<|>))
 import Text.Parsec.String (Parser)
-import Data.Map (Map,toList)
-import Data.Text (Text,pack)
 
 ----------------------- REPL Parser -------------------------------
 
@@ -38,9 +38,7 @@ parseREPL expr = parse (replFunction <|> replExpression) "" expr
 ----------------------- REPL Eval -------------------------------
 
 funcREPL :: (Map Text Expr) -> Env -> Either EvalError ((), Env)
-funcREPL func env = do
-  let func' = toList func
-  runExcept $ runStateT (evalFunc func') env
+funcREPL func env = runExcept $ runStateT (evalFunc $ toList func) env
 
 exprREPL :: Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))
 exprREPL expr stack env = runExceptT $ runRWST (eval expr) (prelude <> env) stack
@@ -73,7 +71,6 @@ run name funcs stack env = case name `elem` (map fst funcs) of
     action
   False -> (putStrLn ("Unknown command '" ++ name ++ "' or lack of arguments")) >> (nocREPL stack env)
 
-
 repl :: Stack -> Env -> [String] -> IO ()
 repl stack env [] = nocREPL stack env
 repl stack env ((':' : cmd) : args) = run cmd (commands args stack env nocREPL) stack env
@@ -89,10 +86,10 @@ repl stack env code = do
         ---
         (Left err') -> print err' >> nocREPL stack env
         (Right ((), newenv)) -> nocREPL stack newenv
-        ---
+      ---
       (ExprInput expr) -> do
-          eval' <- exprREPL expr stack env
-          case eval' of
-            ---
-            (Left err'') -> print err'' >> nocREPL stack env
-            (Right ((), s, ())) -> (putStrLn $ displayStack s) >> (nocREPL s env)
+        eval' <- exprREPL expr stack env
+        case eval' of
+          ---
+          (Left err'') -> print err'' >> nocREPL stack env
+          (Right ((), s, ())) -> (putStrLn $ displayStack s) >> (nocREPL s env)

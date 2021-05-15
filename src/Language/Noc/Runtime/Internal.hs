@@ -1,5 +1,4 @@
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RankNTypes #-}
 
 module Language.Noc.Runtime.Internal where
 
@@ -7,7 +6,7 @@ import Control.Monad.Except
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M
-import Data.Text (Text,pack,unpack)
+import Data.Text (Text, pack, unpack)
 import Language.Noc.Syntax.AST
 
 type Stack = [Value]
@@ -24,35 +23,35 @@ type DeclEval = StateT Env (Except EvalError)
 ------
 data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal Text | BoolVal Bool | PrimVal (Eval ())
 
-data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String | ValueError String deriving Show
+data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | FileNotFoundError String | MainError String | ValueError String deriving (Show)
 
---- Utils ---------------------
+---------- Utils ---------------
 
 initN :: Int -> Stack -> Stack
 initN _ [] = []
 initN 0 l = l
-initN n l = initN (n-1) (init l) 
+initN n l = initN (n -1) (init l)
 
 readAtom :: Value -> Atom
 readAtom (FloatVal x) = FloatAtom x
 readAtom (IntVal x) = IntAtom x
 readAtom (StringVal x) = StringAtom $ unpack x
-readAtom (BoolVal x) = BoolAtom x 
+readAtom (BoolVal x) = BoolAtom x
 readAtom (QuoteVal l) = QuoteAtom l
 
 readValue :: Atom -> Value
 readValue (FloatAtom x) = FloatVal x
 readValue (IntAtom x) = IntVal x
 readValue (StringAtom x) = StringVal $ pack x
-readValue (BoolAtom x) = BoolVal x 
+readValue (BoolAtom x) = BoolVal x
 readValue (QuoteAtom l) = QuoteVal l
 
 filterProg :: (Text -> Text -> Bool) -> [(Text, Expr)] -> [(Text, Expr)]
-filterProg pred prog = filter (\(k,v) -> pred k (pack "main")) prog
+filterProg pred prog = filter (\(k, v) -> pred k (pack "main")) prog
 
 popN :: Integer -> Eval ()
 popN 0 = return ()
-popN n = pop >> popN (n-1)
+popN n = pop >> popN (n -1)
 
 -------------------------------
 
@@ -60,8 +59,8 @@ pop :: Eval Value
 pop = do
   stack <- get
   case stack of
-        [] -> throwError $ EmptyStackError "no or few elements in the stack."
-        _ -> let (x:xs) = reverse stack in ((put $ reverse xs) >> return x)
+    [] -> throwError $ EmptyStackError "no or few elements in the stack."
+    _ -> let (x : xs) = reverse stack in ((put $ reverse xs) >> return x)
 
 -------------------------------
 
@@ -75,7 +74,7 @@ push val = do
 
 evalExpr :: Expr -> Eval ()
 evalExpr [] = return ()
-evalExpr (x:xs) = case x of
+evalExpr (x : xs) = case x of
   (WordAtom n) -> (ask >>= (evalWord n)) >> evalExpr xs
   _ -> (push $ readValue x) >> evalExpr xs
 

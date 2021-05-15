@@ -6,7 +6,7 @@ import Data.Text (Text, pack, unpack)
 import Language.Noc.Runtime.Internal
 import Language.Noc.Syntax.AST
 
-----------------------------------------------
+-------------  Utils --------------------------
 
 parens :: Text -> Text
 parens content = (pack "[") <> content <> (pack "]")
@@ -14,7 +14,7 @@ parens content = (pack "[") <> content <> (pack "]")
 comma :: Text -> Text
 comma content = content <> (pack ", ")
 
----- Pretty printer expression ----
+---- Expression pretty printer ----
 
 pprintVal :: Value -> Text
 pprintVal (FloatVal f) = pack $ show f

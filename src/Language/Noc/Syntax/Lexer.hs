@@ -28,11 +28,12 @@ lexer =
       }
 
 ----------------- Lexer functions --------------------------------------------------
+
 float :: Stream s m Char => ParsecT s u m Double
 float = P.float lexer
 
 natural :: Stream s m Char => ParsecT s u m Integer
-natural = P.natural lexer 
+natural = P.natural lexer
 
 brackets :: Stream s m Char => ParsecT s u m a -> ParsecT s u m a
 brackets = P.brackets lexer

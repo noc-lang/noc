@@ -2,12 +2,11 @@ module Language.Noc.Syntax.AST where
 
 ----------------------- Modules ------------------------
 
+import Data.Map (Map, fromList)
+import Data.Text (Text, pack)
 import Language.Noc.Syntax.Lexer
------
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import Data.Map (Map,fromList)
-import Data.Text (Text,pack)
 
 ----------------------- Atoms --------------------------
 data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | BoolAtom Bool deriving (Show, Eq)
@@ -18,7 +17,7 @@ sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
 operators :: Parser String
-operators = string "+" <|> string "-" <|> string "/" <|> string "*" <|> string "%"
+operators = string "+" <|> string "-" <|> string "/" <|> string "*"
 
 word :: Parser Atom
 word = WordAtom <$> (identifier <|> operators)
@@ -53,7 +52,7 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 -------------------- Module -----------------
 
-data Module = Module { imports :: [FilePath], decls :: Map Text Expr }
+data Module = Module {imports :: [FilePath], decls :: Map Text Expr}
 
 manyTill1 :: Parser Char -> Parser String -> Parser String
 manyTill1 p pend = (:) <$> p <*> (manyTill p pend)
@@ -71,6 +70,4 @@ program = do
   v <- many function
   case v of
     [] -> eof >> (pure $ Module [] (fromList []))
-    (x:xs) -> eof >> (pure $ Module [] (foldl (<>) x xs))
-
-   
+    (x : xs) -> eof >> (pure $ Module [] (foldl (<>) x xs))
