@@ -14,10 +14,10 @@
   - [Advanced Topic](#advanced-topic)
     - [Quotes](#quotes)
       - [List](#list)
-      - [Dict](#dict)
-  - [Control Flow](#control-flow)
-  - [Modules](#modules)
-
+    - [Control Flow](#control-flow)
+    - [Modules](#modules)
+      - [Load Noc files](#load-noc-files)
+      - [Standard Library](#std)
 
 ---
 
@@ -68,28 +68,28 @@ g(f(x,y)) ->    y x f g
 ```
 
 Example:
-```py
+```scala
 noc> 5 6 +
 => [11]
 ```
 To understand this, here is the steps:
-```py
+```scala
 noc> 5
 => [5]
-noc> 5
+noc> 6
 => [5 6]
 noc> + (# here '+' operation pop the 2 top-stack elements and operate them)
 => [11]
 ```
 
 With function composition, we can combine several operators, like:
-```py
+```scala
 noc> 5 6 + 2 * 10 /
 => [2.2]
 ```
 
 Explanations:
-```py
+```scala
 noc> 5
 => [5]
 noc> 6
@@ -112,13 +112,13 @@ We saw some "primitive operators" (the native operators of the interpreter) but 
 We can access to the documentation of the all primitive functions,operators [here](#).
 
 Example: 
-```py
+```scala
 noc> 1 2 3 dup + * /
 => [8.333333333333333e-2] # e is the scientific notation => 8.3*10^(-2)
 ```
 
 Explanations:
-```py
+```scala
 noc> 1 2 3
 => [1 2 3]
 noc> dup
@@ -142,7 +142,7 @@ noc>
 Noc is dynamically typed language like the most concatenative languages (except some languages like Cat), it means that the type errors are reported at the runtime, also it's strongly typed (when types does not match it report at the runtime).
 
 Example:
-```py
+```scala
 noc> 1 "1" +
 TypeError "cannot operate with different types."
 ```
@@ -170,7 +170,7 @@ We are going to more experiment with the REPL of Noc. In this REPL, we can go ba
 
 ``arrow_down => go back to new commands``
 
-```py
+```scala
 noc> 5 5 +
 => [10]
 noc> zap
@@ -190,7 +190,7 @@ We can also put the cursor pointer at the beggining or at the end.
 
 *The parenthesis are here to indicate cursor pointer*
 
-```py
+```scala
 noc> 5 5 +() # current cursor pointer
 noc> (5) 5 + # cursor pointer with ctrl + A
 noc> 5 5 +() # cursor pointer with ctrl + E
@@ -203,7 +203,7 @@ noc> 5 5 +() # cursor pointer with ctrl + E
 ### Commands
 
 There are some commands in the REPL: 
-```py
+```
 noc> :help
 Commands available from the prompt:
 
@@ -213,7 +213,7 @@ Commands available from the prompt:
 :env | Show environment.
 ```
 
-We will show later the 'load' and 'env' commands.
+We will show the 'load' command in [Modules](#modules) topic.
 
 | Name | Description 
 | ----------- | ----------- |
@@ -234,7 +234,7 @@ def function = { word1 word2 ... wordn }
 ```
 
 Example:
-```
+```scala
 noc> def square = {dup *}
 noc> 5 square
 => [25]
@@ -244,12 +244,12 @@ noc> number square
 ```
 
 It's like the substitution, when we called the declared function, in fact it give this:
-```py
+```scala
 noc> 5 dup *
 ```
 
 When we declare a function, the function is pushed in the env. And we can access to this env with the command 'env':
-```py
+```scala
 noc> :env
 square: [dup *], 
 ```
@@ -263,7 +263,7 @@ square: [dup *],
 
 ## CLI
 
-Previously, we used the REPL but now we are going to see the CLI Noc. With this CLI we can create Noc files and evaluate this files.
+Previously, we used the REPL but now we are going to see the CLI Noc. With this CLI we can create Noc files and evaluate these files.
 
 #### Syntax
 ```
@@ -273,20 +273,20 @@ noc [file.noc]
 **IMPORTANT: we have to declare the 'main' function, it's the function that the CLI evaluate.**
 
 Example:
-```
+```scala
 def main = {
   "Hello,World!" print
 }
 ```
 Output:
-```
+```scala
 "Hello,World!"
 ```
 
 Nothing (except comments but it's ignored in parsing) is in the top-level, we write programs in functions. (see [function-level](https://en.wikipedia.org/wiki/Function-level_programming))
 
 Example:
-```
+```scala
 def number = {5} # constant
 
 def square = { dup * }
@@ -297,7 +297,7 @@ def main = {
 }
 ```
 Output:
-```
+```scala
 25
 ```
 
@@ -318,7 +318,7 @@ def main = {
 ```
 
 or multiline comments:
-```
+```scala
 /*
 Hello World in Noc !
 */
@@ -344,7 +344,7 @@ A quote is a kind of anonymous stack containing instructions, it's pretty useful
 To evaluate the quote, we use the ``unquote`` function available in the Prelude.
 
 Example:
-```
+```scala
 noc> 2
 noc> def square = {dup *}
 noc> [square]
@@ -353,8 +353,96 @@ noc> unquote
 => [4]
 ```
 
-</div>
+<div id="list">
+
+### List
+
 
 </div>
 
-To explore all functions, we can check the [STD documentation](#)
+---
+
+
+<div id="control-flow">
+
+## Control Flow
+
+The control flow is implemented in Noc, with the case function.
+```
+[to_case]
+[
+  [[pattern1] [exprs]]
+  [[pattern2] [exprs]]
+  ...
+  [[_] [exprs]]  (# it's the 'otherwise', you can acces to 'to_case' value in exprs for the 'otherwise' pattern)
+]
+case
+```
+
+Example:
+```scala
+def swap = { 2 rotN }
+
+def fact = {
+    [
+        [[0] [1]]
+        [[_] [dup 1 - [] swap pushr fact *]]
+    ] case
+}
+
+def main = {
+    [5] fact print
+}
+```
+Output
+```scala
+120
+```
+
+'eq' implementation with the case function
+```scala
+def eq = { 
+    quote quote
+    swap
+    quote
+    swap
+    [True] pushr quote
+    [[_] [pop False]] quote
+    cat case
+}
+
+def main = {
+  /* False */
+  "1" 1 eq print 
+  /* True */
+  "hello" "hello" eq print
+}
+```
+
+</div>
+
+---
+
+<div id="modules">
+
+## Modules
+
+<div id="load-noc-files">
+
+### Load Noc files
+
+</div>
+
+---
+
+<div id="std">
+
+### Standard Library
+
+</div>
+
+</div>
+
+---
+
+To explore all functions, we can check the [STD documentation](#).
