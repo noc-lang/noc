@@ -15,7 +15,6 @@
     - [Quotes](#quotes)
       - [List](#list)
       - [Dict](#)
-    - [Macros](#)
     - [Control Flow](#)
       - [Case statement](#)
       - [If statement](#)
