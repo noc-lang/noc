@@ -9,8 +9,9 @@ import qualified Data.Map as M (Map, empty, fromList, keys, toList)
 import Data.Text (Text, pack, unpack)
 import Language.Noc.PrettyPrinter (displayEnv)
 import Language.Noc.Runtime.Internal
+import Language.Noc.Runtime.Eval (isUnknown)
 import Language.Noc.Runtime.Prelude (prelude)
-import Language.Noc.Syntax.AST (Expr, Module (..), program)
+import Language.Noc.Syntax.AST (Expr, Module (..), program, Atom (..))
 import System.Console.Haskeline.History (emptyHistory, writeHistory)
 import System.Directory (XdgDirectory (..), getXdgDirectory)
 import Text.Parsec (ParseError)
@@ -84,20 +85,28 @@ load arg stack env repl =
               ---
               let succMap l = M.fromList $ map (\(k, v) -> (k, Function v)) l
               ---
-              let name = map (\(k, v) -> k) succ''
+              let fnames = map (\(k,v) -> k) succ''
               ---
               let envFiltered = filter (\(k, v) -> k `elem` M.keys env) succ''
               let preludeFiltered = filter (\(k, v) -> k `elem` M.keys prelude) succ''
               ---
-              case (length preludeFiltered >= 1, length envFiltered >= 1) of
-                (True, _) -> (print $ "cannot declare the function with " <> (unpack $ fst $ head preludeFiltered) <> " name. (reserved to prelude)") >> repl stack env
+              let isUnknown' = any (\(k,v) -> any (isUnknown (M.keys prelude) fnames) v) succ''
+              let unknownFunctions = filter (\(k,v) -> any (isUnknown (M.keys prelude) fnames) v) succ''
+              ---
+              case (length preludeFiltered >= 1, length envFiltered >= 1, (isUnknown', unknownFunctions)) of
+                (True, _, _) -> (print $ NameError $ "cannot declare the function with " <> (unpack $ fst $ head preludeFiltered) <> " name. (reserved to prelude)") >> repl stack env
                 ---
-                (False, True) -> do
+                (_,_,(True,u)) -> do
+                  let (n,[WordAtom w]) = head u
+                  print $ NameError $ "cannot declare '" <> (unpack n) <> "' function, the function '" <> w <> "' is not declared"
+                  repl stack env
+                ---
+                (False, True, _) -> do
                   let otherFuncs = filter (\(k, v) -> not $ k `elem` M.keys env) succ''
                   putStrLn ("'" ++ (unwords arg) ++ "' is reloaded.")
                   repl stack (succMap otherFuncs <> succMap envFiltered)
                 ---
-                (False, False) -> (putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")) >> (repl stack (env <> succMap succ''))
+                (False, False, _) -> (putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")) >> (repl stack (env <> succMap succ''))
     }
 
 ----------------------------------------------------

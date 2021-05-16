@@ -67,4 +67,4 @@ program = do
   v <- many function
   case v of
     [] -> eof >> (pure $ Module [] (fromList []))
-    (x : xs) -> eof >> (pure $ Module [] (foldl (<>) x xs))
+    (x : xs) -> eof >> (pure $ Module [] (foldr (<>) x xs))

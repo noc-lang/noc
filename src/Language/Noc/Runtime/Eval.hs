@@ -12,6 +12,13 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude
 import Language.Noc.Syntax.AST
 
+--------------- Utils -----------------------
+
+isUnknown :: [T.Text] -> [T.Text] -> Atom -> Bool
+isUnknown p e x = case x of
+  (WordAtom y) -> (not $ T.pack y `elem` p) && (not $ T.pack y `elem` e) -- e -> env or declaration function of a file.
+  _ -> False
+
 -------- Evaluate expressions ----------------
 
 eval :: Expr -> Eval ()
@@ -42,8 +49,14 @@ evalFunc func = do
   let [(k, v)] = func
   let funcName = k
   let function = M.fromList [(funcName, Function v)]
-
-  case (funcName `elem` (M.keys prelude), funcName `elem` (M.keys env)) of
-    (True, _) -> throwError $ NameError $ "cannot declare the function with " <> (T.unpack funcName) <> " name. (reserved to prelude)"
-    (False, True) -> (put $ (M.delete funcName env) <> function) >> return ()
-    (False, False) -> (put $ env <> function) >> return ()
+  ---
+  let isUnknown' = any (isUnknown (M.keys prelude) (M.keys env)) v
+  let unknownFunctions = filter (isUnknown (M.keys prelude) (M.keys env)) v
+  ---
+  case (funcName `elem` (M.keys prelude), funcName `elem` (M.keys env), (isUnknown', unknownFunctions)) of
+    (True, _, _) -> throwError $ NameError $ "cannot declare the function with " <> (T.unpack funcName) <> " name. (reserved to prelude)"
+    (_, _, (True, u)) -> do
+      let (WordAtom w) = head u
+      throwError $ NameError $ "cannot declare '" <> (T.unpack funcName) <> "' function, the function '" <> w <> "' is not declared"
+    (False, True, _) -> (put $ (M.delete funcName env) <> function) >> return ()
+    (False, False, _) -> (put $ env <> function) >> return ()
