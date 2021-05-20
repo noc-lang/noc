@@ -5,13 +5,11 @@ module Interpreter.CLI where
 import Control.Monad.Except
 import Control.Monad.RWS
 import Data.List (foldl')
-import Data.Map (Map, toList)
-import qualified Data.Map as M (empty, fromList)
+import qualified Data.Map as M (empty, toList, fromList)
 import Data.Text (Text, pack)
 import Interactive.REPL (nocREPL)
 import Interpreter.Commands
 import Language.Noc.PrettyPrinter (displayStack)
-import Language.Noc.Runtime.Eval
 import Language.Noc.Runtime.Eval (evalFile)
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (prelude)
@@ -41,7 +39,7 @@ run (Exec path) = do
     (Right succ) -> do
       ---
       let (Module imports decls) = succ
-      let succ' = toList decls
+      let succ' = M.toList decls
       ---
       let otherFuncs = filterProg (/=) succ'
       let mainFunction = filterProg (==) succ'
