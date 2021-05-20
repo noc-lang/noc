@@ -38,7 +38,7 @@ evalFile mainfunc = do
   env <- ask
 
   case (length mainfunc > 1, mainfunc, env) of
-    (_, [], _) -> throwError $ MainError $ "the main function not found."
+    (_, [], _) -> liftIO $ print "the main function not found."
     (_, [(_, expr)], _) -> evalExpr expr
 
 ------- Evaluate function declaration ---------

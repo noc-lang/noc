@@ -171,7 +171,7 @@ builtinReadFile = do
     (StringVal x) -> do
       content <- liftIO (try $ TIO.readFile (T.unpack x) :: IO (Either SomeException T.Text))
       case content of
-        (Left err) -> throwError $ FileNotFoundError "the file does not exist (no such file or directory)"
+        (Left err) -> liftIO $ print "the file does not exist (no such file or directory)"
         (Right succ) -> push $ StringVal succ
     _ -> throwError $ TypeError "the parameter is not string."
 
