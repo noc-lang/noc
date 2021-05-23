@@ -1,0 +1,8 @@
+/*
+Stack functions
+*/
+
+def quote = { [] swap pushr}
+
+def swap = { 2 rotN }
+

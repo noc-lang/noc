@@ -1,0 +1,5 @@
+/*
+I/O functions
+*/
+
+def putstrln = { "\n" cat putstr }

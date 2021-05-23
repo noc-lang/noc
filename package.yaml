@@ -4,13 +4,13 @@ github:              "mortim/noc"
 license:             BSD3
 author:              "mortim"
 maintainer:          "aouladkarim010@gmail.com"
-copyright:           "2020 mortim"
+copyright:           "2021 mortim"
 
 extra-source-files:
 - README.md
 
 # Metadata used when publishing your package
-synopsis:            User-friendly stack-based concatenative language,
+synopsis:            User-friendly concatenative language,
 category:            Language
 
 # To avoid duplicated efforts in documentation and dealing with the

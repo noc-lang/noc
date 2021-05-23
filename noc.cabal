@@ -4,17 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6e86e355bded669ff9ad242748ea84521f266569caf02db53716a535e4f11af8
+-- hash: 540a0a70d3ab939355a8749a36cc363aff707c64ba82d6b0449d5c7b0d5f2419
 
 name:           noc
 version:        0.1.0.0
-synopsis:       User-friendly stack-based concatenative language,
+synopsis:       User-friendly concatenative language,
 category:       Language
 homepage:       https://github.com/mortim/noc#readme
 bug-reports:    https://github.com/mortim/noc/issues
 author:         mortim
 maintainer:     aouladkarim010@gmail.com
-copyright:      2020 mortim
+copyright:      2021 mortim
 license:        BSD3
 build-type:     Simple
 extra-source-files:

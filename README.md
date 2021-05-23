@@ -17,24 +17,32 @@ User-friendly stack-based concatenative programming language.
 
 ## Getting started
 
-### Installation
+### Installation/Uninstallation
 
 Pre-requisite:
-- Haskell toolchain
-- Stack
+- [Haskell toolchain](https://www.haskell.org/platform/)
+- [Stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/)
 
-This command builds project and copies binary in:
-- **~/.local/bin** (GNU/Linux system)
-- **%APPDATA%\local\bin** (Windows system)
+#### BSD/Unix based systems
+To install Noc interpreter:
+```
+make install
+```
+To uninstall Noc interpreter:
+```
+make uninstall
+```
 
-```
-stack install
-```
+#### Windows systems
+Upcoming...
 
 ---
 
 ### Usage
 
 To learn Noc language, check the [Noc book](./docs/noc-book.md).
+
+---
+
 
 

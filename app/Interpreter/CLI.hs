@@ -16,6 +16,8 @@ import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Syntax.AST
 import Options.Applicative (Parser, ParserInfo, empty, fullDesc, header, helper, info, (<|>))
 import qualified Text.Parsec.String as P (parseFromFile)
+import Data.Version (showVersion)
+import qualified Paths_noc as PN (version)
 
 ----------------- CLI Parser ----------------------------
 
@@ -23,7 +25,7 @@ opts :: ParserInfo Command
 opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
 
 run :: Command -> IO ()
-run Version = putStrLn "Noc version 1.0"
+run Version = putStrLn $ "Noc version " <> (showVersion PN.version)
 run Repl = nocREPL [] M.empty
 run (Exec path) = do
   parse <- P.parseFromFile program path
