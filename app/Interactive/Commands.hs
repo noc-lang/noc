@@ -5,10 +5,11 @@ module Interactive.Commands where
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
 import Control.Monad.RWS
-import qualified Data.Map as M (Map, empty, fromList, keys, toList)
-import Data.Text (Text, pack, unpack)
+import qualified Data.Map as M (Map, empty, fromList, keys, toList, union)
+import qualified Data.Text as T (unpack, unwords)
+import Interpreter.Utils
 import Language.Noc.PrettyPrinter (displayEnv)
-import Language.Noc.Runtime.Eval (isUnknown)
+import Language.Noc.Runtime.Eval
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Syntax.AST (Atom (..), Expr, Module (..), program)
@@ -69,44 +70,37 @@ load arg stack env repl =
     { name = "load",
       args = arg,
       action = do
-        parsed <- try $ parseFromFile program (unwords arg) :: IO (Either SomeException (Either ParseError Module))
-        case parsed of
-          ---
-          (Left err) -> (print err) >> (repl stack env)
+        parse <- try $ parseFromFile program (unwords arg) :: IO (Either SomeException (Either ParseError Module))
+        case parse of
+          (Left errPath) -> (print errPath) >> (repl stack env)
           ---
           (Right succ) -> case succ of
+            (Left errParse) -> (print errParse) >> (repl stack env)
             ---
-            (Left err') -> (putStrLn ("'" ++ (unwords arg) ++ "' is not loaded.")) >> (print err') >> (repl stack env)
-            ---
-            (Right succ') -> do
-              ---
-              let (Module imports decls) = succ'
-              let succ'' = M.toList decls
-              ---
-              let succMap l = M.fromList $ map (\(k, v) -> (k, Function v)) l
-              ---
-              let fnames = map (\(k, v) -> k) succ''
-              ---
-              let envFiltered = filter (\(k, v) -> k `elem` M.keys env) succ''
-              let preludeFiltered = filter (\(k, v) -> k `elem` M.keys prelude) succ''
-              ---
-              let isUnknown' = any (\(k, v) -> any (isUnknown (M.keys prelude) fnames) v) succ''
-              let unknownFunctions = filter (\(k, v) -> any (isUnknown (M.keys prelude) fnames) v) succ''
-              ---
-              case (length preludeFiltered >= 1, length envFiltered >= 1, (isUnknown', unknownFunctions)) of
-                (True, _, _) -> (print $ NameError $ "cannot declare the function with " <> (unpack $ fst $ head preludeFiltered) <> " name. (reserved to prelude)") >> repl stack env
+            (Right (Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
+              (True, k) -> (putStrLn $ "Cannot load '" <> (unwords arg) <> "' file, multiple function declarations for '" <> (T.unpack k) <> "' function.") >> repl stack env
+              (False, _) -> do
+                let declList = M.toList $ foldr M.union M.empty decls
                 ---
-                (_, _, (True, u)) -> do
-                  let (n, [WordAtom w]) = head u
-                  print $ NameError $ "cannot declare '" <> (unpack n) <> "' function, the function '" <> w <> "' is not declared"
-                  repl stack env
+                let declMap l = M.fromList $ map (\(k, v) -> (k, Function v)) l
+                let filter' e l = filter (\(k, _) -> k `elem` M.keys e) l
                 ---
-                (False, True, _) -> do
-                  let otherFuncs = filter (\(k, v) -> not $ k `elem` M.keys env) succ''
-                  putStrLn ("'" ++ (unwords arg) ++ "' is reloaded.")
-                  repl stack (succMap otherFuncs <> succMap envFiltered)
+                let fnames = map (\(k, v) -> k) declList
                 ---
-                (False, False, _) -> (putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")) >> (repl stack (env <> succMap succ''))
+                let envFilter = filter' env declList
+                let preludeFilter = filter' prelude declList
+                ---
+                case (length preludeFilter > 0, length envFilter > 0) of
+                  (True, _) -> do
+                    let ((n, _) : xs) = preludeFilter
+                    (print $ NameError $ "cannot declare the function with '" <> (T.unpack n) <> "' name. (reserved to prelude)") >> repl stack env
+                  ---
+                  (_, True) -> do
+                    let otherFuncs = filter (\(k, v) -> not $ k `elem` M.keys env) declList
+                    putStrLn ("'" ++ (unwords arg) ++ "' is reloaded.")
+                    repl stack (declMap otherFuncs <> declMap envFilter)
+                  ---
+                  _ -> (putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")) >> (repl stack (env <> declMap declList))
     }
 
 ----------------------------------------------------

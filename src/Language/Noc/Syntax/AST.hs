@@ -2,8 +2,8 @@ module Language.Noc.Syntax.AST where
 
 ----------------------- Modules ------------------------
 
-import Data.Map (Map, fromList)
-import Data.Text (Text, pack)
+import Data.Map (Map, fromList, keys)
+import Data.Text (Text, empty, pack)
 import Language.Noc.Syntax.Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
@@ -13,11 +13,15 @@ data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Doubl
 
 type Expr = [Atom]
 
+--------------------- Utils ----------------------------
+
 sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
 operators :: Parser String
 operators = string "+" <|> string "-" <|> string "/" <|> string "*"
+
+--------------------------------------------------------
 
 word :: Parser Atom
 word = WordAtom <$> (identifier <|> operators)
@@ -52,7 +56,7 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 -------------------- Module -----------------
 
-data Module = Module {imports :: [FilePath], decls :: Map Text Expr}
+data Module = Module {imports :: [FilePath], decls :: [Map Text Expr]}
 
 function :: Parser (Map Text Expr)
 function = do
@@ -65,6 +69,7 @@ program :: Parser Module
 program = do
   whiteSpace
   v <- many function
+  eof
   case v of
-    [] -> eof >> (pure $ Module [] (fromList []))
-    (x : xs) -> eof >> (pure $ Module [] (foldr (<>) x xs))
+    [] -> pure $ Module [] [fromList []]
+    v' -> pure $ Module [] v'

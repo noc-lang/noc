@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e1a26a870c97d2a433f925df63e752897c9807a474f4cfa809aac683a9f0b7ac
+-- hash: 6e86e355bded669ff9ad242748ea84521f266569caf02db53716a535e4f11af8
 
 name:           noc
 version:        0.1.0.0
@@ -54,6 +54,7 @@ executable noc
       Interactive.REPL
       Interpreter.CLI
       Interpreter.Commands
+      Interpreter.Utils
       Paths_noc
   hs-source-dirs:
       app

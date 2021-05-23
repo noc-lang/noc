@@ -32,6 +32,10 @@ initN _ [] = []
 initN 0 l = l
 initN n l = initN (n -1) (init l)
 
+popN :: Integer -> Eval ()
+popN 0 = return ()
+popN n = pop >> popN (n -1)
+
 readAtom :: Value -> Atom
 readAtom (FloatVal x) = FloatAtom x
 readAtom (IntVal x) = IntAtom x
@@ -45,13 +49,6 @@ readValue (IntAtom x) = IntVal x
 readValue (StringAtom x) = StringVal $ pack x
 readValue (BoolAtom x) = BoolVal x
 readValue (QuoteAtom l) = QuoteVal l
-
-filterProg :: (Text -> Text -> Bool) -> [(Text, Expr)] -> [(Text, Expr)]
-filterProg pred prog = filter (\(k, v) -> pred k (pack "main")) prog
-
-popN :: Integer -> Eval ()
-popN 0 = return ()
-popN n = pop >> popN (n -1)
 
 -------------------------------
 
