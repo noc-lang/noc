@@ -65,11 +65,18 @@ function = do
   content <- (lexeme $ braces $ (whiteSpace *> stack))
   pure $ fromList [(pack name, content)]
 
+load :: Parser String
+load = do
+  lexeme $ reserved $ "load"
+  path <- lexeme $ stringLiteral
+  pure path
+
 program :: Parser Module
 program = do
   whiteSpace
+  loads <- many load
   v <- many function
   eof
   case v of
-    [] -> pure $ Module [] [fromList []]
-    v' -> pure $ Module [] v'
+    [] -> pure $ Module loads [fromList []]
+    v' -> pure $ Module loads v'

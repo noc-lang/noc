@@ -31,10 +31,10 @@ run (Exec path) = do
   case parse of
     (Left err) -> print err
     ---
-    (Right (Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
-      (True, k) -> putStrLn $ "Multiple function declarations for '" <> (T.unpack k) <> "' function."
+    (Right (Module imports decls)) -> case isMultipleDecls $ concatMap M.keys decls of
+      Just k -> print $ NameError $ "Multiple function declarations for '" <> (T.unpack k) <> "' function."
       ---
-      (False, _) -> do
+      Nothing -> do
         let ast = foldr M.union M.empty decls
         case isMainError ast of
           True -> putStrLn "MainError: Cannot evaluate this file without main function."

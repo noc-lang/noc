@@ -78,8 +78,8 @@ load arg stack env repl =
             (Left errParse) -> (print errParse) >> (repl stack env)
             ---
             (Right (Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
-              (True, k) -> (putStrLn $ "Cannot load '" <> (unwords arg) <> "' file, multiple function declarations for '" <> (T.unpack k) <> "' function.") >> repl stack env
-              (False, _) -> do
+              (Just k) -> (print $ NameError $ "Cannot load '" <> (unwords arg) <> "' file, multiple function declarations for '" <> (T.unpack k) <> "' function.") >> repl stack env
+              Nothing -> do
                 let declList = M.toList $ foldr M.union M.empty decls
                 ---
                 let declMap l = M.fromList $ map (\(k, v) -> (k, Function v)) l
