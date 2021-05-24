@@ -28,6 +28,10 @@ To install Noc interpreter:
 ```
 make install
 ```
+To update Noc interpreter:
+```
+make update
+```
 To uninstall Noc interpreter:
 ```
 make uninstall
@@ -38,7 +42,11 @@ To install Noc interpreter:
 ```
 ./setup.ps1 install
 ```
-To  uninstall Noc interpreter:
+To update Noc interpreter:
+```
+./setup.ps1 update
+```
+To uninstall Noc interpreter:
 ```
 ./setup.ps1 uninstall
 ```
