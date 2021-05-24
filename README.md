@@ -33,10 +33,14 @@ To uninstall Noc interpreter:
 make uninstall
 ```
 
-#### Windows systems
-To install/uninstall in Windows systems, we are going to use [setup-win.ps1](setup-win.ps1) (in **Powershell**)
+#### Windows systems (with Powershell)
+To install Noc interpreter:
 ```
-./setup-win.ps1
+./setup.ps1 install
+```
+To  uninstall Noc interpreter:
+```
+./setup.ps1 uninstall
 ```
 
 ---
