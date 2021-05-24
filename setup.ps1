@@ -39,6 +39,11 @@ elseif($arg -eq "uninstall")
 {
   Uninstallation $LOCAL_PATH
 } 
+elseif($arg -eq "upgrade")
+{
+  Uninstallation $LOCAL_PATH
+  Installation $LOCAL_PATH
+}
 else 
 {
   Write-Host "Wrong argument or no positional argument." -ForegroundColor Red
