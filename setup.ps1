@@ -39,7 +39,7 @@ elseif($arg -eq "uninstall")
 {
   Uninstallation $LOCAL_PATH
 } 
-elseif($arg -eq "upgrade")
+elseif($arg -eq "update")
 {
   Uninstallation $LOCAL_PATH
   Installation $LOCAL_PATH
