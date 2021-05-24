@@ -34,15 +34,16 @@ make uninstall
 ```
 
 #### Windows systems
-Upcoming...
+To install/uninstall in Windows systems, we are going to use [setup-win.ps1](setup-win.ps1) (in **Powershell**)
+```
+./setup-win.ps1
+```
 
 ---
 
 ### Usage
 
 To learn Noc language, check the [Noc book](./docs/noc-book.md).
-
----
 
 
 
