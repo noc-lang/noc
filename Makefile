@@ -19,4 +19,5 @@ uninstall:
 	@rm -rf $(LOCAL_LIB_PATH)
 
 	@echo "\033[0;32m noc uninstallation is done.\033[0m"
-	
+
+update: uninstall install
