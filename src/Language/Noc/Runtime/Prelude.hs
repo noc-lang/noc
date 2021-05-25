@@ -13,6 +13,7 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.PrettyPrinter
 import Language.Noc.Syntax.AST
 import System.IO
+import System.Exit (exitFailure, exitSuccess)
 import Text.Read (readMaybe)
 
 ----------------------------------------------------
@@ -46,7 +47,8 @@ prelude =
       (T.pack "id", Constant $ PrimVal builtinId),
       (T.pack "str", Constant $ PrimVal builtinStr),
       (T.pack "int", Constant $ PrimVal builtinInt),
-      (T.pack "float", Constant $ PrimVal builtinFloat)
+      (T.pack "float", Constant $ PrimVal builtinFloat),
+      (T.pack "exit", Constant $ PrimVal builtinExit)
     ]
 
 ----------------------------------------------------
@@ -257,3 +259,17 @@ builtinFloat = do
       (Just v) -> push $ FloatVal v
       Nothing -> throwError $ ValueError "the value is not a integer."
     _ -> throwError $ TypeError "can only float with int,float,str"
+
+----------------------------------------------------
+
+builtinExit :: Eval ()
+builtinExit = do
+  typeExit <- pop
+  case typeExit of
+    (StringVal x) -> case (T.unpack x) of 
+      "success" -> liftIO exitSuccess
+      "failure" -> liftIO $ (putStrLn "*** Exception: ExitFailure") >> exitFailure
+      _ -> throwError $ TypeError "the exit parameter is wrong."
+    _ -> throwError $ TypeError "the exit parameter is not string." 
+
+    

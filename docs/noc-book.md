@@ -603,4 +603,30 @@ id => [5]
 "10.5" float => [10.5]
 ```
 
+##### exit
+> Exit program after the current instruction
+```scala
+def main = {
+  "ERROR! ..." print
+  "failure" exit
+  "other instructions..." print 
+}
+/*
+Output: 
+"ERROR! ..."
+*** Exception: ExitFailure
+/*
+```
+```scala
+def main = {
+  "other instructions..." print
+  "success" exit
+}
+/*
+Output: 
+"other instructions..."
+*/
+```
+
+
 </div>
