@@ -10,6 +10,7 @@ import qualified Data.Map as M (fromList, keys)
 import qualified Data.Text as T (Text, pack, unpack)
 import qualified Data.Text.IO as TIO (getLine, readFile)
 import Language.Noc.Runtime.Internal
+import Language.Noc.PrettyPrinter
 import Language.Noc.Syntax.AST
 import System.IO
 import Text.Read (readMaybe)
@@ -33,8 +34,9 @@ prelude =
       -- I/O
       (T.pack "print", Constant $ PrimVal builtinPrint),
       (T.pack "putstr", Constant $ PrimVal builtinPutStr),
-      (T.pack "read", Constant $ PrimVal builtinReadFile),
       (T.pack "ask", Constant $ PrimVal builtinAsk),
+      -- Fs
+      (T.pack "read", Constant $ PrimVal builtinReadFile),
       (T.pack "write", Constant $ PrimVal builtinWrite),
       -- Quote
       (T.pack "unquote", Constant $ PrimVal builtinUnquote),
@@ -151,6 +153,7 @@ builtinPrint = do
     (FloatVal x) -> (liftIO $ print x) >> return ()
     (IntVal x) -> (liftIO $ print x) >> return ()
     (BoolVal x) -> (liftIO $ print x) >> return ()
+    (QuoteVal x) -> (liftIO $ putStrLn $ displayQuote x)
     _ -> throwError $ TypeError "can only print with strings,floats,integers,bool."
 
 ----------------------------------------------------

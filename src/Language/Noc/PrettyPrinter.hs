@@ -46,3 +46,6 @@ showEnv (x : xs) = foldl (\acc x -> (acc <> (pack " ")) <> (pprintEnv x)) (pprin
 
 displayEnv :: Text -> Expr -> String
 displayEnv fname content = unpack $ comma $ fname <> (pack ": ") <> (parens $ showEnv content)
+
+displayQuote :: Expr -> String
+displayQuote content = unpack $ (parens $ showEnv content)
