@@ -230,6 +230,7 @@ builtinStr = do
     (FloatVal x) -> push $ StringVal $ T.pack $ show x
     (IntVal x) -> push $ StringVal $ T.pack $ show x
     (BoolVal x) -> push $ StringVal $ T.pack $ show x
+    (QuoteVal x) -> push $ StringVal $ T.pack $ displayQuote x
     _ -> throwError $ TypeError "can only str with str,float,int,bool"
 
 ----------------------------------------------------
