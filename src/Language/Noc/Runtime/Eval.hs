@@ -27,6 +27,7 @@ eval expr = do
 ---------- Evaluate Noc file -----------------
 
 evalFile :: [(T.Text, Expr)] -> Eval ()
+evalFile [] = return ()
 evalFile [(_, v)] = evalExpr v
 
 ------- Evaluate function declaration ---------

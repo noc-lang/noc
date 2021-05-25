@@ -1,11 +1,8 @@
 module Interpreter.Utils where
 
-import qualified Data.Map as M (Map, toList)
-import qualified Data.Text as T (Text, empty, pack, unwords)
+import qualified Data.Map as M (Map, toList, union, empty)
+import qualified Data.Text as T (Text, pack, unwords)
 import Language.Noc.Syntax.AST (Expr)
-
-isMainError :: (M.Map T.Text Expr) -> Bool
-isMainError decl = not $ any (\(k, v) -> k == (T.pack "main")) (M.toList decl)
 
 isMultipleDecls :: [T.Text] -> Maybe T.Text
 isMultipleDecls [] = Nothing
@@ -19,3 +16,6 @@ filterProg prog = (main', other')
     filter' pred ast = filter (\(k, v) -> pred k (T.pack "main")) (M.toList ast)
     main' = filter' (==) prog
     other' = filter' (/=) prog
+
+unionMap :: [M.Map T.Text Expr] -> (M.Map T.Text Expr)
+unionMap l = foldr M.union M.empty l

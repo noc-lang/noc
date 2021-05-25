@@ -36,21 +36,17 @@ run (Exec path) = do
     (Right (Module imports decls)) -> case isMultipleDecls $ concatMap M.keys decls of
       Just k -> print $ NameError $ "Multiple function declarations for '" <> (T.unpack k) <> "' function."
       ---
-      Nothing -> do
-        let ast = foldr M.union M.empty decls
-        case isMainError ast of
-          True -> putStrLn "MainError: Cannot evaluate this file without main function."
-          False -> case filter (\k -> k `elem` (M.keys prelude)) (M.keys ast) of
-            [] -> do
-              let (main', other') = filterProg ast
-              ---
-              let otherFuncsMap = M.fromList $ map (\(k, v) -> (k, Function v)) other'
-              evalFile' <- runExceptT $ runRWST (evalFile main') (prelude <> otherFuncsMap) []
-              ---
-              case evalFile' of
-                (Left err') -> print err'
-                (Right _) -> return ()
-            (x : _) -> print $ NameError $ "cannot declare the function with '" <> (T.unpack x) <> "' name. (reserved to prelude)"
+      Nothing -> case filter (\k -> k `elem` (M.keys prelude)) (M.keys $ unionMap decls) of
+        [] -> do
+          let (main', other') = filterProg (unionMap decls)
+          ---
+          let otherFuncsMap = M.fromList $ map (\(k, v) -> (k, Function v)) other'
+          evalFile' <- runExceptT $ runRWST (evalFile main') (prelude <> otherFuncsMap) []
+          ---
+          case evalFile' of
+            (Left err') -> print err'
+            (Right _) -> return ()
+        (x : _) -> print $ NameError $ "cannot declare the function with '" <> (T.unpack x) <> "' name. (reserved to prelude)"
 
 cmd :: Parser Command
 cmd = foldl' (<|>) empty cmdFuncs
