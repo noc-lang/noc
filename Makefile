@@ -1,13 +1,13 @@
 LOCAL_BIN_PATH:=${HOME}/.local/bin/noc
-LOCAL_LIB_PATH:=${HOME}/.local/lib/noc
+LOCAL_LIB_PATH:=${HOME}/.local/share/noc
 
 install:
 	@echo "Building/Copying Noc binary ..."
 	@stack install
 
 	@echo "Copying Noc library ..."
-	@mkdir $(LOCAL_LIB_PATH)
-	@cp -R std $(LOCAL_LIB_PATH)/std
+	@mkdir -p $(LOCAL_LIB_PATH)/std
+	@cp -R std $(LOCAL_LIB_PATH)
 
 	@echo "\033[0;32m noc installation is done.\033[0m"
 
