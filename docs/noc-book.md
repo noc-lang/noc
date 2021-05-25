@@ -1,8 +1,7 @@
 # Noc book
 
-*In this tutorial, we are going to use the REPL Noc but the Noc interpreter use will explained.*
-
 ## Table of contents
+  - [Installation](#installation)
   - [Introduction to concatenative programming](#introduction-to-concatenative-programming)
   - [Basics](#basics)
     - [Expressions](#expressions)
@@ -12,18 +11,74 @@
       - [Declare functions](#functions)
     - [CLI](#cli)
   - [Advanced Topic](#advanced-topic)
+    - [Modules](#)
+        - [Load Noc files](#)
+        - [Standard Library](#)
     - [Quotes](#quotes)
       - [List](#list)
-      - [Dict](#)
+      - [Dict](#dict)
     - [Control Flow](#)
       - [Case statement](#)
       - [If statement](#)
-    - [Modules](#)
-      - [Load Noc files](#)
-      - [Standard Library](#)
   - [Prelude Functions](#prelude-functions)
 
 ---
+
+<div id="installation">
+
+## Installation
+
+Pre-requisite:
+- [Haskell toolchain](https://www.haskell.org/platform/)
+- [Stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/)
+- [Git](https://git-scm.com/)
+
+##### Installing noc on BSD/Unix based systems
+If you’re using Linux or macOS (or BSD)
+```
+git clone https://github.com/mortim/noc && cd noc
+make install
+```
+
+##### Installing noc on Windows (Powershell)
+```
+git clone https://github.com/mortim/noc && cd noc
+./setup.ps1 install
+```
+
+##### Updating and Uninstalling
+We can update noc to get the latest version.
+
+```
+make update (BSD/Unix based systems)
+or
+./setup.ps1 update (Windows)
+```
+
+To uninstall noc.
+```
+make uninstall (BSD/Unix based systems)
+or
+./setup.ps1 uninstall (Windows)
+```
+
+##### Troubleshooting
+To check if we have noc installed:
+```
+noc --version
+```
+
+##### Run Noc program
+To run a noc file (cf: [CLI](#cli)):
+```
+noc [file.noc]
+```
+To run the noc [REPL](#repl)
+```
+noc (optional: -r)
+```
+
+</div>
 
 <div id="introduction-to-concatenative-programming">
 
@@ -259,7 +314,7 @@ square: [dup *],
 
 ---
 
-<div id="interpreter">
+<div id="cli">
 
 ## CLI
 
@@ -352,6 +407,33 @@ noc> [square]
 noc> unquote
 => [4]
 ```
+
+<div id="list">
+
+#### List
+
+We can construct list with quotes thanks to the delay execution.
+
+Example:
+```scala
+noc> [1 2 3]
+[[1 2 3]]
+```
+</div>
+
+
+<div id="dict">
+
+#### Dict
+
+With nested quotes, we can also construct dictionaries.
+
+Example:
+```scala
+noc> [["A" 1] ["B" 2] ["C" 3]]
+[[["A" 1] ["B" 2] ["C" 3]]]
+```
+</div>
 
 </div>
 
