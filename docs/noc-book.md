@@ -417,7 +417,7 @@ We can construct list with quotes thanks to the delay execution.
 Example:
 ```scala
 noc> [1 2 3]
-[[1 2 3]]
+=> [[1 2 3]]
 ```
 </div>
 
@@ -431,7 +431,7 @@ With nested quotes, we can also construct dictionaries.
 Example:
 ```scala
 noc> [["A" 1] ["B" 2] ["C" 3]]
-[[["A" 1] ["B" 2] ["C" 3]]]
+=> [[["A" 1] ["B" 2] ["C" 3]]]
 ```
 </div>
 
@@ -537,18 +537,22 @@ stack: [10 2]
 => []
 ```
 
-##### read
-> Open a file and read the content
-```
-"file.txt" read => ["A file containing text!"]
-```
-
 ##### ask
 > Read line from the standard input
 ```
 "Your name: " ask
 Your name: john 
 => ["john"]
+```
+
+---
+
+### FS
+
+##### read
+> Open a file and read the content
+```
+"file.txt" read => ["A file containing text!"]
 ```
 
 ##### write
