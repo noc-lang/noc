@@ -558,6 +558,7 @@ Output:
 -----
 noc file.noc -- a b --arg c
 ["a" "b" "--arg" "c"]
+*/
 ```
 
 ---
@@ -630,7 +631,7 @@ def main = {
 Output: 
 "ERROR! ..."
 *** Exception: ExitFailure
-/*
+*/
 ```
 ```scala
 def main = {
