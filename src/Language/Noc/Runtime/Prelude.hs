@@ -14,6 +14,7 @@ import Language.Noc.PrettyPrinter
 import Language.Noc.Syntax.AST
 import System.IO
 import System.Exit (exitFailure, exitSuccess)
+import System.Environment (getArgs)
 import Text.Read (readMaybe)
 
 ----------------------------------------------------
@@ -36,6 +37,7 @@ prelude =
       (T.pack "print", Constant $ PrimVal builtinPrint),
       (T.pack "putstr", Constant $ PrimVal builtinPutStr),
       (T.pack "ask", Constant $ PrimVal builtinAsk),
+      (T.pack "args", Constant $ PrimVal builtinArgs),
       -- Fs
       (T.pack "read", Constant $ PrimVal builtinReadFile),
       (T.pack "write", Constant $ PrimVal builtinWrite),
@@ -192,6 +194,15 @@ builtinAsk = do
       inp <- liftIO $ TIO.getLine
       push $ StringVal inp
     _ -> throwError $ TypeError "the parameter is not string."
+
+----------------------------------------------------
+
+builtinArgs :: Eval ()
+builtinArgs = do
+  (_:y:args) <- liftIO getArgs
+  case y of
+    "--" -> push $ QuoteVal (map StringAtom args)
+    _ -> push $ QuoteVal (map StringAtom (y:args))
 
 ----------------------------------------------------
 

@@ -27,7 +27,7 @@ opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-base
 run :: Command -> IO ()
 run Version = putStrLn $ "Noc version " <> (showVersion PN.version)
 run Repl = nocREPL [] M.empty
-run (Exec path) = do
+run (Exec (path:_)) = do
   parse <- P.parseFromFile program path
   ---
   case parse of

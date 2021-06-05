@@ -545,6 +545,21 @@ Your name: john
 => ["john"]
 ```
 
+##### args
+> Get the program's command line arguments
+```scala
+def main = {
+  args print
+}
+/*
+noc file.noc a b
+Output:
+["a", "b"]
+-----
+noc file.noc -- a b --arg c
+["a" "b" "--arg" "c"]
+```
+
 ---
 
 ### FS
