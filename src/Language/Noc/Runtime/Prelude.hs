@@ -199,10 +199,13 @@ builtinAsk = do
 
 builtinArgs :: Eval ()
 builtinArgs = do
-  (_:y:args) <- liftIO getArgs
-  case y of
-    "--" -> push $ QuoteVal (map StringAtom args)
-    _ -> push $ QuoteVal (map StringAtom (y:args))
+  args <- liftIO getArgs
+  case args of
+    [] -> push $ QuoteVal []
+    (_:y:args)  -> case y of
+      "--" -> push $ QuoteVal (map StringAtom args)
+      _ -> push $ QuoteVal (map StringAtom (y:args))
+    _ -> push $ QuoteVal (map StringAtom args)
 
 ----------------------------------------------------
 
