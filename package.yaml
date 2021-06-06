@@ -1,6 +1,6 @@
 name:                noc
 version:             0.1.0.0
-github:              "mortim/noc"
+github:              "noc-lang/noc"
 license:             BSD3
 author:              "mortim"
 maintainer:          "aouladkarim010@gmail.com"
@@ -10,7 +10,7 @@ extra-source-files:
 - README.md
 
 # Metadata used when publishing your package
-synopsis:            User-friendly concatenative language,
+synopsis:            A user-friendly concatenative language,
 category:            Language
 
 # To avoid duplicated efforts in documentation and dealing with the

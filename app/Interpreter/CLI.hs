@@ -22,7 +22,7 @@ import qualified Paths_noc as PN (version)
 ----------------- CLI Parser ----------------------------
 
 opts :: ParserInfo Command
-opts = info (helper <*> cmd) (fullDesc <> header "noc - User-friendly stack-based concatenative language.")
+opts = info (helper <*> cmd) (fullDesc <> header "noc - A user-friendly concatenative language.")
 
 run :: Command -> IO ()
 run Version = putStrLn $ "Noc version " <> (showVersion PN.version)

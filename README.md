@@ -1,10 +1,7 @@
 # The Noc Programming Language
 
-User-friendly stack-based concatenative programming language.
+A user-friendly concatenative programming language.
 
-## Quick start
+## Documentation
 
-Read ["Installation"](./docs/noc-book.md#installation) from the [Noc book](./docs/noc-book.md).
-
-
-
+You can check the Noc documentation, [here](https://noc-lang.github.io/)
