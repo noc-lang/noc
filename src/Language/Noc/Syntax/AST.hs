@@ -27,7 +27,7 @@ word :: Parser Atom
 word = WordAtom <$> (identifier <|> operators)
 
 strLiteral :: Parser Atom
-strLiteral = StringAtom <$> stringLiteral
+strLiteral = StringAtom <$> (stringLiteral <|> (between (string "'") (string "'") (many $ noneOf "'")))
 
 int :: Parser Atom
 int = do
