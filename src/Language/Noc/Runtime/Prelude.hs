@@ -7,7 +7,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M (fromList, keys)
-import qualified Data.Text as T (Text, pack, unpack)
+import qualified Data.Text as T (Text, pack, unpack, splitOn, replace)
 import qualified Data.Text.IO as TIO (getLine, readFile)
 import Language.Noc.Runtime.Internal
 import Language.Noc.PrettyPrinter
@@ -50,7 +50,8 @@ prelude =
       (T.pack "str", Constant $ PrimVal builtinStr),
       (T.pack "int", Constant $ PrimVal builtinInt),
       (T.pack "float", Constant $ PrimVal builtinFloat),
-      (T.pack "exit", Constant $ PrimVal builtinExit)
+      (T.pack "exit", Constant $ PrimVal builtinExit),
+      (T.pack "format", Constant $ PrimVal builtinFormat)
     ]
 
 ----------------------------------------------------
@@ -286,4 +287,34 @@ builtinExit = do
       _ -> throwError $ TypeError "the exit parameter is wrong."
     _ -> throwError $ TypeError "the exit parameter is not string." 
 
-    
+----------------------------------------------------
+
+format' :: [T.Text] -> [Value] -> [T.Text] -> Either EvalError [T.Text]
+format' [] [] res = Right res
+format' [] _  res = Right res
+format' (x:xs) (y:ys) res= case isBrace x  of
+  True -> case y of
+    (StringVal a) -> format' xs ys (T.replace (T.pack "{}") a x : res)       
+    (IntVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)     
+    (FloatVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)      
+    (BoolVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res) 
+    (QuoteVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res) 
+    _ -> Left $ TypeError "format: cannot format with this type."
+  False -> format' xs (y:ys) (x : res)
+format' (x:xs) [] res = case isBrace x of
+  True -> Left $ ValueError "format: too many braces."
+  False -> format' xs [] (x : res)
+
+builtinFormat :: Eval ()
+builtinFormat = do
+  quote <- pop
+  str <- pop
+  case str of
+    (StringVal s) -> case quote of
+      (QuoteVal l) -> do
+        let toFormat = format' (T.splitOn (T.pack " ") s) (map readValue l) []
+        case toFormat of
+          (Left err) -> throwError $ err
+          (Right succ) -> push $ StringVal $ T.pack $ initSafe $ T.unpack $ foldl (\acc x -> (x <> T.pack " ") <> acc) (T.pack "") succ
+      _ -> throwError $ TypeError "cannot format with a wrong parameter (the second parameter is a quote)."
+    _ -> throwError $ TypeError "cannot format with a wrong parameter (the first parameter is a string)."
