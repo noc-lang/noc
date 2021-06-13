@@ -289,16 +289,16 @@ builtinExit = do
 
 ----------------------------------------------------
 
-format' :: [T.Text] -> [Value] -> [T.Text] -> Either EvalError [T.Text]
+format' :: [T.Text] -> Expr -> [T.Text] -> Either EvalError [T.Text]
 format' [] [] res = Right res
 format' [] _  res = Right res
 format' (x:xs) (y:ys) res= case isBrace x  of
   True -> case y of
-    (StringVal a) -> format' xs ys (T.replace (T.pack "{}") a x : res)       
-    (IntVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)     
-    (FloatVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)      
-    (BoolVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res) 
-    (QuoteVal a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res) 
+    (StringAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack a) x : res)       
+    (IntAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)     
+    (FloatAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)      
+    (BoolAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res) 
+    (QuoteAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res) 
     _ -> Left $ TypeError "format: cannot format with this type."
   False -> format' xs (y:ys) (x : res)
 format' (x:xs) [] res = case isBrace x of
@@ -312,7 +312,15 @@ builtinFormat = do
   case str of
     (StringVal s) -> case quote of
       (QuoteVal l) -> do
-        let toFormat = format' (T.splitOn (T.pack " ") s) (map readValue l) []
+        stack <- get
+        builtinZap
+        evalExpr l
+        putAllInQuote []
+        newstack <- get
+        put $ stack <> newstack
+        v <- pop
+        let (QuoteVal val) = v
+        let toFormat = format' (T.splitOn (T.pack " ") s) val []
         case toFormat of
           (Left err) -> throwError $ err
           (Right succ) -> push $ StringVal $ T.pack $ initSafe $ T.unpack $ foldl (\acc x -> (x <> T.pack " ") <> acc) (T.pack "") succ

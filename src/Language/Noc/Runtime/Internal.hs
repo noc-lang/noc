@@ -59,6 +59,15 @@ initSafe t = let (x:xs) = reverse t in reverse xs
 isBrace :: T.Text -> Bool
 isBrace x = (T.pack "{}") `T.isInfixOf` x
 
+putAllInQuote :: Expr -> Eval ()
+putAllInQuote res = do
+  stack <- get
+  case stack of
+    [] -> push $ QuoteVal res
+    _ -> do
+      v <- pop
+      putAllInQuote (readAtom v : res)
+
 -------------------------------
 
 pop :: Eval Value
