@@ -13,7 +13,7 @@ type Stack = [Value]
 
 type Env = M.Map T.Text EnvEntry
 
-data EnvEntry = Function (DocString, Expr) | Constant (DocString, Value)
+data EnvEntry = Function (Maybe DocString, Expr) | Constant (DocString, Value)
 
 ------
 type Eval a = RWST Env () Stack (ExceptT EvalError IO) a

@@ -24,7 +24,7 @@ import Text.Parsec.String (Parser)
 
 ----------------------- REPL Parser -------------------------------
 
-data REPLInput = DeclInput (Map Text (DocString,Expr)) | ExprInput Expr deriving (Show, Eq)
+data REPLInput = DeclInput (Map Text (Maybe DocString,Expr)) | ExprInput Expr deriving (Show, Eq)
 
 replFunction :: Parser REPLInput
 replFunction = (function <* eof) >>= (pure . DeclInput)
@@ -37,7 +37,7 @@ parseREPL expr = parse (replFunction <|> replExpression) "" expr
 
 ----------------------- REPL Eval -------------------------------
 
-funcREPL :: (Map Text (DocString, Expr)) -> Env -> Either EvalError ((), Env)
+funcREPL :: (Map Text (Maybe DocString, Expr)) -> Env -> Either EvalError ((), Env)
 funcREPL func env = runExcept $ runStateT (evalFunc $ toList func) env
 
 exprREPL :: Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))

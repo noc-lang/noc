@@ -3,7 +3,7 @@ module Language.Noc.Syntax.AST where
 ----------------------- Modules ------------------------
 
 import Data.Map (Map, fromList, keys)
-import Data.Text (Text, empty, pack)
+import Data.Text (Text, empty, pack, unpack, strip)
 import Language.Noc.Syntax.Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
@@ -56,19 +56,19 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 -------------------- Module -----------------
 
-data Module = Module {imports :: [FilePath], decls :: [Map Text (DocString, Expr)]}
+data Module = Module {imports :: [FilePath], decls :: [Map Text (Maybe DocString, Expr)]}
 
 type DocString = String
 
-parseContent :: Parser (DocString, Expr)
+parseContent :: Parser (Maybe DocString, Expr)
 parseContent = do
   doc <- optionMaybe $ between (symbol "---") (symbol "---") (many $ noneOf "-")
-  e <- whiteSpace *> stack 
+  e <- whiteSpace *> stack
   case doc of
-    (Just x) -> return (x,e)
-    Nothing -> return ([],e)
+    (Just a) -> return (Just $ unpack $ strip $ pack a, e)
+    Nothing -> return (Nothing,e)
 
-function :: Parser (Map Text (DocString, Expr))
+function :: Parser (Map Text (Maybe DocString, Expr))
 function = do
   lexeme $ reserved "def"
   name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))

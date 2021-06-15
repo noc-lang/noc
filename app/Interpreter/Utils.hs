@@ -10,12 +10,12 @@ isMultipleDecls (x : xs) = case x `elem` xs of
   True -> Just x
   False -> isMultipleDecls xs
 
-filterProg :: (M.Map T.Text (DocString,Expr)) -> ([(T.Text, (DocString,Expr))], [(T.Text, (DocString,Expr))])
+filterProg :: (M.Map T.Text (Maybe DocString,Expr)) -> ([(T.Text, (Maybe DocString,Expr))], [(T.Text, (Maybe DocString,Expr))])
 filterProg prog = (main', other')
   where
     filter' pred ast = filter (\(k, v) -> pred k (T.pack "main")) (M.toList ast)
     main' = filter' (==) prog
     other' = filter' (/=) prog
 
-unionMap :: [M.Map T.Text (DocString,Expr)] -> (M.Map T.Text (DocString,Expr))
+unionMap :: [M.Map T.Text (Maybe DocString,Expr)] -> (M.Map T.Text (Maybe DocString,Expr))
 unionMap l = foldr M.union M.empty l
