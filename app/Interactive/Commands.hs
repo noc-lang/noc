@@ -82,7 +82,7 @@ load arg stack env repl =
               Nothing -> do
                 let declList = M.toList $ foldr M.union M.empty decls
                 ---
-                let declMap l = M.fromList $ map (\(k, v) -> (k, Function v)) l
+                let declMap l = M.fromList $ map (\(k, d) -> (k, Function d)) l
                 let filter' e l = filter (\(k, _) -> k `elem` M.keys e) l
                 ---
                 let fnames = map (\(k, v) -> k) declList
@@ -111,7 +111,7 @@ env' arg stack env repl =
     { name = "env",
       args = arg,
       action = do
-        let environment = foldl (\acc (name, Function expr) -> (displayEnv name expr) <> acc) "" (M.toList env)
+        let environment = foldl (\acc (name, Function (_,expr)) -> (displayEnv name expr) <> acc) "" (M.toList env)
         putStrLn environment
         repl stack env
     }

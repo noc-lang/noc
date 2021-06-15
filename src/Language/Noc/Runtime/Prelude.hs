@@ -6,7 +6,7 @@ import Control.Exception (SomeException, try)
 import Control.Monad.Except (throwError)
 import Control.Monad.RWS
 import Control.Monad.State
-import qualified Data.Map as M (fromList, keys)
+import qualified Data.Map as M (fromList, keys, lookup)
 import qualified Data.Text as T (Text, pack, unpack, splitOn, replace)
 import qualified Data.Text.IO as TIO (getLine, readFile)
 import Language.Noc.Runtime.Internal
@@ -16,6 +16,7 @@ import System.IO
 import System.Exit (exitFailure, exitSuccess)
 import System.Environment (getArgs)
 import Text.Read (readMaybe)
+import Language.Noc.Runtime.PreludeDoc
 
 ----------------------------------------------------
 
@@ -23,35 +24,36 @@ prelude :: Env
 prelude =
   M.fromList
     [ -- Stack-shuffler
-      (T.pack "dup", Constant $ PrimVal builtinDup),
-      (T.pack "pop", Constant $ PrimVal builtinPop),
-      (T.pack "zap", Constant $ PrimVal builtinZap),
-      (T.pack "cat", Constant $ PrimVal builtinCat),
-      (T.pack "rotN", Constant $ PrimVal builtinRotN),
+      (T.pack "dup", Constant $ (docDup,PrimVal builtinDup)),
+      (T.pack "pop", Constant $ (docPop,PrimVal builtinPop)),
+      (T.pack "zap", Constant $ (docZap,PrimVal builtinZap)),
+      (T.pack "cat", Constant $ (docCat,PrimVal builtinCat)),
+      (T.pack "rotN", Constant $ (docRotN,PrimVal builtinRotN)),
       -- Arithmetic operators
-      (T.pack "+", Constant $ PrimVal $ builtinOp (+)),
-      (T.pack "-", Constant $ PrimVal $ builtinOp (-)),
-      (T.pack "*", Constant $ PrimVal $ builtinOp (*)),
-      (T.pack "/", Constant $ PrimVal $ builtinDiv),
+      (T.pack "+", Constant $ (docOp "+",PrimVal $ builtinOp (+))),
+      (T.pack "-", Constant $ (docOp "-",PrimVal $ builtinOp (-))),
+      (T.pack "*", Constant $ (docOp "*",PrimVal $ builtinOp (*))),
+      (T.pack "/", Constant $ (docDiv,PrimVal $ builtinDiv)),
       -- I/O
-      (T.pack "print", Constant $ PrimVal builtinPrint),
-      (T.pack "putstr", Constant $ PrimVal builtinPutStr),
-      (T.pack "ask", Constant $ PrimVal builtinAsk),
-      (T.pack "args", Constant $ PrimVal builtinArgs),
+      (T.pack "print", Constant $ (docPrint,PrimVal builtinPrint)),
+      (T.pack "putstr", Constant $ (docPutStr,PrimVal builtinPutStr)),
+      (T.pack "ask", Constant $ (docAsk,PrimVal builtinAsk)),
+      (T.pack "args", Constant $ (docArgs,PrimVal builtinArgs)),
       -- Fs
-      (T.pack "read", Constant $ PrimVal builtinReadFile),
-      (T.pack "write", Constant $ PrimVal builtinWrite),
+      (T.pack "read", Constant $ (docReadFile,PrimVal builtinReadFile)),
+      (T.pack "write", Constant $ (docWrite,PrimVal builtinWrite)),
       -- Quote
-      (T.pack "unquote", Constant $ PrimVal builtinUnquote),
-      (T.pack "pushr", Constant $ PrimVal builtinPushr),
-      (T.pack "popr", Constant $ PrimVal builtinPopr),
+      (T.pack "unquote", Constant $ (docUnquote,PrimVal builtinUnquote)),
+      (T.pack "pushr", Constant $ (docPushr,PrimVal builtinPushr)),
+      (T.pack "popr", Constant $ (docPopr,PrimVal builtinPopr)),
       -- Misc
-      (T.pack "id", Constant $ PrimVal builtinId),
-      (T.pack "str", Constant $ PrimVal builtinStr),
-      (T.pack "int", Constant $ PrimVal builtinInt),
-      (T.pack "float", Constant $ PrimVal builtinFloat),
-      (T.pack "exit", Constant $ PrimVal builtinExit),
-      (T.pack "format", Constant $ PrimVal builtinFormat)
+      (T.pack "id", Constant $ (docId,PrimVal builtinId)),
+      (T.pack "str", Constant $ (docStr,PrimVal builtinStr)),
+      (T.pack "int", Constant $ (docInt,PrimVal builtinInt)),
+      (T.pack "float", Constant $ (docFloat,PrimVal builtinFloat)),
+      (T.pack "exit", Constant $ (docExit,PrimVal builtinExit)),
+      (T.pack "format", Constant $ (docFormat,PrimVal builtinFormat)),
+      (T.pack "help", Constant $ (docHelp,PrimVal builtinHelp))
     ]
 
 ----------------------------------------------------
@@ -326,3 +328,20 @@ builtinFormat = do
           (Right succ) -> push $ StringVal $ T.pack $ initSafe $ T.unpack $ foldl (\acc x -> (x <> T.pack " ") <> acc) (T.pack "") succ
       _ -> throwError $ TypeError "cannot format with a wrong parameter (the second parameter is a quote)."
     _ -> throwError $ TypeError "cannot format with a wrong parameter (the first parameter is a string)."
+
+----------------------------------------------------
+
+builtinHelp :: Eval ()
+builtinHelp = do
+  env <- ask
+  quote <- pop
+  case quote of
+    (QuoteVal n) -> case n of
+      [WordAtom n'] -> case M.lookup (T.pack n') env of
+        (Just (Constant (d,_))) -> liftIO $ liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
+        (Just (Function (d, _))) -> liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
+        Nothing -> throwError $ NameError $ "the '" <> n' <> "' function does not exists."
+      _ -> throwError $ ValueError $ "bad expression in the quote (required: function)."
+    _ -> throwError $ TypeError "cannot help without a quote parameter."
+
+    

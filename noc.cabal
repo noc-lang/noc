@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 56028e0e6b786a1132bd21e085db15e6ba787d04baa243cde35a4e0572d75957
+-- hash: dd9c856e8bbd973df10cd2f09862ed7592913e1895a1e46729d8c12fe238b584
 
 name:           noc
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
       Language.Noc.Runtime.Eval
       Language.Noc.Runtime.Internal
       Language.Noc.Runtime.Prelude
+      Language.Noc.Runtime.PreludeDoc
       Language.Noc.Syntax.AST
       Language.Noc.Syntax.Lexer
   other-modules:

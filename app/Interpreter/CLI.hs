@@ -40,7 +40,7 @@ run (Exec (path:_)) = do
         [] -> do
           let (main', other') = filterProg (unionMap decls)
           ---
-          let otherFuncsMap = M.fromList $ map (\(k, v) -> (k, Function v)) other'
+          let otherFuncsMap = M.fromList $ map (\(k, d) -> (k, Function d)) other'
           evalFile' <- runExceptT $ runRWST (evalFile main') (prelude <> otherFuncsMap) []
           ---
           case evalFile' of

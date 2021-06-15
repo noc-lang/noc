@@ -26,16 +26,16 @@ eval expr = do
 
 ---------- Evaluate Noc file -----------------
 
-evalFile :: [(T.Text, Expr)] -> Eval ()
+evalFile :: [(T.Text, (DocString, Expr))] -> Eval ()
 evalFile [] = return ()
-evalFile [(_, v)] = evalExpr v
+evalFile [(_, (_,v))] = evalExpr v
 
 ------- Evaluate function declaration ---------
 
-evalFunc :: [(T.Text, Expr)] -> DeclEval ()
-evalFunc [(k, v)] = do
+evalFunc :: [(T.Text, (DocString,Expr))] -> DeclEval ()
+evalFunc [(k, decl)] = do
   env <- get
-  let function = M.fromList [(k, Function v)]
+  let function = M.fromList [(k, Function decl)]
   ---
   case (k `elem` (M.keys prelude), k `elem` (M.keys env)) of
     (True, _) -> throwError $ NameError $ "cannot declare the function with '" <> (T.unpack k) <> "' name. (reserved to prelude)"

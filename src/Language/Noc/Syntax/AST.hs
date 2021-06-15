@@ -56,14 +56,25 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 -------------------- Module -----------------
 
-data Module = Module {imports :: [FilePath], decls :: [Map Text Expr]}
+data Module = Module {imports :: [FilePath], decls :: [Map Text (DocString, Expr)]}
 
-function :: Parser (Map Text Expr)
+type DocString = String
+
+parseContent :: Parser (DocString, Expr)
+parseContent = do
+  doc <- optionMaybe $ between (symbol "---") (symbol "---") (many $ noneOf "-")
+  e <- whiteSpace *> stack 
+  case doc of
+    (Just x) -> return (x,e)
+    Nothing -> return ([],e)
+
+function :: Parser (Map Text (DocString, Expr))
 function = do
   lexeme $ reserved "def"
   name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
-  content <- (lexeme $ braces $ (whiteSpace *> stack))
-  pure $ fromList [(pack name, content)]
+  contentFunction <- (lexeme $ braces $ parseContent)
+  let (doc,content) = contentFunction
+  pure $ fromList [(pack name, (doc,content))]
 
 load :: Parser String
 load = do
@@ -75,8 +86,8 @@ program :: Parser Module
 program = do
   whiteSpace
   loads <- many load
-  v <- many function
+  funcs <- many function
   eof
-  case v of
+  case funcs of
     [] -> pure $ Module loads [fromList []]
-    v' -> pure $ Module loads v'
+    v -> pure $ Module loads v

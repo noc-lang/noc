@@ -13,7 +13,7 @@ type Stack = [Value]
 
 type Env = M.Map T.Text EnvEntry
 
-data EnvEntry = Function Expr | Constant Value
+data EnvEntry = Function (DocString, Expr) | Constant (DocString, Value)
 
 ------
 type Eval a = RWST Env () Stack (ExceptT EvalError IO) a
@@ -98,6 +98,6 @@ evalExpr (x : xs) = case x of
 evalWord :: String -> Env -> Eval ()
 evalWord w e = do
   case M.lookup (T.pack w) e of
-    (Just (Constant (PrimVal f))) -> f
-    (Just (Function expr)) -> evalExpr expr
+    (Just (Constant (_,PrimVal f))) -> f
+    (Just (Function (_, expr))) -> evalExpr expr
     Nothing -> throwError (NameError (w <> " function doesn't declared or not in prelude.")) >> return ()
