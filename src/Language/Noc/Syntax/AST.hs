@@ -1,9 +1,11 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Language.Noc.Syntax.AST where
 
 ----------------------- Modules ------------------------
 
 import Data.Map (Map, fromList, keys)
-import Data.Text (Text, empty, pack, unpack, strip)
+import Data.Text (Text, empty, pack, strip, unpack)
 import Language.Noc.Syntax.Lexer
 import Text.Parsec
 import Text.Parsec.String (Parser)
@@ -21,13 +23,27 @@ sign = (char '-' >> return negate) <|> return id
 operators :: Parser String
 operators = string "+" <|> string "-" <|> string "/" <|> string "*"
 
+---- Escape char for single quote strings
+doubleQuoteLiteral :: Parser String
+doubleQuoteLiteral = between (char '"') (char '"') (many $ doubleQuoteLetter <|> doubleQuoteEscape)
+
+doubleQuoteLetter :: Parser Char
+doubleQuoteLetter = satisfy (\c -> (c /= '"') && (c /= '\\'))
+
+doubleQuoteEscape :: Parser Char
+doubleQuoteEscape = do
+  char '\\'
+  let codes = zip ("abfnrtv\\\"\'") ("\a\b\f\n\r\t\v\\\"\'")
+  esc <- choice $ map (\(c, code) -> char c >> return code) codes
+  return esc
+
 --------------------------------------------------------
 
 word :: Parser Atom
 word = WordAtom <$> (identifier <|> operators)
 
 strLiteral :: Parser Atom
-strLiteral = StringAtom <$> (stringLiteral <|> (between (string "'") (string "'") (many $ noneOf "'")))
+strLiteral = StringAtom <$> doubleQuoteLiteral
 
 int :: Parser Atom
 int = do
@@ -66,15 +82,15 @@ parseContent = do
   e <- whiteSpace *> stack
   case doc of
     (Just a) -> return (Just $ unpack $ strip $ pack a, e)
-    Nothing -> return (Nothing,e)
+    Nothing -> return (Nothing, e)
 
 function :: Parser (Map Text (Maybe DocString, Expr))
 function = do
   lexeme $ reserved "def"
   name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
   contentFunction <- (lexeme $ braces $ parseContent)
-  let (doc,content) = contentFunction
-  pure $ fromList [(pack name, (doc,content))]
+  let (doc, content) = contentFunction
+  pure $ fromList [(pack name, (doc, content))]
 
 load :: Parser String
 load = do

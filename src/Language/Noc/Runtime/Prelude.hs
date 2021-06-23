@@ -7,16 +7,16 @@ import Control.Monad.Except (throwError)
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M (fromList, keys, lookup)
-import qualified Data.Text as T (Text, pack, unpack, splitOn, replace)
+import qualified Data.Text as T (Text, pack, replace, splitOn, unpack)
 import qualified Data.Text.IO as TIO (getLine, readFile)
-import Language.Noc.Runtime.Internal
 import Language.Noc.PrettyPrinter
-import Language.Noc.Syntax.AST
-import System.IO
-import System.Exit (exitFailure, exitSuccess)
-import System.Environment (getArgs)
-import Text.Read (readMaybe)
+import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.PreludeDoc
+import Language.Noc.Syntax.AST
+import System.Environment (getArgs)
+import System.Exit (exitFailure, exitSuccess)
+import System.IO
+import Text.Read (readMaybe)
 
 ----------------------------------------------------
 
@@ -24,36 +24,36 @@ prelude :: Env
 prelude =
   M.fromList
     [ -- Stack-shuffler
-      (T.pack "dup", Constant $ (docDup,PrimVal builtinDup)),
-      (T.pack "pop", Constant $ (docPop,PrimVal builtinPop)),
-      (T.pack "zap", Constant $ (docZap,PrimVal builtinZap)),
-      (T.pack "cat", Constant $ (docCat,PrimVal builtinCat)),
-      (T.pack "rotN", Constant $ (docRotN,PrimVal builtinRotN)),
+      (T.pack "dup", Constant $ (docDup, PrimVal builtinDup)),
+      (T.pack "pop", Constant $ (docPop, PrimVal builtinPop)),
+      (T.pack "zap", Constant $ (docZap, PrimVal builtinZap)),
+      (T.pack "cat", Constant $ (docCat, PrimVal builtinCat)),
+      (T.pack "rotN", Constant $ (docRotN, PrimVal builtinRotN)),
       -- Arithmetic operators
-      (T.pack "+", Constant $ (docOp "+",PrimVal $ builtinOp (+))),
-      (T.pack "-", Constant $ (docOp "-",PrimVal $ builtinOp (-))),
-      (T.pack "*", Constant $ (docOp "*",PrimVal $ builtinOp (*))),
-      (T.pack "/", Constant $ (docDiv,PrimVal $ builtinDiv)),
+      (T.pack "+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
+      (T.pack "-", Constant $ (docOp "-", PrimVal $ builtinOp (-))),
+      (T.pack "*", Constant $ (docOp "*", PrimVal $ builtinOp (*))),
+      (T.pack "/", Constant $ (docDiv, PrimVal $ builtinDiv)),
       -- I/O
-      (T.pack "print", Constant $ (docPrint,PrimVal builtinPrint)),
-      (T.pack "putstr", Constant $ (docPutStr,PrimVal builtinPutStr)),
-      (T.pack "ask", Constant $ (docAsk,PrimVal builtinAsk)),
-      (T.pack "args", Constant $ (docArgs,PrimVal builtinArgs)),
+      (T.pack "print", Constant $ (docPrint, PrimVal builtinPrint)),
+      (T.pack "putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
+      (T.pack "ask", Constant $ (docAsk, PrimVal builtinAsk)),
+      (T.pack "args", Constant $ (docArgs, PrimVal builtinArgs)),
       -- Fs
-      (T.pack "read", Constant $ (docReadFile,PrimVal builtinReadFile)),
-      (T.pack "write", Constant $ (docWrite,PrimVal builtinWrite)),
+      (T.pack "read", Constant $ (docReadFile, PrimVal builtinReadFile)),
+      (T.pack "write", Constant $ (docWrite, PrimVal builtinWrite)),
       -- Quote
-      (T.pack "unquote", Constant $ (docUnquote,PrimVal builtinUnquote)),
-      (T.pack "pushr", Constant $ (docPushr,PrimVal builtinPushr)),
-      (T.pack "popr", Constant $ (docPopr,PrimVal builtinPopr)),
+      (T.pack "unquote", Constant $ (docUnquote, PrimVal builtinUnquote)),
+      (T.pack "pushr", Constant $ (docPushr, PrimVal builtinPushr)),
+      (T.pack "popr", Constant $ (docPopr, PrimVal builtinPopr)),
       -- Misc
-      (T.pack "id", Constant $ (docId,PrimVal builtinId)),
-      (T.pack "str", Constant $ (docStr,PrimVal builtinStr)),
-      (T.pack "int", Constant $ (docInt,PrimVal builtinInt)),
-      (T.pack "float", Constant $ (docFloat,PrimVal builtinFloat)),
-      (T.pack "exit", Constant $ (docExit,PrimVal builtinExit)),
-      (T.pack "format", Constant $ (docFormat,PrimVal builtinFormat)),
-      (T.pack "help", Constant $ (docHelp,PrimVal builtinHelp))
+      (T.pack "id", Constant $ (docId, PrimVal builtinId)),
+      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
+      (T.pack "int", Constant $ (docInt, PrimVal builtinInt)),
+      (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
+      (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
+      (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
+      (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp))
     ]
 
 ----------------------------------------------------
@@ -205,9 +205,9 @@ builtinArgs = do
   args <- liftIO getArgs
   case args of
     [] -> push $ QuoteVal []
-    (_:y:args)  -> case y of
+    (_ : y : args) -> case y of
       "--" -> push $ QuoteVal (map StringAtom args)
-      _ -> push $ QuoteVal (map StringAtom (y:args))
+      _ -> push $ QuoteVal (map StringAtom (y : args))
     _ -> push $ QuoteVal (map StringAtom args)
 
 ----------------------------------------------------
@@ -283,27 +283,27 @@ builtinExit :: Eval ()
 builtinExit = do
   typeExit <- pop
   case typeExit of
-    (StringVal x) -> case (T.unpack x) of 
+    (StringVal x) -> case (T.unpack x) of
       "success" -> liftIO exitSuccess
       "failure" -> liftIO $ (putStrLn "*** Exception: ExitFailure") >> exitFailure
       _ -> throwError $ TypeError "the exit parameter is wrong."
-    _ -> throwError $ TypeError "the exit parameter is not string." 
+    _ -> throwError $ TypeError "the exit parameter is not string."
 
 ----------------------------------------------------
 
 format' :: [T.Text] -> Expr -> [T.Text] -> Either EvalError [T.Text]
 format' [] [] res = Right res
-format' [] _  res = Right res
-format' (x:xs) (y:ys) res= case isBrace x  of
+format' [] _ res = Right res
+format' (x : xs) (y : ys) res = case isBrace x of
   True -> case y of
-    (StringAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack a) x : res)       
-    (IntAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)     
-    (FloatAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)      
-    (BoolAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res) 
-    (QuoteAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res) 
+    (StringAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack a) x : res)
+    (IntAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
+    (FloatAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
+    (BoolAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
+    (QuoteAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res)
     _ -> Left $ TypeError "format: cannot format with this type."
-  False -> format' xs (y:ys) (x : res)
-format' (x:xs) [] res = case isBrace x of
+  False -> format' xs (y : ys) (x : res)
+format' (x : xs) [] res = case isBrace x of
   True -> Left $ ValueError "format: too many braces."
   False -> format' xs [] (x : res)
 
@@ -338,12 +338,10 @@ builtinHelp = do
   case quote of
     (QuoteVal n) -> case n of
       [WordAtom n'] -> case M.lookup (T.pack n') env of
-        (Just (Constant (d,_))) -> liftIO $ liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
+        (Just (Constant (d, _))) -> liftIO $ liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
         (Just (Function (d, _))) -> case d of
           (Just d') -> liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
           Nothing -> liftIO $ putStrLn $ "no documentation entry for '" <> n' <> "' function."
         Nothing -> throwError $ NameError $ "the '" <> n' <> "' function does not exists."
       _ -> throwError $ ValueError $ "bad expression in the quote (required: function)."
     _ -> throwError $ TypeError "cannot help without a quote parameter."
-
-    

@@ -28,11 +28,11 @@ eval expr = do
 
 evalFile :: [(T.Text, (Maybe DocString, Expr))] -> Eval ()
 evalFile [] = return ()
-evalFile [(_, (_,v))] = evalExpr v
+evalFile [(_, (_, v))] = evalExpr v
 
 ------- Evaluate function declaration ---------
 
-evalFunc :: [(T.Text, (Maybe DocString,Expr))] -> DeclEval ()
+evalFunc :: [(T.Text, (Maybe DocString, Expr))] -> DeclEval ()
 evalFunc [(k, decl)] = do
   env <- get
   let function = M.fromList [(k, Function decl)]

@@ -7,6 +7,7 @@ import Control.Monad.RWS
 import Data.List (foldl')
 import qualified Data.Map as M (Map, empty, fromList, keys, toList, union)
 import qualified Data.Text as T (Text, unpack, unwords)
+import Data.Version (showVersion)
 import Interactive.REPL (nocREPL)
 import Interpreter.Commands
 import Interpreter.Utils
@@ -15,9 +16,8 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (prelude)
 import Language.Noc.Syntax.AST
 import Options.Applicative (Parser, ParserInfo, empty, fullDesc, header, helper, info, (<|>))
-import qualified Text.Parsec.String as P (parseFromFile)
-import Data.Version (showVersion)
 import qualified Paths_noc as PN (version)
+import qualified Text.Parsec.String as P (parseFromFile)
 
 ----------------- CLI Parser ----------------------------
 
@@ -27,7 +27,7 @@ opts = info (helper <*> cmd) (fullDesc <> header "noc - A user-friendly concaten
 run :: Command -> IO ()
 run Version = putStrLn $ "Noc version " <> (showVersion PN.version)
 run Repl = nocREPL [] M.empty
-run (Exec (path:_)) = do
+run (Exec (path : _)) = do
   parse <- P.parseFromFile program path
   ---
   case parse of

@@ -111,7 +111,7 @@ env' arg stack env repl =
     { name = "env",
       args = arg,
       action = do
-        let environment = foldl (\acc (name, Function (_,expr)) -> (displayEnv name expr) <> acc) "" (M.toList env)
+        let environment = foldl (\acc (name, Function (_, expr)) -> (displayEnv name expr) <> acc) "" (M.toList env)
         putStrLn environment
         repl stack env
     }

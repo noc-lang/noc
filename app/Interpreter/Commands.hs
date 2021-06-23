@@ -22,4 +22,3 @@ repl = flag Repl Repl (long "repl" <> short 'r' <> help "Running Noc REPL.")
 
 version :: Parser Command
 version = flag' Version (long "version" <> short 'v' <> help "Noc version.")
-

@@ -6,7 +6,7 @@ import Control.Monad.Except
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M
-import qualified Data.Text as T (Text, pack, unpack, isInfixOf)
+import qualified Data.Text as T (Text, isInfixOf, pack, unpack)
 import Language.Noc.Syntax.AST
 
 type Stack = [Value]
@@ -23,7 +23,7 @@ type DeclEval = StateT Env (Except EvalError)
 ------
 data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal T.Text | BoolVal Bool | PrimVal (Eval ())
 
-data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | ValueError String deriving Show
+data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | ValueError String deriving (Show)
 
 ---------- Utils ---------------
 
@@ -54,7 +54,7 @@ readValue (QuoteAtom l) = QuoteVal l
 
 initSafe :: String -> String
 initSafe [] = []
-initSafe t = let (x:xs) = reverse t in reverse xs
+initSafe t = let (x : xs) = reverse t in reverse xs
 
 isBrace :: T.Text -> Bool
 isBrace x = (T.pack "{}") `T.isInfixOf` x
@@ -98,6 +98,6 @@ evalExpr (x : xs) = case x of
 evalWord :: String -> Env -> Eval ()
 evalWord w e = do
   case M.lookup (T.pack w) e of
-    (Just (Constant (_,PrimVal f))) -> f
+    (Just (Constant (_, PrimVal f))) -> f
     (Just (Function (_, expr))) -> evalExpr expr
     Nothing -> throwError (NameError (w <> " function doesn't declared or not in prelude.")) >> return ()

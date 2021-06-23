@@ -24,7 +24,7 @@ import Text.Parsec.String (Parser)
 
 ----------------------- REPL Parser -------------------------------
 
-data REPLInput = DeclInput (Map Text (Maybe DocString,Expr)) | ExprInput Expr deriving (Show, Eq)
+data REPLInput = DeclInput (Map Text (Maybe DocString, Expr)) | ExprInput Expr deriving (Show, Eq)
 
 replFunction :: Parser REPLInput
 replFunction = (function <* eof) >>= (pure . DeclInput)
