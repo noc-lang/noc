@@ -78,7 +78,7 @@ type DocString = String
 
 parseContent :: Parser (Maybe DocString, Expr)
 parseContent = do
-  doc <- optionMaybe $ between (symbol "---") (symbol "---") (many $ noneOf "-")
+  doc <- optionMaybe $ symbol "---" >> (manyTill anyChar (try $ symbol "---"))
   e <- whiteSpace *> stack
   case doc of
     (Just a) -> return (Just $ unpack $ strip $ pack a, e)
