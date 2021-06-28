@@ -4,6 +4,7 @@ module Language.Noc.Runtime.Prelude where
 
 import Control.Exception (SomeException, try)
 import Control.Monad.Except (throwError)
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.RWS
 import Control.Monad.State
 import qualified Data.Map as M (fromList, keys, lookup)
@@ -14,10 +15,9 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.PreludeDoc
 import Language.Noc.Syntax.AST
 import System.Environment (getArgs)
-import System.Exit (exitSuccess,exitWith, ExitCode (..))
+import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.IO
 import Text.Read (readMaybe)
-import Control.Monad.IO.Class (liftIO)
 
 ----------------------------------------------------
 
@@ -144,7 +144,7 @@ builtinRotNM = do
               False -> do
                 let rotate l = [last l] ++ init l
                 put $ original <> (result rotate m')
-        _ -> throwError $ TypeError "the first parameter must be an integer." 
+        _ -> throwError $ TypeError "the first parameter must be an integer."
       _ -> throwError $ TypeError "the second parameter must be an integer."
 
 ----------------------------------------------------

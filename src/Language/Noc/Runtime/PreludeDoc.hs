@@ -203,7 +203,7 @@ docHelp =
   \   pop => [1]"
 
 docBool :: DocString
-docBool = 
+docBool =
   "Convert a value to boolean value\n\n\
   \(example)\n\
   \ 1 Bool => [True]"
