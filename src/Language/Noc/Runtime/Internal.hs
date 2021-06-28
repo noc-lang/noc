@@ -27,15 +27,6 @@ data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError S
 
 ---------- Utils ---------------
 
-initN :: Int -> Stack -> Stack
-initN _ [] = []
-initN 0 l = l
-initN n l = initN (n -1) (init l)
-
-popN :: Integer -> Eval ()
-popN 0 = return ()
-popN n = pop >> popN (n -1)
-
 readAtom :: Value -> Atom
 readAtom (FloatVal x) = FloatAtom x
 readAtom (IntVal x) = IntAtom x

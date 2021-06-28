@@ -4,5 +4,5 @@ Stack functions
 
 def quote = { [] swap pushr}
 
-def swap = { 2 rotN }
+def swap = { 2 1 rotNM }
 

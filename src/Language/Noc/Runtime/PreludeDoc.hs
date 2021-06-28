@@ -30,12 +30,13 @@ docCat =
   \  [1] [2] cat => [1 2]\n\
   \  \"Hello, \" \"World!\" cat => \"Hello, World!\""
 
-docRotN :: DocString
-docRotN =
-  "Rotate the stack N elements\n\n\
+docRotNM :: DocString
+docRotNM =
+  "Rotate the stack N elements M times\n\n\
   \(example)\n\
   \  stack: [1 2 3]\n\
-  \  2 rotN => [1,3,2]"
+  \  2 1 rotNM => [1 3 2]\n\
+  \  3 -1 rotNM => [2 3 1]"
 
 docOp :: String -> DocString
 docOp "+" =
@@ -162,18 +163,18 @@ docExit =
   \(example)\n\
   \ def main = {\n\
   \ \"ERROR! ...\" print\n\
-  \ \"failure\" exit\n\
+  \ 1 exit\n\
   \ \"other instructions...\" print \n\
   \ }\n\
   \ /*\n\
   \ Output:\n\
   \ \"ERROR! ...\"\n\
-  \ *** Exception: ExitFailure\n\
+  \ *** Exception: ExitFailure 1\n\
   \ */\n\
   \ ---------\n\
   \ def main = {\n\
   \ \"other instructions...\" print\n\
-  \ \"success\" exit\n\
+  \ 0 exit\n\
   \ }\n\
   \ /*\n\
   \ Output: \n\
@@ -200,3 +201,9 @@ docHelp =
   \ (example)\n\
   \   stack: [1 2]\n\
   \   pop => [1]"
+
+docBool :: DocString
+docBool = 
+  "Convert a value to boolean value\n\n\
+  \(example)\n\
+  \ 1 Bool => [True]"

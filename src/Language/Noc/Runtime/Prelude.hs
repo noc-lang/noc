@@ -14,9 +14,10 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.PreludeDoc
 import Language.Noc.Syntax.AST
 import System.Environment (getArgs)
-import System.Exit (exitFailure, exitSuccess)
+import System.Exit (exitSuccess,exitWith, ExitCode (..))
 import System.IO
 import Text.Read (readMaybe)
+import Control.Monad.IO.Class (liftIO)
 
 ----------------------------------------------------
 
@@ -28,7 +29,7 @@ prelude =
       (T.pack "pop", Constant $ (docPop, PrimVal builtinPop)),
       (T.pack "zap", Constant $ (docZap, PrimVal builtinZap)),
       (T.pack "cat", Constant $ (docCat, PrimVal builtinCat)),
-      (T.pack "rotN", Constant $ (docRotN, PrimVal builtinRotN)),
+      (T.pack "rotNM", Constant $ (docRotNM, PrimVal builtinRotNM)),
       -- Arithmetic operators
       (T.pack "+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
       (T.pack "-", Constant $ (docOp "-", PrimVal $ builtinOp (-))),
@@ -53,7 +54,8 @@ prelude =
       (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
       (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
       (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
-      (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp))
+      (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
+      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool))
     ]
 
 ----------------------------------------------------
@@ -118,16 +120,32 @@ builtinCat = do
 
 ----------------------------------------------------
 
-builtinRotN :: Eval ()
-builtinRotN = do
+builtinRotNM :: Eval ()
+builtinRotNM = do
+  m <- pop
   n <- pop
-  case n of
-    (IntVal x) -> do
-      stack <- get
-      let n = fromIntegral x
-      let rot = take n $ reverse stack
-      put $ (initN n stack) <> rot
-    _ -> throwError $ TypeError "the parameter isn't an int."
+  stack <- get
+  case stack of
+    [] -> throwError $ EmptyStackError "no or few elements in the stack."
+    _ -> case m of
+      (IntVal m') -> case n of
+        (IntVal n') -> case n' <= 0 of
+          True -> case n' == 0 of
+            True -> return ()
+            False -> throwError $ ValueError "cannot rotate with a negative number in first parameter."
+          False -> do
+            let original = take (length stack - (fromIntegral n')) stack
+            let rot = drop (length stack - (fromIntegral n')) stack
+            let result f x = last $ take (fromIntegral $ x + 1) (iterate f rot)
+            case m' < 0 of
+              True -> do
+                let rotate l = tail l ++ [head l]
+                put $ original <> (result rotate (abs m'))
+              False -> do
+                let rotate l = [last l] ++ init l
+                put $ original <> (result rotate m')
+        _ -> throwError $ TypeError "the first parameter must be an integer." 
+      _ -> throwError $ TypeError "the second parameter must be an integer."
 
 ----------------------------------------------------
 
@@ -281,13 +299,12 @@ builtinFloat = do
 
 builtinExit :: Eval ()
 builtinExit = do
-  typeExit <- pop
-  case typeExit of
-    (StringVal x) -> case (T.unpack x) of
-      "success" -> liftIO exitSuccess
-      "failure" -> liftIO $ (putStrLn "*** Exception: ExitFailure") >> exitFailure
-      _ -> throwError $ TypeError "the exit parameter is wrong."
-    _ -> throwError $ TypeError "the exit parameter is not string."
+  returncode <- pop
+  case returncode of
+    (IntVal x) -> case x of
+      0 -> liftIO exitSuccess
+      n -> liftIO $ (putStrLn $ "*** Exception: ExitFailure " <> show n) >> (exitWith $ ExitFailure $ fromIntegral n)
+    _ -> throwError $ TypeError "the exit parameter must be an integer parameter."
 
 ----------------------------------------------------
 
@@ -345,3 +362,12 @@ builtinHelp = do
         Nothing -> throwError $ NameError $ "the '" <> n' <> "' function does not exists."
       _ -> throwError $ ValueError $ "bad expression in the quote (required: function)."
     _ -> throwError $ TypeError "cannot help without a quote parameter."
+
+----------------------------------------------------
+
+builtinBool :: Eval ()
+builtinBool = do
+  v <- pop
+  case v of
+    (IntVal 0) -> push $ BoolVal False
+    _ -> push $ BoolVal True
