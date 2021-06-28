@@ -2,4 +2,14 @@
 I/O functions
 */
 
-def putstrln = { "\n" cat putstr }
+def putstrln = {
+    ---
+    putstr function with newline
+
+    (example)
+    "Hello, World!" putstrln
+    Output:
+    Hello, World
+    ---
+    "\n" cat putstr
+}
