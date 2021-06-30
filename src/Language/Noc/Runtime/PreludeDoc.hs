@@ -207,3 +207,17 @@ docBool =
   "Convert a value to boolean value\n\n\
   \(example)\n\
   \ 1 Bool => [True]"
+
+docCase :: DocString
+docCase =  "Pattern matching combinator\n\n\
+  \(example)\n\
+  \ def fact = { \n\
+  \   [\n\
+  \     [[0] [pop 1]]\n\
+  \     [[_] [dup 1 - quote [dup] cat fact *]] # wildcard (match any pattern)\n\
+  \   ] case\n\
+  \ }\n\
+  \ \n\
+  \ def main = { \n\
+  \   [6 dup] fact \n\
+  \ }"

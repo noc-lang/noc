@@ -1,0 +1,32 @@
+/*
+Bool functions
+*/
+
+load "stack.noc"
+
+def if = {
+  ---
+  if statement
+  ---
+  [
+    [[True] [swap pop unquote]]
+    [[False] [pop unquote]]
+  ] case
+}
+
+def not = {
+    ---
+    Logical operator
+    Get False if the value is True and True if value is False
+
+    (example)
+    True not => [False]
+    False not => [True]
+    ---
+    quote
+    [
+        [[True] [False]]
+        [[False] [True]]
+    ] case
+}
+

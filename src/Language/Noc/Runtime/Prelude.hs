@@ -18,6 +18,7 @@ import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.IO
 import Text.Read (readMaybe)
+import Control.Monad.IO.Class (liftIO)
 
 ----------------------------------------------------
 
@@ -55,7 +56,8 @@ prelude =
       (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
       (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
-      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool))
+      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
     ]
 
 ----------------------------------------------------
@@ -164,6 +166,7 @@ builtinPopr = do
   v1 <- pop
   case v1 of
     ((QuoteVal x)) -> case reverse x of
+      [] -> return ()
       ((WordAtom y) : ys) -> (push $ QuoteVal $ reverse ys) >> (evalWord y env)
       (y : ys) -> (push $ QuoteVal $ reverse ys) >> (push $ readValue y)
     _ -> throwError $ TypeError "can only popr with a quotation."
@@ -371,3 +374,50 @@ builtinBool = do
   case v of
     (IntVal 0) -> push $ BoolVal False
     _ -> push $ BoolVal True
+
+----------------------------------------------------
+
+isPattern :: Atom -> Bool
+isPattern x = case x of
+  (QuoteAtom [QuoteAtom _, QuoteAtom _]) -> True
+  (QuoteAtom _) -> True
+  _ -> False 
+
+eqValue :: Value -> Value -> Bool
+eqValue a b = 
+  case (a,b) of
+  (QuoteVal x, QuoteVal y) -> x == y
+  (FloatVal x, FloatVal y) -> x == y
+  (IntVal x, IntVal y) -> x == y
+  (StringVal x, StringVal y) ->  x == y
+  (BoolVal x, BoolVal y) -> x == y
+  _ -> False
+
+runCase :: Value -> Expr -> Eval ()
+runCase _ [] = throwError $ EmptyStackError "no pattern matches."
+runCase c (p:ps) = do
+  case p of
+    (QuoteAtom [QuoteAtom [WordAtom "_"], QuoteAtom expr]) -> evalExpr expr
+    (QuoteAtom [QuoteAtom p', QuoteAtom expr]) -> do
+      evalExpr p'
+      p'' <- pop
+      case eqValue c p'' of
+        True -> evalExpr expr
+        False -> runCase c ps
+    _ -> throwError $ ValueError "cannot case with bad pattern(s)."
+
+builtinCase :: Eval ()
+builtinCase = do
+  patterns <- pop
+  tocase <- pop
+  case tocase of
+    (QuoteVal c) -> case patterns of
+      (QuoteVal pat) -> do
+        evalExpr c
+        case' <- pop
+        --- 
+        case all isPattern pat of
+          True -> runCase case' pat
+          False -> throwError $ ValueError "cannot case with bad pattern(s)."
+      _ ->  throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
+    _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."
