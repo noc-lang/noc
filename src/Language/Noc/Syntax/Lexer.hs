@@ -24,7 +24,7 @@ lexer =
         P.opLetter = (noneOf ""),
         P.reservedNames = ["def", "load"],
         P.reservedOpNames = [],
-        P.caseSensitive = False
+        P.caseSensitive = True
       }
 
 ----------------- Lexer functions --------------------------------------------------
