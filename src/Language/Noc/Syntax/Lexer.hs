@@ -26,7 +26,7 @@ lexer =
         P.reservedOpNames = [],
         P.caseSensitive = True
       }
-      
+
 ----------------- Lexer functions --------------------------------------------------
 
 float :: Stream s m Char => ParsecT s u m Double

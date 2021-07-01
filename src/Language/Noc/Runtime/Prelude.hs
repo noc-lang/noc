@@ -18,7 +18,6 @@ import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.IO
 import Text.Read (readMaybe)
-import Control.Monad.IO.Class (liftIO)
 
 ----------------------------------------------------
 
@@ -381,21 +380,21 @@ isPattern :: Atom -> Bool
 isPattern x = case x of
   (QuoteAtom [QuoteAtom _, QuoteAtom _]) -> True
   (QuoteAtom _) -> True
-  _ -> False 
+  _ -> False
 
 eqValue :: Value -> Value -> Bool
-eqValue a b = 
-  case (a,b) of
-  (QuoteVal x, QuoteVal y) -> x == y
-  (FloatVal x, FloatVal y) -> x == y
-  (IntVal x, IntVal y) -> x == y
-  (StringVal x, StringVal y) ->  x == y
-  (BoolVal x, BoolVal y) -> x == y
-  _ -> False
+eqValue a b =
+  case (a, b) of
+    (QuoteVal x, QuoteVal y) -> x == y
+    (FloatVal x, FloatVal y) -> x == y
+    (IntVal x, IntVal y) -> x == y
+    (StringVal x, StringVal y) -> x == y
+    (BoolVal x, BoolVal y) -> x == y
+    _ -> False
 
 runCase :: Value -> Expr -> Eval ()
 runCase _ [] = throwError $ EmptyStackError "no pattern matches."
-runCase c (p:ps) = do
+runCase c (p : ps) = do
   case p of
     (QuoteAtom [QuoteAtom [WordAtom "_"], QuoteAtom expr]) -> evalExpr expr
     (QuoteAtom [QuoteAtom p', QuoteAtom expr]) -> do
@@ -415,9 +414,9 @@ builtinCase = do
       (QuoteVal pat) -> do
         evalExpr c
         case' <- pop
-        --- 
+        ---
         case all isPattern pat of
           True -> runCase case' pat
           False -> throwError $ ValueError "cannot case with bad pattern(s)."
-      _ ->  throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
+      _ -> throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
     _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."

@@ -5,12 +5,12 @@ module Interpreter.Commands where
 import Data.Semigroup ((<>))
 import Options.Applicative
 
-data Command = Version | Exec [String] | Repl
+data Command = Version | Exec [String] | Repl | WriteStack String
 
 --------------- Utils ----------------------------
 
 cmdFuncs :: [Parser Command]
-cmdFuncs = [repl, exec, version]
+cmdFuncs = [repl, exec, version, writeStack]
 
 ------------ Command's function ------------------
 
@@ -22,3 +22,6 @@ repl = flag Repl Repl (long "repl" <> short 'r' <> help "Running Noc REPL.")
 
 version :: Parser Command
 version = flag' Version (long "version" <> short 'v' <> help "Noc version.")
+
+writeStack :: Parser Command
+writeStack = WriteStack <$> (strOption $ long "write-stack" <> metavar "FILENAME")

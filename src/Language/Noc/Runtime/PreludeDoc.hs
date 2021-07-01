@@ -209,7 +209,8 @@ docBool =
   \ 1 Bool => [True]"
 
 docCase :: DocString
-docCase =  "Pattern matching combinator\n\n\
+docCase =
+  "Pattern matching combinator\n\n\
   \(example)\n\
   \ def fact = { \n\
   \   [\n\
