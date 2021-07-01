@@ -53,7 +53,7 @@ run Repl = nocREPL [] M.empty
 run (WriteStack path) = do
   v <- runFile path
   case v of
-    [] -> return ()
+    [] -> putStrLn "---\nStack:\n => []"
     s -> putStrLn $ "---\nStack: \n" <> displayStack s
 run (Exec (path : _)) = do
   v <- runFile path
