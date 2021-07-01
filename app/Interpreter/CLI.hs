@@ -20,15 +20,15 @@ import Options.Applicative (Parser, ParserInfo, empty, fullDesc, header, helper,
 import qualified Paths_noc as PN (version)
 import qualified Text.Parsec.String as P (parseFromFile)
 
-runFile :: FilePath -> IO Stack
+runFile :: FilePath -> IO (Maybe Stack)
 runFile path = do
   parse <- P.parseFromFile program path
   ---
   case parse of
-    (Left err) -> (print err) >> return []
+    (Left err) -> (print err) >> return Nothing
     ---
     (Right (Module imports decls)) -> case isMultipleDecls $ concatMap M.keys decls of
-      Just k -> (print $ NameError $ "Multiple function declarations for '" <> (T.unpack k) <> "' function.") >> return []
+      Just k -> (print $ NameError $ "Multiple function declarations for '" <> (T.unpack k) <> "' function.") >> return Nothing
       ---
       Nothing -> case filter (\k -> k `elem` (M.keys prelude)) (M.keys $ unionMap decls) of
         [] -> do
@@ -38,9 +38,9 @@ runFile path = do
           evalFile' <- runExceptT $ runRWST (evalFile main') (prelude <> otherFuncsMap) []
           ---
           case evalFile' of
-            (Left err') -> (print err') >> return []
-            (Right (_, s, _)) -> return s
-        (x : _) -> (print $ NameError $ "cannot declare the function with '" <> (T.unpack x) <> "' name. (reserved to prelude)") >> return []
+            (Left err') -> (print err') >> return Nothing
+            (Right (_, s, _)) -> return $ Just s
+        (x : _) -> (print $ NameError $ "cannot declare the function with '" <> (T.unpack x) <> "' name. (reserved to prelude)") >> return Nothing
 
 ----------------- CLI Parser ----------------------------
 
@@ -53,8 +53,8 @@ run Repl = nocREPL [] M.empty
 run (WriteStack path) = do
   v <- runFile path
   case v of
-    [] -> putStrLn "---\nStack:\n => []"
-    s -> putStrLn $ "---\nStack: \n" <> displayStack s
+    Nothing -> return ()
+    (Just s) -> putStrLn $ "---\nStack: \n" <> displayStack s
 run (Exec (path : _)) = do
   v <- runFile path
   case v of
