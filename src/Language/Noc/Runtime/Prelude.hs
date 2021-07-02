@@ -278,6 +278,7 @@ builtinInt :: Eval ()
 builtinInt = do
   v <- pop
   case v of
+    (FloatVal x) -> push $ IntVal $ floor x
     (IntVal x) -> push $ IntVal x
     (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
       (Just v) -> push $ IntVal v
@@ -376,22 +377,6 @@ builtinBool = do
 
 ----------------------------------------------------
 
-isPattern :: Atom -> Bool
-isPattern x = case x of
-  (QuoteAtom [QuoteAtom _, QuoteAtom _]) -> True
-  (QuoteAtom _) -> True
-  _ -> False
-
-eqValue :: Value -> Value -> Bool
-eqValue a b =
-  case (a, b) of
-    (QuoteVal x, QuoteVal y) -> x == y
-    (FloatVal x, FloatVal y) -> x == y
-    (IntVal x, IntVal y) -> x == y
-    (StringVal x, StringVal y) -> x == y
-    (BoolVal x, BoolVal y) -> x == y
-    _ -> False
-
 runCase :: Value -> Expr -> Eval ()
 runCase _ [] = throwError $ EmptyStackError "no pattern matches."
 runCase c (p : ps) = do
@@ -414,7 +399,6 @@ builtinCase' = do
       (QuoteVal pat) -> do
         evalExpr c
         case' <- pop
-        ---
         case all isPattern pat of
           True -> runCase case' pat
           False -> throwError $ ValueError "cannot case with bad pattern(s)."

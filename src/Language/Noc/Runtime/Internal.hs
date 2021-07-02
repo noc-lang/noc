@@ -59,6 +59,26 @@ putAllInQuote res = do
       v <- pop
       putAllInQuote (readAtom v : res)
 
+------ case function utils ------
+
+isPattern :: Atom -> Bool
+isPattern x = case x of
+  (QuoteAtom [QuoteAtom _, QuoteAtom _]) -> True
+  (QuoteAtom _) -> True
+  _ -> False
+
+eqValue :: Value -> Value -> Bool
+eqValue a b =
+  case (a, b) of
+    (QuoteVal x, QuoteVal y) -> x == y
+    (FloatVal x, FloatVal y) -> x == y
+    (IntVal x, IntVal y) -> x == y
+    (FloatVal x, IntVal y) -> x == (fromIntegral y)
+    (IntVal x, FloatVal y) -> (fromIntegral x) == y
+    (StringVal x, StringVal y) -> x == y
+    (BoolVal x, BoolVal y) -> x == y
+    _ -> False
+
 -------------------------------
 
 pop :: Eval Value
