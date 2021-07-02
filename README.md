@@ -1,8 +1,8 @@
 # The Noc Programming Language
 
-This repository contains the Noc interpreter and the Noc Standard Library. For more informations, you can check the [Noc website](https://noc-lang.github.io).
-
 <img src="https://raw.githubusercontent.com/noc-lang/noc-lang.github.io/master/assets/icon.png" alt="Noc icon" align=right width="160" />
+
+This repository contains the Noc interpreter and the Noc Standard Library. For more informations, you can check the [Noc website](https://noc-lang.github.io).
 
 ## Get Noc
 
