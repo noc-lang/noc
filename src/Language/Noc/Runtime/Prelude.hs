@@ -405,8 +405,8 @@ runCase c (p : ps) = do
         False -> runCase c ps
     _ -> throwError $ ValueError "cannot case with bad pattern(s)."
 
-builtinCase :: Eval ()
-builtinCase = do
+builtinCase' :: Eval ()
+builtinCase' = do
   patterns <- pop
   tocase <- pop
   case tocase of
@@ -420,3 +420,11 @@ builtinCase = do
           False -> throwError $ ValueError "cannot case with bad pattern(s)."
       _ -> throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
     _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."
+
+
+builtinCase :: Eval ()
+builtinCase = do
+  patterns <- pop
+  tocase <- pop
+  let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
+  
