@@ -7,6 +7,9 @@ load "stack.noc"
 def if = {
   ---
   if statement
+  
+  (example)
+  ["else"] ["then"] [True] if => ["then"]
   ---
   [
     [[True] [swap pop unquote]]
