@@ -112,8 +112,9 @@ env' arg stack env repl =
       args = arg,
       action = do
         let environment = foldl (\acc (name, Function (_, expr)) -> (displayEnv name expr) <> acc) "" (M.toList env)
-        putStrLn environment
-        repl stack env
+        case environment == [] of
+          True -> putStrLn "[]" >> repl stack env
+          False -> putStrLn environment >> repl stack env
     }
 
 ----------------------------------------------------

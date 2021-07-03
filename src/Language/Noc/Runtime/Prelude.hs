@@ -405,10 +405,8 @@ builtinCase' = do
       _ -> throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
     _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."
 
-
 builtinCase :: Eval ()
 builtinCase = do
   patterns <- pop
   tocase <- pop
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
-  

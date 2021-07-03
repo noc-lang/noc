@@ -52,14 +52,21 @@ defaultSettings' path =
       autoAddHistory = True
     }
 
-prompt :: IO [String]
-prompt = do
+prompt :: String -> IO [String]
+prompt name = do
   path <- getXdgDirectory XdgCache ".noc_history"
-  input <- runInputT (defaultSettings' path) (getInputLine "noc> ")
+  input <- runInputT (defaultSettings' path) (getInputLine $ name <> " ")
   return $ words $ fromMaybe "" input
 
+readMultiline :: [String] -> IO [String]
+readMultiline l = do
+  inp <- prompt "noc|"
+  case inp of
+    [":}"] -> return l
+    content -> readMultiline (l <> content)
+
 nocREPL :: Stack -> Env -> IO ()
-nocREPL stack env = prompt >>= repl stack env
+nocREPL stack env = (prompt "noc>") >>= repl stack env
 
 ----------------- REPL Commands  -----------------------------------
 
@@ -73,6 +80,7 @@ run name funcs stack env = case name `elem` (map fst funcs) of
 
 repl :: Stack -> Env -> [String] -> IO ()
 repl stack env [] = nocREPL stack env
+repl stack env [":{"] = readMultiline [] >>= (repl stack env)
 repl stack env ((':' : cmd) : args) = run cmd (commands args stack env nocREPL) stack env
 repl stack env code = do
   let expression = unwords code
