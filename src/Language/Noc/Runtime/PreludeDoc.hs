@@ -222,3 +222,15 @@ docCase =
   \ def main = { \n\
   \   [6 dup] fact \n\
   \ }"
+
+docSugar :: DocString
+docSugar =
+  "Convert a quote of strings to string for a better syntax\n\n\
+  \(example)\n\
+  \ [\"a\" \"b\" \"c\"] sugar => [\"abc\"]"
+
+docDesugar :: DocString
+docDesugar =
+  "Convert a string to a quote of strings to better manipulate the string\n\n\
+  \(example)\n\
+  \ \"abc\" desugar => [\"a\" \"b\" \"c\"]"

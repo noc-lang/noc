@@ -54,8 +54,11 @@ defaultSettings' path =
 
 tryAction :: String -> InputT IO (Maybe String)
 tryAction name = withInterrupt loop
-    where loop = handle (\Interrupt -> outputStrLn "KeyboardInterrupt" >> loop)
-                    (getInputLine name)
+  where
+    loop =
+      handle
+        (\Interrupt -> outputStrLn "KeyboardInterrupt" >> loop)
+        (getInputLine name)
 
 prompt :: String -> IO [String]
 prompt name = do

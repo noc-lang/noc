@@ -56,7 +56,10 @@ prelude =
       (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
       (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
-      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
+      (T.pack "sugar", Constant $ (docSugar, PrimVal builtinSugar)),
+      (T.pack "desugar", Constant $ (docDesugar, PrimVal builtinDesugar)),
+      (T.pack "$", Constant $ (docDesugar, PrimVal builtinDesugar))
     ]
 
 ----------------------------------------------------
@@ -410,3 +413,31 @@ builtinCase = do
   patterns <- pop
   tocase <- pop
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
+
+----------------------------------------------------
+isString :: Atom -> Bool
+isString x = case x of
+  (StringAtom x) -> True
+  _ -> False
+
+builtinSugar :: Eval ()
+builtinSugar = do
+  v <- pop
+  case v of
+    (QuoteVal l) -> case all isString l of
+      True -> push $ StringVal $ T.pack $ foldr (\(StringAtom x) acc -> x <> acc) [] l
+      False -> throwError $ TypeError "can only sugar on a quote based on string atoms."
+    _ -> throwError $ TypeError "can only sugar with a quote."
+
+----------------------------------------------------
+
+split :: String -> [String]
+split [] = []
+split (x : xs) = [x] : split xs
+
+builtinDesugar :: Eval ()
+builtinDesugar = do
+  v <- pop
+  case v of
+    (StringVal s) -> push $ QuoteVal $ map (\x -> StringAtom x) $ split (T.unpack s)
+    _ -> throwError $ TypeError "can only desugar with a string."
