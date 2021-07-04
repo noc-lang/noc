@@ -11,7 +11,7 @@ import Text.Parsec
 import Text.Parsec.String (Parser)
 
 ----------------------- Atoms --------------------------
-data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | BoolAtom Bool deriving (Show, Eq)
+data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | CharAtom Char | BoolAtom Bool deriving (Show, Eq)
 
 type Expr = [Atom]
 
@@ -45,6 +45,9 @@ word = WordAtom <$> (identifier <|> operators)
 strLiteral :: Parser Atom
 strLiteral = StringAtom <$> doubleQuoteLiteral
 
+chrLiteral :: Parser Atom
+chrLiteral = CharAtom <$> charLiteral
+
 int :: Parser Atom
 int = do
   f <- sign
@@ -68,7 +71,7 @@ quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
 
 stack :: Parser Expr
-stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLiteral <|> word)
+stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLiteral <|> chrLiteral <|> word)
 
 -------------------- Module -----------------
 

@@ -225,12 +225,14 @@ docCase =
 
 docSugar :: DocString
 docSugar =
-  "Convert a quote of strings to string for a better syntax\n\n\
+  "Convert a quote of chars to string for a better syntax\n\n\
   \(example)\n\
-  \ [\"a\" \"b\" \"c\"] sugar => [\"abc\"]"
+  \ ['a' 'b' 'c'] => [\"abc\"] \n\
+  \ desugar => [['a' 'b' 'c']] \n\
+  \ sugar => [\"abc\"]"
 
 docDesugar :: DocString
 docDesugar =
-  "Convert a string to a quote of strings to better manipulate the string\n\n\
+  "Convert a string to a quote of chars to better manipulate the string\n\n\
   \(example)\n\
-  \ \"abc\" desugar => [\"a\" \"b\" \"c\"]"
+  \ \"abc\" desugar => ['a' 'b' 'c']"

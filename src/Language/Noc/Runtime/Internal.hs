@@ -21,7 +21,7 @@ type Eval a = RWST Env () Stack (ExceptT EvalError IO) a
 type DeclEval = StateT Env (Except EvalError)
 
 ------
-data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal T.Text | BoolVal Bool | PrimVal (Eval ())
+data Value = QuoteVal Expr | FloatVal Double | IntVal Integer | StringVal T.Text | CharVal Char | BoolVal Bool | PrimVal (Eval ())
 
 data EvalError = ZeroDivisionError String | EmptyStackError String | TypeError String | NameError String | ValueError String deriving (Show, Eq)
 
@@ -31,6 +31,7 @@ readAtom :: Value -> Atom
 readAtom (FloatVal x) = FloatAtom x
 readAtom (IntVal x) = IntAtom x
 readAtom (StringVal x) = StringAtom $ T.unpack x
+readAtom (CharVal x) = CharAtom x
 readAtom (BoolVal x) = BoolAtom x
 readAtom (QuoteVal l) = QuoteAtom l
 
@@ -38,8 +39,14 @@ readValue :: Atom -> Value
 readValue (FloatAtom x) = FloatVal x
 readValue (IntAtom x) = IntVal x
 readValue (StringAtom x) = StringVal $ T.pack x
+readValue (CharAtom x) = CharVal x
 readValue (BoolAtom x) = BoolVal x
 readValue (QuoteAtom l) = QuoteVal l
+
+isChar :: Atom -> Bool
+isChar x = case x of
+  (CharAtom x) -> True
+  _ -> False
 
 ------ format function utils ------
 
@@ -76,6 +83,7 @@ eqValue a b =
     (FloatVal x, IntVal y) -> x == (fromIntegral y)
     (IntVal x, FloatVal y) -> (fromIntegral x) == y
     (StringVal x, StringVal y) -> x == y
+    (CharVal x, CharVal y) -> x == y
     (BoolVal x, BoolVal y) -> x == y
     _ -> False
 
@@ -102,7 +110,11 @@ evalExpr :: Expr -> Eval ()
 evalExpr [] = return ()
 evalExpr (x : xs) = case x of
   (WordAtom n) -> (ask >>= (evalWord n)) >> evalExpr xs
-  _ -> (push $ readValue x) >> evalExpr xs
+  y -> case y of
+    (QuoteAtom z) -> case all isChar z of
+      True -> (push $ StringVal $ T.pack $ foldr (\(CharAtom x) acc -> x : acc) [] z) >> evalExpr xs
+      False -> (push $ readValue x) >> evalExpr xs
+    _ -> (push $ readValue x) >> evalExpr xs
 
 -------------------------------
 

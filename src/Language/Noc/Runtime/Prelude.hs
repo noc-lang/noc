@@ -120,7 +120,8 @@ builtinCat = do
   case (v1, v2) of
     ((QuoteVal a), (QuoteVal b)) -> push $ (QuoteVal $ b ++ a)
     ((StringVal a), (StringVal b)) -> push $ (StringVal $ b <> a)
-    _ -> throwError $ TypeError "cannot cat with different types or concat functions,floats."
+    ((CharVal a), (CharVal b)) -> push $ (StringVal $ T.pack $ [b, a])
+    _ -> throwError $ TypeError "cannot cat with different types or concat functions,int,floats."
 
 ----------------------------------------------------
 
@@ -180,6 +181,7 @@ builtinPrint = do
   v <- pop
   case v of
     (StringVal x) -> (liftIO $ print x) >> return ()
+    (CharVal x) -> (liftIO $ print x) >> return ()
     (FloatVal x) -> (liftIO $ print x) >> return ()
     (IntVal x) -> (liftIO $ print x) >> return ()
     (BoolVal x) -> (liftIO $ print x) >> return ()
@@ -269,6 +271,7 @@ builtinStr = do
   v <- pop
   case v of
     (StringVal x) -> push $ StringVal x
+    (CharVal x) -> push $ StringVal $ T.pack $ show $ x
     (FloatVal x) -> push $ StringVal $ T.pack $ show x
     (IntVal x) -> push $ StringVal $ T.pack $ show x
     (BoolVal x) -> push $ StringVal $ T.pack $ show x
@@ -320,6 +323,7 @@ format' [] _ res = Right res
 format' (x : xs) (y : ys) res = case isBrace x of
   True -> case y of
     (StringAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack a) x : res)
+    (CharAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
     (IntAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
     (FloatAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
     (BoolAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
@@ -415,29 +419,20 @@ builtinCase = do
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
 
 ----------------------------------------------------
-isString :: Atom -> Bool
-isString x = case x of
-  (StringAtom x) -> True
-  _ -> False
-
 builtinSugar :: Eval ()
 builtinSugar = do
   v <- pop
   case v of
-    (QuoteVal l) -> case all isString l of
-      True -> push $ StringVal $ T.pack $ foldr (\(StringAtom x) acc -> x <> acc) [] l
-      False -> throwError $ TypeError "can only sugar on a quote based on string atoms."
+    (QuoteVal l) -> case all isChar l of
+      True -> push $ StringVal $ T.pack $ foldr (\(CharAtom x) acc -> x : acc) [] l
+      False -> throwError $ TypeError "can only sugar on a quote based on char atoms."
     _ -> throwError $ TypeError "can only sugar with a quote."
 
 ----------------------------------------------------
-
-split :: String -> [String]
-split [] = []
-split (x : xs) = [x] : split xs
 
 builtinDesugar :: Eval ()
 builtinDesugar = do
   v <- pop
   case v of
-    (StringVal s) -> push $ QuoteVal $ map (\x -> StringAtom x) $ split (T.unpack s)
+    (StringVal s) -> push $ QuoteVal $ map (\x -> CharAtom x) (T.unpack s)
     _ -> throwError $ TypeError "can only desugar with a string."

@@ -58,3 +58,6 @@ reserved = P.reserved lexer
 
 stringLiteral :: Stream s m Char => ParsecT s u m String
 stringLiteral = P.stringLiteral lexer
+
+charLiteral :: Stream s m Char => ParsecT s u m Char
+charLiteral = P.charLiteral lexer
