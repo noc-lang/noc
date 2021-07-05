@@ -80,7 +80,7 @@ docPutChar :: DocString
 docPutChar =
   "Output a char value (Standard output)\n\n\
   \(example)\n\
-  \  'a' putstr => a=> []"
+  \  'a' putchar => a=> []"
 
 docAsk :: DocString
 docAsk =

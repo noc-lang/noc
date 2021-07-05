@@ -55,17 +55,17 @@ prelude =
       (T.pack "sugar", Constant $ (docSugar, PrimVal builtinSugar)),
       (T.pack "desugar", Constant $ (docDesugar, PrimVal builtinDesugar)),
       (T.pack "$", Constant $ (docDesugar, PrimVal builtinDesugar)),
-      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
       -- Char
       (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
       (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),
       -- Misc
       (T.pack "id", Constant $ (docId, PrimVal builtinId)),
+      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
       (T.pack "int", Constant $ (docInt, PrimVal builtinInt)),
       (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
+      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
       (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
-      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
       (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
     ]
 
