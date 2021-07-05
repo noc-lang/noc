@@ -21,7 +21,7 @@ sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
 operators :: Parser String
-operators = string "+" <|> string "-" <|> string "/" <|> string "*" <|> string "$"
+operators = string "+" <|> string "-" <|> string "/" <|> string "*" <|> string "$" <|> string "<>"
 
 ---- Escape char for single quote strings
 doubleQuoteLiteral :: Parser String

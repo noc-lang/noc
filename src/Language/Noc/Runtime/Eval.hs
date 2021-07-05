@@ -21,7 +21,7 @@ eval expr = do
 
   case (length expr, expr) of
     (1, [WordAtom w]) -> evalWord w env
-    (1, [QuoteAtom y]) -> case all isChar y of
+    (1, [QuoteAtom y]) -> case all isChar y && y /= [] of
       True -> (push $ QuoteVal y) >> builtinSugar
       False -> push $ QuoteVal y
     (1, [expr']) -> push (readValue expr')

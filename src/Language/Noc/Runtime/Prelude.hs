@@ -7,6 +7,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.RWS
 import Control.Monad.State
+import Data.Char (chr, ord)
 import qualified Data.Map as M (fromList, keys, lookup)
 import qualified Data.Text as T (Text, pack, replace, splitOn, unpack)
 import qualified Data.Text.IO as TIO (getLine, readFile)
@@ -29,6 +30,7 @@ prelude =
       (T.pack "pop", Constant $ (docPop, PrimVal builtinPop)),
       (T.pack "zap", Constant $ (docZap, PrimVal builtinZap)),
       (T.pack "cat", Constant $ (docCat, PrimVal builtinCat)),
+      (T.pack "<>", Constant $ (docCat, PrimVal builtinCat)),
       (T.pack "rotNM", Constant $ (docRotNM, PrimVal builtinRotNM)),
       -- Arithmetic operators
       (T.pack "+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
@@ -38,6 +40,7 @@ prelude =
       -- I/O
       (T.pack "print", Constant $ (docPrint, PrimVal builtinPrint)),
       (T.pack "putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
+      (T.pack "putchar", Constant $ (docPutChar, PrimVal builtinPutChar)),
       (T.pack "ask", Constant $ (docAsk, PrimVal builtinAsk)),
       (T.pack "args", Constant $ (docArgs, PrimVal builtinArgs)),
       -- Fs
@@ -47,19 +50,23 @@ prelude =
       (T.pack "unquote", Constant $ (docUnquote, PrimVal builtinUnquote)),
       (T.pack "pushr", Constant $ (docPushr, PrimVal builtinPushr)),
       (T.pack "popr", Constant $ (docPopr, PrimVal builtinPopr)),
+      -- String
+      (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
+      (T.pack "sugar", Constant $ (docSugar, PrimVal builtinSugar)),
+      (T.pack "desugar", Constant $ (docDesugar, PrimVal builtinDesugar)),
+      (T.pack "$", Constant $ (docDesugar, PrimVal builtinDesugar)),
+      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
+      -- Char
+      (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
+      (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),
       -- Misc
       (T.pack "id", Constant $ (docId, PrimVal builtinId)),
-      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
       (T.pack "int", Constant $ (docInt, PrimVal builtinInt)),
       (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
       (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
-      (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
       (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
-      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
-      (T.pack "sugar", Constant $ (docSugar, PrimVal builtinSugar)),
-      (T.pack "desugar", Constant $ (docDesugar, PrimVal builtinDesugar)),
-      (T.pack "$", Constant $ (docDesugar, PrimVal builtinDesugar))
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
     ]
 
 ----------------------------------------------------
@@ -196,6 +203,15 @@ builtinPutStr = do
   case v of
     (StringVal x) -> (liftIO $ putStr $ T.unpack $ x) >> return ()
     _ -> throwError $ TypeError "can only putstr with strings."
+
+----------------------------------------------------
+
+builtinPutChar :: Eval ()
+builtinPutChar = do
+  v <- pop
+  case v of
+    (CharVal x) -> (liftIO $ putChar x) >> return ()
+    _ -> throwError $ TypeError "can only putchar with char."
 
 ----------------------------------------------------
 
@@ -436,3 +452,21 @@ builtinDesugar = do
   case v of
     (StringVal s) -> push $ QuoteVal $ map (\x -> CharAtom x) (T.unpack s)
     _ -> throwError $ TypeError "can only desugar with a string."
+
+----------------------------------------------------
+
+builtinChr :: Eval ()
+builtinChr = do
+  n <- pop
+  case n of
+    (IntVal x) -> push $ CharVal $ chr $ fromIntegral x
+    _ -> throwError $ TypeError "can only chr with int."
+
+----------------------------------------------------
+
+builtinOrd :: Eval ()
+builtinOrd = do
+  c <- pop
+  case c of
+    (CharVal x) -> push $ IntVal $ fromIntegral $ ord x
+    _ -> throwError $ TypeError "can only ord with char."

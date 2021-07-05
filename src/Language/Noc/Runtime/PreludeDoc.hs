@@ -76,6 +76,12 @@ docPutStr =
   \  \"Hello!\" putstr => Hello!\n\
   \  => []"
 
+docPutChar :: DocString
+docPutChar =
+  "Output a char value (Standard output)\n\n\
+  \(example)\n\
+  \  'a' putstr => a=> []"
+
 docAsk :: DocString
 docAsk =
   "Read line from the standard input\n\n\
@@ -236,3 +242,15 @@ docDesugar =
   "Convert a string to a quote of chars to better manipulate the string\n\n\
   \(example)\n\
   \ \"abc\" desugar => ['a' 'b' 'c']"
+
+docChr :: DocString
+docChr =
+  "Get the character Unicode representation of the decimal number.\n\n\
+  \(example)\n\
+  \ 97 chr => ['a']"
+
+docOrd :: DocString
+docOrd =
+  "Get the decimal representation of a Unicode character.\n\n\
+  \(example)\n\
+  \ 'A' ord => [65]"
