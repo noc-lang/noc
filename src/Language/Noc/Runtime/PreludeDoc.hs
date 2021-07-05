@@ -106,18 +106,16 @@ docArgs =
   \ [\"a\" \"b\" \"--arg\" \"c\"]\n\
   \ */"
 
-docReadFile :: DocString
-docReadFile =
-  "Open a file and read the content\n\n\
+docOpen :: DocString
+docOpen =
+  "Proceed to 'read', 'write', 'append' actions to files\n\n\
   \(example)\n\
-  \  \"file.txt\" read => [\"A file containing text!\"]"
-
-docWrite :: DocString
-docWrite =
-  "Write text into a file\n\n\
-  \(example)\n\
-  \  \"file.txt\" \"Hello!\" write\n\
-  \ => []"
+  \ \"filename\" \"\" \"r\" open => [\"This is a content.\\n\"]\n\
+  \ pop \"filename\" \"content\" \"w\" open => []\n\
+  \ \"filename\" \"\\ncontent2\" \"a\" open => []\n\n\
+  \ Modes combined: \n\
+  \ \"filename\" \"This is a new content\" \"rw\" open => [\"content\\ncontent2\"]\n\
+  \ pop \"filename\" \"This is a new content\" \"ra\" open => [\"This is a new content\"]"
 
 docUnquote :: DocString
 docUnquote =

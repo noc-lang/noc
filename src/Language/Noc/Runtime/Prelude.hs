@@ -15,6 +15,7 @@ import Language.Noc.PrettyPrinter
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.PreludeDoc
 import Language.Noc.Syntax.AST
+import System.Directory (doesPathExist)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.IO
@@ -44,8 +45,7 @@ prelude =
       (T.pack "ask", Constant $ (docAsk, PrimVal builtinAsk)),
       (T.pack "args", Constant $ (docArgs, PrimVal builtinArgs)),
       -- Fs
-      (T.pack "read", Constant $ (docReadFile, PrimVal builtinReadFile)),
-      (T.pack "write", Constant $ (docWrite, PrimVal builtinWrite)),
+      (T.pack "open", Constant $ (docOpen, PrimVal builtinOpen)),
       -- Quote
       (T.pack "unquote", Constant $ (docUnquote, PrimVal builtinUnquote)),
       (T.pack "pushr", Constant $ (docPushr, PrimVal builtinPushr)),
@@ -214,19 +214,6 @@ builtinPutChar = do
 
 ----------------------------------------------------
 
-builtinReadFile :: Eval ()
-builtinReadFile = do
-  path <- pop
-  case path of
-    (StringVal x) -> do
-      content <- liftIO (try $ TIO.readFile (T.unpack x) :: IO (Either SomeException T.Text))
-      case content of
-        (Left err) -> liftIO $ print "the file does not exist (no such file or directory)"
-        (Right succ) -> push $ StringVal succ
-    _ -> throwError $ TypeError "the parameter is not string."
-
-----------------------------------------------------
-
 builtinAsk :: Eval ()
 builtinAsk = do
   msg <- pop
@@ -262,15 +249,41 @@ builtinPushr = do
 
 ----------------------------------------------------
 
-builtinWrite :: Eval ()
-builtinWrite = do
+read' :: T.Text -> Eval ()
+read' path = do
+  isExist <- liftIO $ doesPathExist $ T.unpack path
+  case isExist of
+    True -> do
+      content' <- liftIO (try $ TIO.readFile $ T.unpack path :: IO (Either SomeException T.Text))
+      case content' of
+        (Left err) -> throwError $ FileNotFoundError $ "the file does not exist (no such file)"
+        (Right succ) -> push $ StringVal succ
+    False -> throwError $ FileNotFoundError $ "the file does not exist (no such file or directory)"
+
+write' :: T.Text -> T.Text -> Eval ()
+write' path content = liftIO $ writeFile (T.unpack path) (T.unpack content)
+
+append :: T.Text -> T.Text -> Eval ()
+append path content = liftIO $ appendFile (T.unpack path) (T.unpack content)
+
+builtinOpen :: Eval ()
+builtinOpen = do
+  mode <- pop
   content <- pop
-  path <- pop
-  case path of
-    (StringVal p) -> case content of
-      (StringVal c) -> liftIO $ writeFile (T.unpack p) (T.unpack c)
-      _ -> throwError $ TypeError "the first parameter is not string."
-    _ -> throwError $ TypeError "the second parameter is not string."
+  filename <- pop
+  case mode of
+    (StringVal m) -> case content of
+      (StringVal c) -> case filename of
+        (StringVal f) -> case (T.unpack m) of
+          "r" -> read' f
+          "w" -> write' f c
+          "a" -> append f c
+          "rw" -> (read' f) >> (write' f c)
+          "ra" -> (read' f) >> (append f c)
+          _ -> throwError $ ValueError "incorrect mode."
+        _ -> throwError $ TypeError "the first parameter must be a string."
+      _ -> throwError $ TypeError "the second parameter must be a string."
+    _ -> throwError $ TypeError "the third parameter must be a string."
 
 ----------------------------------------------------
 
