@@ -31,3 +31,14 @@ def not = {
         [[False] [True]]
     ] case
 }
+
+def isEqual = {
+    ---
+    Check if 2 values are equal 
+
+    (example)
+    5 6 isEqual => [False]
+    [Right "ok"] [Right "ok"] isEqual => [True]
+    ---
+    quote quote [[True]] cat quote [[[_] [False]]] cat case
+}
