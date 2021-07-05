@@ -4,6 +4,13 @@ List functions
 
 load "stack.noc"
 
+def len' = {
+    [
+        [[[]] [pop 0]]
+        [[_] [1 swap popr pop dup len' +]]
+    ] case
+}
+
 def len = {
     ---
     Get a list's length
@@ -11,8 +18,5 @@ def len = {
     (example)
     [1 2 3] len => [3]
     ---
-    [
-        [[[]] [pop 0]]
-        [[_] [1 swap popr pop dup len +]]
-    ] case
+    dup len'
 }

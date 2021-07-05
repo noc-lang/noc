@@ -26,10 +26,8 @@ def not = {
     True not => [False]
     False not => [True]
     ---
-    quote
     [
         [[True] [False]]
         [[False] [True]]
     ] case
 }
-
