@@ -1,0 +1,33 @@
+/*
+FS functions
+*/
+
+def write = {
+    ---
+    'Write' action of the open function
+
+    (example)
+    "filename" write => []
+    ---
+    "w" open
+}
+
+def read = {
+    ---
+    'Read' action of the open function
+
+    (example)
+    "filename" read => ["This is a content."]
+    ---
+    "" "r" open
+}
+
+def append = {
+    ---
+    'Append' action of the open function
+
+    (example)
+    "filename" append => []
+    ---
+    "a" open
+}
