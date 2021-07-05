@@ -127,7 +127,6 @@ builtinCat = do
   case (v1, v2) of
     ((QuoteVal a), (QuoteVal b)) -> push $ (QuoteVal $ b ++ a)
     ((StringVal a), (StringVal b)) -> push $ (StringVal $ b <> a)
-    ((CharVal a), (CharVal b)) -> push $ (StringVal $ T.pack $ [b, a])
     _ -> throwError $ TypeError "cannot cat with different types or concat functions,int,floats."
 
 ----------------------------------------------------
