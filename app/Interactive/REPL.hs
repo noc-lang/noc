@@ -95,7 +95,7 @@ repl stack env [":{"] = readMultiline [] >>= (repl stack env)
 repl stack env ((s : cmd) : args) = case s of
   ':' -> run cmd (commands args stack env nocREPL) stack env
   _ -> case (s : cmd) `elem` reservedWords of
-    True -> run (s : cmd) (commands args stack env nocREPL) stack env
+    True -> run (s : cmd) (commands (if args == [] then ["\"\""] else args) stack env nocREPL) stack env
     False -> do
       let code = ((s : cmd) : args)
       let expression = unwords code
