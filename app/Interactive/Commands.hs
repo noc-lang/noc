@@ -70,7 +70,7 @@ load arg stack env repl =
     { name = "load",
       args = arg,
       action = do
-        parse <- try $ parseFromFile program (unwords arg) :: IO (Either SomeException (Either ParseError Module))
+        parse <- try $ parseFromFile program (if (last $ reverse $ unwords arg) == '"' && (last $ unwords arg) == '"' then tail $ init $ unwords arg else unwords arg) :: IO (Either SomeException (Either ParseError Module))
         case parse of
           (Left errPath) -> (print errPath) >> (repl stack env)
           ---

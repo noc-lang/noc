@@ -98,7 +98,7 @@ function = do
 load :: Parser String
 load = do
   lexeme $ reserved $ "load"
-  path <- lexeme $ stringLiteral
+  path <- lexeme $ (stringLiteral <|> (many $ alphaNum <|> char '/' <|> char '\\' <|> char '.'))
   pure path
 
 program :: Parser Module

@@ -25,6 +25,6 @@ version = flag' Version (long "version" <> short 'v' <> help "Noc version.")
 
 writeStack :: Parser Command
 writeStack = do
-    let a = WriteStack <$> many (strOption $ long "write-stack")
-    let b = WriteStack <$> many (strArgument (metavar "FILENAME"))
-    a <* b
+  let a = WriteStack <$> many (strOption $ long "write-stack")
+  let b = WriteStack <$> many (strArgument (metavar "FILENAME"))
+  a <* b
