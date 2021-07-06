@@ -50,7 +50,7 @@ opts = info (helper <*> cmd) (fullDesc <> header "noc - A user-friendly concaten
 run :: Command -> IO ()
 run Version = putStrLn $ "Noc version " <> (showVersion PN.version)
 run Repl = nocREPL [] M.empty
-run (WriteStack path) = do
+run (WriteStack (path: _)) = do
   v <- runFile path
   case v of
     Nothing -> return ()

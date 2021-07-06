@@ -231,7 +231,12 @@ builtinArgs :: Eval ()
 builtinArgs = do
   args <- liftIO getArgs
   case args of
-    [] -> push $ QuoteVal []
+    [('-':'-':_),filename] -> push $ QuoteVal []
+    (('-':'-':_):_:y:args) -> case y of
+      "--" -> push $ QuoteVal (map StringAtom args)
+      _ -> push $ QuoteVal (map StringAtom (y : args))
+    -------------------------------
+    [filename] -> push $ QuoteVal []
     (_ : y : args) -> case y of
       "--" -> push $ QuoteVal (map StringAtom args)
       _ -> push $ QuoteVal (map StringAtom (y : args))

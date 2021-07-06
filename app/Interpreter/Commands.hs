@@ -5,7 +5,7 @@ module Interpreter.Commands where
 import Data.Semigroup ((<>))
 import Options.Applicative
 
-data Command = Version | Exec [String] | Repl | WriteStack String
+data Command = Version | Exec [String] | Repl | WriteStack [String]
 
 --------------- Utils ----------------------------
 
@@ -24,4 +24,7 @@ version :: Parser Command
 version = flag' Version (long "version" <> short 'v' <> help "Noc version.")
 
 writeStack :: Parser Command
-writeStack = WriteStack <$> (strOption $ long "write-stack" <> metavar "FILENAME")
+writeStack = do
+    let a = WriteStack <$> many (strOption $ long "write-stack")
+    let b = WriteStack <$> many (strArgument (metavar "FILENAME"))
+    a <* b
