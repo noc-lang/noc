@@ -243,12 +243,26 @@ docDesugar =
 
 docChr :: DocString
 docChr =
-  "Get the character Unicode representation of the decimal number.\n\n\
+  "Get the character Unicode representation of the decimal number\n\n\
   \(example)\n\
   \ 97 chr => ['a']"
 
 docOrd :: DocString
 docOrd =
-  "Get the decimal representation of a Unicode character.\n\n\
+  "Get the decimal representation of a Unicode character\n\n\
   \(example)\n\
   \ 'A' ord => [65]"
+
+docStep :: DocString
+docStep =
+  "Execute a specific function for each element of a quote\n\n\
+  \quote [function] step \n\n\
+  \(example)\n\
+  \ [\"noc\" \"hello\" \"world!\"] [$ len] step => [[3 5 6]]"
+
+docFold :: DocString
+docFold =
+  "Reduce a quote of elements to one value in accumulating each elements with a specific function\n\n\
+  \quote (initial_value -> accumulator) [function] fold \n\n\
+  \(example)\n\
+  \ [1 2 3] 0 [+] fold => [6]"

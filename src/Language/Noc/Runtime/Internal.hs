@@ -48,6 +48,10 @@ isChar x = case x of
   (CharAtom x) -> True
   _ -> False
 
+initN :: Int -> Stack -> Stack
+initN 0 l = l
+initN n (x : xs) = initN (n -1) xs
+
 ------ format function utils ------
 
 initSafe :: String -> String

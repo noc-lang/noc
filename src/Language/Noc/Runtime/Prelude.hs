@@ -66,7 +66,9 @@ prelude =
       (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
       (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
-      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
+      (T.pack "step", Constant $ (docStep, PrimVal builtinStep)),
+      (T.pack "fold", Constant $ (docFold, PrimVal builtinFold))
     ]
 
 ----------------------------------------------------
@@ -137,13 +139,13 @@ builtinRotNM = do
   n <- pop
   stack <- get
   case stack of
-    [] -> throwError $ EmptyStackError "no or few elements in the stack."
+    [] -> throwError $ EmptyStackError "rotNM: no or few elements in the stack."
     _ -> case m of
       (IntVal m') -> case n of
         (IntVal n') -> case n' <= 0 of
           True -> case n' == 0 of
             True -> return ()
-            False -> throwError $ ValueError "cannot rotate with a negative number in first parameter."
+            False -> throwError $ ValueError "rotNM: cannot rotate with a negative number in first parameter."
           False -> do
             let original = take (length stack - (fromIntegral n')) stack
             let rot = drop (length stack - (fromIntegral n')) stack
@@ -155,8 +157,8 @@ builtinRotNM = do
               False -> do
                 let rotate l = [last l] ++ init l
                 put $ original <> (result rotate m')
-        _ -> throwError $ TypeError "the first parameter must be an integer."
-      _ -> throwError $ TypeError "the second parameter must be an integer."
+        _ -> throwError $ TypeError "rotNM: the first parameter must be an integer."
+      _ -> throwError $ TypeError "rotNM: the second parameter must be an integer."
 
 ----------------------------------------------------
 
@@ -223,7 +225,7 @@ builtinAsk = do
       liftIO $ hFlush stdout
       inp <- liftIO $ TIO.getLine
       push $ StringVal inp
-    _ -> throwError $ TypeError "the parameter is not string."
+    _ -> throwError $ TypeError "ask: the parameter is not string."
 
 ----------------------------------------------------
 
@@ -261,9 +263,9 @@ read' path = do
     True -> do
       content' <- liftIO (try $ TIO.readFile $ T.unpack path :: IO (Either SomeException T.Text))
       case content' of
-        (Left err) -> throwError $ FileNotFoundError $ "the file does not exist (no such file)"
+        (Left err) -> throwError $ FileNotFoundError $ "open: the file does not exist (no such file)"
         (Right succ) -> push $ StringVal succ
-    False -> throwError $ FileNotFoundError $ "the file does not exist (no such file or directory)"
+    False -> throwError $ FileNotFoundError $ "open: the file does not exist (no such file or directory)"
 
 write' :: T.Text -> T.Text -> Eval ()
 write' path content = liftIO $ writeFile (T.unpack path) (T.unpack content)
@@ -285,10 +287,10 @@ builtinOpen = do
           "a" -> append f c
           "rw" -> (read' f) >> (write' f c)
           "ra" -> (read' f) >> (append f c)
-          _ -> throwError $ ValueError "incorrect mode."
-        _ -> throwError $ TypeError "the first parameter must be a string."
-      _ -> throwError $ TypeError "the second parameter must be a string."
-    _ -> throwError $ TypeError "the third parameter must be a string."
+          _ -> throwError $ ValueError "open: incorrect mode."
+        _ -> throwError $ TypeError "open: the first parameter must be a string."
+      _ -> throwError $ TypeError "oepn: the second parameter must be a string."
+    _ -> throwError $ TypeError "open: the third parameter must be a string."
 
 ----------------------------------------------------
 
@@ -321,7 +323,7 @@ builtinInt = do
     (IntVal x) -> push $ IntVal x
     (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
       (Just v) -> push $ IntVal v
-      Nothing -> throwError $ ValueError "the value is not a integer."
+      Nothing -> throwError $ ValueError "int: the value is not a integer."
     _ -> throwError $ TypeError "can only int with int,str"
 
 ----------------------------------------------------
@@ -334,7 +336,7 @@ builtinFloat = do
     (FloatVal x) -> push $ FloatVal x
     (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Double of
       (Just v) -> push $ FloatVal v
-      Nothing -> throwError $ ValueError "the value is not a integer."
+      Nothing -> throwError $ ValueError "float: the value is not a integer."
     _ -> throwError $ TypeError "can only float with int,float,str"
 
 ----------------------------------------------------
@@ -401,10 +403,10 @@ builtinHelp = do
         (Just (Constant (d, _))) -> liftIO $ liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
         (Just (Function (d, _))) -> case d of
           (Just d') -> liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
-          Nothing -> liftIO $ putStrLn $ "no documentation entry for '" <> n' <> "' function."
-        Nothing -> throwError $ NameError $ "the '" <> n' <> "' function does not exists."
-      _ -> throwError $ ValueError $ "bad expression in the quote (required: function)."
-    _ -> throwError $ TypeError "cannot help without a quote parameter."
+          Nothing -> liftIO $ putStrLn $ "help: no documentation entry for '" <> n' <> "' function."
+        Nothing -> throwError $ NameError $ "help: the '" <> n' <> "' function does not exists."
+      _ -> throwError $ ValueError $ "help: bad expression in the quote (required: function)."
+    _ -> throwError $ TypeError "help: cannot help without a quote parameter."
 
 ----------------------------------------------------
 
@@ -418,7 +420,7 @@ builtinBool = do
 ----------------------------------------------------
 
 runCase :: Value -> Expr -> Eval ()
-runCase _ [] = throwError $ EmptyStackError "no pattern matches."
+runCase _ [] = throwError $ EmptyStackError "case: no pattern matches."
 runCase c (p : ps) = do
   case p of
     (QuoteAtom [QuoteAtom [WordAtom "_"], QuoteAtom expr]) -> evalExpr expr
@@ -487,3 +489,45 @@ builtinOrd = do
   case c of
     (CharVal x) -> push $ IntVal $ fromIntegral $ ord x
     _ -> throwError $ TypeError "can only ord with char."
+
+----------------------------------------------------
+
+runStep :: Expr -> Int -> Expr -> Eval ()
+runStep _ len [] = do
+  stack <- get
+  let origin = take (length stack - len) stack
+  let new = QuoteVal $ map readAtom (reverse $ take len $ reverse stack)
+  put $ origin <> [new]
+runStep f len (x : xs) = (evalExpr $ [x] <> f) >> runStep f len xs
+
+builtinStep :: Eval ()
+builtinStep = do
+  f <- pop
+  l <- pop
+  case f of
+    (QuoteVal f') -> case l of
+      (QuoteVal l') -> runStep f' (length l') l'
+      _ -> throwError $ TypeError "step: the first parameter must be a quote."
+    _ -> throwError $ TypeError "step: the second parameter must be a quote."
+
+----------------------------------------------------
+
+runFold :: Expr -> Expr -> Expr -> Eval ()
+runFold _ acc [] = evalExpr acc
+runFold f acc (x : xs) = do
+  let app = acc <> [x] <> f
+  evalExpr app
+  v <- pop
+  runFold f [readAtom v] xs
+
+builtinFold :: Eval ()
+builtinFold = do
+  f <- pop
+  acc <- pop
+  l <- pop
+  let acc' = [readAtom acc]
+  case f of
+    (QuoteVal f') -> case l of
+      (QuoteVal l') -> runFold f' acc' l'
+      _ -> throwError $ TypeError "fold: the first parameter must be a quote."
+    _ -> throwError $ TypeError "fold: the third parameter must be a quote."
