@@ -4,19 +4,46 @@ module Interactive.Commands where
 
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
 import Control.Monad.RWS
-import qualified Data.Map as M (Map, empty, fromList, keys, toList, union)
-import qualified Data.Text as T (unpack, unwords)
+import Control.Monad.State (runStateT)
+import qualified Data.Map as M (Map, empty, fromList, keys, lookup, toList, union)
+import qualified Data.Text as T (Text, pack, unpack, unwords)
 import Interpreter.Utils
-import Language.Noc.PrettyPrinter (displayEnv)
+import Language.Noc.PrettyPrinter (displayEnv, displayStack)
 import Language.Noc.Runtime.Eval
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (prelude)
-import Language.Noc.Syntax.AST (Atom (..), Expr, Module (..), program)
+import qualified Language.Noc.Syntax.AST as A
+import Language.Noc.Syntax.Lexer
 import System.Console.Haskeline.History (emptyHistory, writeHistory)
 import System.Directory (XdgDirectory (..), getXdgDirectory)
-import Text.Parsec (ParseError)
-import Text.Parsec.String (parseFromFile)
+import Text.Parsec (ParseError, eof, parse, (<|>))
+import Text.Parsec.String (Parser, parseFromFile)
+
+----------------------- REPL Parser -------------------------------
+
+data REPLInput = DeclInput (M.Map T.Text (Maybe A.DocString, A.Expr)) | ExprInput A.Expr deriving (Show, Eq)
+
+reservedWords :: [String]
+reservedWords = ["load"]
+
+replFunction :: Parser REPLInput
+replFunction = (A.function <* eof) >>= (pure . DeclInput)
+
+replExpression :: Parser REPLInput
+replExpression = (whiteSpace *> A.stack) >>= (pure . ExprInput)
+
+parseREPL :: String -> Either ParseError REPLInput
+parseREPL expr = parse (replFunction <|> replExpression) "" expr
+
+----------------------- REPL Eval -------------------------------
+
+funcREPL :: (M.Map T.Text (Maybe A.DocString, A.Expr)) -> Env -> Either EvalError ((), Env)
+funcREPL func env = runExcept $ runStateT (evalFunc $ M.toList func) env
+
+exprREPL :: A.Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))
+exprREPL expr stack env = runExceptT $ runRWST (eval expr) (prelude <> env) stack
 
 ----------------------------------------------------
 data REPLCommands = REPLCommands {name :: String, args :: [String], action :: IO ()}
@@ -27,7 +54,8 @@ commands args stack env repl =
     ("quit", quit args stack env repl),
     ("help", help args stack env repl),
     ("env", env' args stack env repl),
-    ("reset", reset args stack env repl)
+    ("reset", reset args stack env repl),
+    ("debug", debug args stack env repl)
   ]
 
 ----------------------------------------------------
@@ -57,7 +85,8 @@ help arg stack env repl =
               ":quit | Exit REPL and clear the .noc_history file",
               ":load [filepath] | Load Noc file.",
               ":reset | Reset stack and env.",
-              ":env | Show environment."
+              ":env | Show environment.",
+              ":debug | Debug a Noc expression."
             ]
         repl stack env
     }
@@ -70,14 +99,14 @@ load arg stack env repl =
     { name = "load",
       args = arg,
       action = do
-        parse <- try $ parseFromFile program (if (last $ reverse $ unwords arg) == '"' && (last $ unwords arg) == '"' then tail $ init $ unwords arg else unwords arg) :: IO (Either SomeException (Either ParseError Module))
+        parse <- try $ parseFromFile A.program (if (last $ reverse $ unwords arg) == '"' && (last $ unwords arg) == '"' then tail $ init $ unwords arg else unwords arg) :: IO (Either SomeException (Either ParseError A.Module))
         case parse of
           (Left errPath) -> (print errPath) >> (repl stack env)
           ---
           (Right succ) -> case succ of
             (Left errParse) -> (print errParse) >> (repl stack env)
             ---
-            (Right (Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
+            (Right (A.Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
               (Just k) -> (print $ NameError $ "Cannot load '" <> (unwords arg) <> "' file, multiple function declarations for '" <> (T.unpack k) <> "' function.") >> repl stack env
               Nothing -> do
                 let declList = M.toList $ foldr M.union M.empty decls
@@ -127,4 +156,37 @@ reset arg _ _ repl =
       action = do
         (putStrLn "Resetting stack and env...")
         repl [] (M.empty)
+    }
+
+----------------------------------------------------
+
+runDebug :: Stack -> Env -> A.Expr -> IO ()
+runDebug _ _ [] = return ()
+runDebug s e (x : xs) = case x of
+  (A.WordAtom w) -> case M.lookup (T.pack w) e of
+    (Just (Function (_, expr))) -> (putStrLn $ "(" <> w <> ") ") >> runDebug s e (expr <> xs)
+    (Just (Constant (_, expr))) -> do
+      eval' <- exprREPL [A.WordAtom w] s e
+      putStrLn $ displayStack s <> " (" <> w <> ")"
+      case eval' of
+        (Left err) -> print err
+        (Right ((), s', ())) -> (putStrLn $ displayStack s') >> runDebug s' e xs
+    Nothing -> print (NameError (w <> " function doesn't declared or not in prelude."))
+  _ -> do
+    eval' <- exprREPL [x] s e
+    case eval' of
+      (Left err) -> print err
+      (Right ((), s', ())) -> (putStrLn $ displayStack s') >> runDebug s' e xs
+
+debug :: [String] -> Stack -> Env -> (Stack -> Env -> IO ()) -> REPLCommands
+debug arg stack env repl =
+  REPLCommands
+    { name = "debug",
+      args = arg,
+      action = do
+        let parsed = parse replExpression "" (unwords arg)
+        case parsed of
+          (Left err) -> (print err) >> repl stack env
+          (Right succ) -> case succ of
+            (ExprInput expr) -> (runDebug [] (prelude <> env) expr) >> repl stack env
     }

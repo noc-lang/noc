@@ -2,13 +2,10 @@ module Interactive.REPL where
 
 ----------------Modules ------------------------------------------ù
 
-import Control.Monad.Except
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.RWS
-import Control.Monad.State (runStateT)
 import Data.Map (Map, toList)
 import Data.Maybe (fromMaybe)
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Interactive.Commands
 import Language.Noc.PrettyPrinter (displayStack)
 import Language.Noc.Runtime.Eval
@@ -18,33 +15,8 @@ import Language.Noc.Syntax.AST
 import Language.Noc.Syntax.Lexer
 import System.Console.Haskeline
 import System.Directory (XdgDirectory (..), getXdgDirectory)
-import System.IO (hFlush, stdout)
-import Text.Parsec (ParseError, eof, parse, (<|>))
+import Text.Parsec
 import Text.Parsec.String (Parser)
-
------------------------ REPL Parser -------------------------------
-
-data REPLInput = DeclInput (Map Text (Maybe DocString, Expr)) | ExprInput Expr deriving (Show, Eq)
-
-reservedWords :: [String]
-reservedWords = ["load"]
-
-replFunction :: Parser REPLInput
-replFunction = (function <* eof) >>= (pure . DeclInput)
-
-replExpression :: Parser REPLInput
-replExpression = (whiteSpace *> stack) >>= (pure . ExprInput)
-
-parseREPL :: String -> Either ParseError REPLInput
-parseREPL expr = parse (replFunction <|> replExpression) "" expr
-
------------------------ REPL Eval -------------------------------
-
-funcREPL :: (Map Text (Maybe DocString, Expr)) -> Env -> Either EvalError ((), Env)
-funcREPL func env = runExcept $ runStateT (evalFunc $ toList func) env
-
-exprREPL :: Expr -> Stack -> Env -> IO (Either EvalError ((), Stack, ()))
-exprREPL expr stack env = runExceptT $ runRWST (eval expr) (prelude <> env) stack
 
 ----------------------- REPL Session -----------------------------
 defaultSettings' :: MonadIO m => FilePath -> Settings m
