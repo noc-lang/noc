@@ -52,9 +52,9 @@ prelude =
       (T.pack "popr", Constant $ (docPopr, PrimVal builtinPopr)),
       -- String
       (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
-      (T.pack "sugar", Constant $ (docSugar, PrimVal builtinSugar)),
-      (T.pack "desugar", Constant $ (docDesugar, PrimVal builtinDesugar)),
-      (T.pack "$", Constant $ (docDesugar, PrimVal builtinDesugar)),
+      (T.pack "tostr", Constant $ (docToStr, PrimVal builtinToStr)),
+      (T.pack "chars", Constant $ (docChars, PrimVal builtinChars)),
+      (T.pack "$", Constant $ (docChars, PrimVal builtinChars)),
       -- Char
       (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
       (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),
@@ -454,8 +454,8 @@ builtinCase = do
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
 
 ----------------------------------------------------
-builtinSugar :: Eval ()
-builtinSugar = do
+builtinToStr :: Eval ()
+builtinToStr = do
   v <- pop
   case v of
     (QuoteVal l) -> case all isChar l of
@@ -465,8 +465,8 @@ builtinSugar = do
 
 ----------------------------------------------------
 
-builtinDesugar :: Eval ()
-builtinDesugar = do
+builtinChars :: Eval ()
+builtinChars = do
   v <- pop
   case v of
     (StringVal s) -> push $ QuoteVal $ map (\x -> CharAtom x) (T.unpack s)

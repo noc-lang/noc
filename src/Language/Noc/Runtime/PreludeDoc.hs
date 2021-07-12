@@ -227,19 +227,17 @@ docCase =
   \   [6 dup] fact \n\
   \ }"
 
-docSugar :: DocString
-docSugar =
-  "Convert a quote of chars to string for a better syntax\n\n\
+docToStr :: DocString
+docToStr =
+  "Convert a quote of chars to string\n\n\
   \(example)\n\
-  \ ['a' 'b' 'c'] => [\"abc\"] \n\
-  \ desugar => [['a' 'b' 'c']] \n\
-  \ sugar => [\"abc\"]"
+  \ ['a' 'b' 'c'] tostr => [\"abc\"]"
 
-docDesugar :: DocString
-docDesugar =
-  "Convert a string to a quote of chars to better manipulate the string\n\n\
+docChars :: DocString
+docChars =
+  "Convert a string to a quote of chars\n\n\
   \(example)\n\
-  \ \"abc\" desugar => ['a' 'b' 'c']"
+  \ \"abc\" chars => ['a' 'b' 'c']"
 
 docChr :: DocString
 docChr =

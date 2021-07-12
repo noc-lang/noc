@@ -114,11 +114,7 @@ evalExpr :: Expr -> Eval ()
 evalExpr [] = return ()
 evalExpr (x : xs) = case x of
   (WordAtom n) -> (ask >>= (evalWord n)) >> evalExpr xs
-  y -> case y of
-    (QuoteAtom z) -> case all isChar z && z /= [] of
-      True -> (push $ StringVal $ T.pack $ foldr (\(CharAtom x) acc -> x : acc) [] z) >> evalExpr xs
-      False -> (push $ readValue x) >> evalExpr xs
-    _ -> (push $ readValue x) >> evalExpr xs
+  _ -> (push $ readValue x) >> evalExpr xs
 
 -------------------------------
 
