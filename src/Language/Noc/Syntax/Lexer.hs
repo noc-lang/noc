@@ -20,8 +20,8 @@ lexer =
         P.nestedComments = False,
         P.identStart = alphaNum <|> oneOf "_",
         P.identLetter = alphaNum <|> oneOf "_'",
-        P.opStart = (noneOf ""),
-        P.opLetter = (noneOf ""),
+        P.opStart = oneOf "$*+/<>-!^%",
+        P.opLetter = (noneOf " []{}\n"),
         P.reservedNames = ["def", "load"],
         P.reservedOpNames = [],
         P.caseSensitive = True
@@ -61,3 +61,6 @@ stringLiteral = P.stringLiteral lexer
 
 charLiteral :: Stream s m Char => ParsecT s u m Char
 charLiteral = P.charLiteral lexer
+
+operator :: Stream s m Char => ParsecT s u m String
+operator = P.operator lexer

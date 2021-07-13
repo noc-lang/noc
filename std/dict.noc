@@ -19,7 +19,7 @@ def values = {
     Get the dictionnary values
 
     (example)
-    [["A" 1] ["B" 2] ["C" 3]] keys => [[1 2 3]]
+    [["A" 1] ["B" 2] ["C" 3]] values => [[1 2 3]]
     ---
     [unquote swap pop] step
 }

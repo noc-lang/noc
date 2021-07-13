@@ -25,3 +25,23 @@ def mod = {
     unquote dup 3 rotNR
     / int * -
 }
+
+def % = {
+    ---
+    Modulo operation
+
+    (example)
+    10 6 mod => [4]
+    ---
+    mod
+}
+
+def sqrt = {
+    ---
+    Square root of a number
+
+    (example)
+    25 sqrt => [5.0]
+    ---
+    0.5 ^
+}

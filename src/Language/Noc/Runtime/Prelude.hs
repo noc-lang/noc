@@ -38,6 +38,7 @@ prelude =
       (T.pack "-", Constant $ (docOp "-", PrimVal $ builtinOp (-))),
       (T.pack "*", Constant $ (docOp "*", PrimVal $ builtinOp (*))),
       (T.pack "/", Constant $ (docDiv, PrimVal $ builtinDiv)),
+      (T.pack "^", Constant $ (docPow, PrimVal $ builtinPow)),
       -- I/O
       (T.pack "print", Constant $ (docPrint, PrimVal builtinPrint)),
       (T.pack "putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
@@ -58,6 +59,13 @@ prelude =
       -- Char
       (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
       (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),
+      -- Boolean
+      (T.pack ">", Constant $ (docBoolOp ">", PrimVal $ builtinBoolOp ">" (>))),
+      (T.pack "<", Constant $ (docBoolOp "<", PrimVal $ builtinBoolOp "<" (<))),
+      (T.pack ">=", Constant $ (docBoolOp ">=", PrimVal $ builtinBoolOp ">=" (>=))),
+      (T.pack "<=", Constant $ (docBoolOp "<=", PrimVal $ builtinBoolOp "<=" (<=))),
+      (T.pack "and", Constant $ (docBoolOp "and", PrimVal $ builtinCondBool "and" (&&))),
+      (T.pack "or", Constant $ (docBoolOp "or", PrimVal $ builtinCondBool "or" (||))),
       -- Misc
       (T.pack "id", Constant $ (docId, PrimVal builtinId)),
       (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
@@ -324,6 +332,9 @@ builtinInt = do
     (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
       (Just v) -> push $ IntVal v
       Nothing -> throwError $ ValueError "int: the value is not a integer."
+    (BoolVal x) -> case x of
+      True -> push $ IntVal 1
+      False -> push $ IntVal 0
     _ -> throwError $ TypeError "can only int with int,str"
 
 ----------------------------------------------------
@@ -531,3 +542,123 @@ builtinFold = do
       (QuoteVal l') -> runFold f' acc' l'
       _ -> throwError $ TypeError "fold: the first parameter must be a quote."
     _ -> throwError $ TypeError "fold: the third parameter must be a quote."
+
+----------------------------------------------------
+
+builtinBoolOp :: String -> (forall a. Ord a => a -> a -> Bool) -> Eval ()
+builtinBoolOp fname op = do
+  v1 <- pop
+  v2 <- pop
+  case v2 of
+    (QuoteVal x) -> case v1 of
+      (QuoteVal y) -> push $ BoolVal $ length x `op` length y
+      _ -> throwError $ TypeError $ fname <> ": the second argument has a wrong type."
+    ---
+    (FloatVal x) -> case v1 of
+      (FloatVal y) -> push $ BoolVal $ x `op` y
+      (IntVal y) -> push $ BoolVal $ x `op` (fromIntegral y)
+      (BoolVal y) -> do
+        push v1
+        builtinInt
+        v <- pop
+        let (IntVal z) = v
+        push $ BoolVal $ x `op` (fromIntegral z)
+      _ -> throwError $ TypeError $ fname <> ": the second argument has a wrong type."
+    ---
+    (IntVal x) -> case v1 of
+      (FloatVal y) -> push $ BoolVal $ (fromIntegral x) `op` y
+      (IntVal y) -> push $ BoolVal $ x `op` y
+      (BoolVal y) -> do
+        push v1
+        builtinInt
+        v <- pop
+        let (IntVal z) = v
+        push $ BoolVal $ x `op` z
+      _ -> throwError $ TypeError $ fname <> ": the second argument has a wrong type."
+    ---
+    (StringVal x) -> case v1 of
+      (StringVal y) -> push $ BoolVal $ (length $ T.unpack x) `op` (length $ T.unpack y)
+      (CharVal y) -> push $ BoolVal $ (length $ T.unpack x) `op` length [y]
+      _ -> throwError $ TypeError $ fname <> ": the second argument has a wrong type."
+    ---
+    (CharVal x) -> case v1 of
+      (StringVal y) -> push $ BoolVal $ length [x] `op` (length $ T.unpack y)
+      (CharVal y) -> push $ BoolVal $ length [x] `op` length [y]
+      _ -> throwError $ TypeError $ fname <> ": the second argument has a wrong type."
+    ---
+    (BoolVal x) -> case v1 of
+      (FloatVal y) -> do
+        push v2
+        builtinInt
+        v <- pop
+        let (IntVal z) = v
+        push $ BoolVal $ (fromIntegral z) `op` y
+      (IntVal y) -> do
+        push v2
+        builtinInt
+        v <- pop
+        let (IntVal z) = v
+        push $ BoolVal $ z `op` y
+      (BoolVal y) -> do
+        push v1
+        builtinInt
+        v <- pop
+        let (IntVal z) = v
+        ---
+        push v2
+        builtinInt
+        v' <- pop
+        let (IntVal z') = v'
+        push $ BoolVal $ z' `op` z
+      _ -> throwError $ TypeError $ fname <> ": the second parameter has a wrong type."
+    _ -> throwError $ TypeError $ fname <> ": the first parameter has a wrong type."
+
+builtinCondBool :: String -> (Bool -> Bool -> Bool) -> Eval ()
+builtinCondBool fname op = do
+  v1 <- pop
+  v2 <- pop
+  case v2 of
+    (BoolVal y) -> case v1 of
+      (IntVal x) -> do
+        push v1
+        builtinBool
+        v <- pop
+        let (BoolVal z) = v
+        push $ BoolVal $ y `op` z
+      (BoolVal x) -> push $ BoolVal $ y `op` x
+      _ -> throwError $ TypeError $ fname <> ": the second parameter has a wrong type."
+    (IntVal y) -> case v1 of
+      (IntVal x) -> do
+        push v1
+        builtinBool
+        v <- pop
+        let (BoolVal z) = v
+        ---
+        push v2
+        builtinBool
+        v' <- pop
+        let (BoolVal z') = v'
+        push $ BoolVal $ z' `op` z
+      (BoolVal x) -> do
+        push v2
+        builtinBool
+        v <- pop
+        let (BoolVal z) = v
+        push $ BoolVal $ z `op` x
+      _ -> throwError $ TypeError $ fname <> ": the second parameter has a wrong type."
+    _ -> throwError $ TypeError $ fname <> ": the first parameter has a wrong type."
+
+builtinPow :: Eval ()
+builtinPow = do
+  exp' <- pop
+  n <- pop
+  case n of
+    (FloatVal n') -> case exp' of
+      (FloatVal exp'') -> push $ FloatVal $ n' ** exp''
+      (IntVal exp'') -> push $ FloatVal $ n' ** (fromIntegral exp'')
+      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
+    (IntVal n') -> case exp' of
+      (FloatVal exp'') -> push $ FloatVal $ (fromIntegral n') ** exp''
+      (IntVal exp'') -> push $ IntVal $ n' ^ exp''
+      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
+    _ -> throwError $ TypeError "^: the first parameter has a wrong type."

@@ -20,9 +20,6 @@ type Expr = [Atom]
 sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
-operators :: Parser String
-operators = string "+" <|> string "-" <|> string "/" <|> string "*" <|> string "$" <|> string "<>"
-
 ---- Escape char for single quote strings
 doubleQuoteLiteral :: Parser String
 doubleQuoteLiteral = between (char '"') (char '"') (many $ doubleQuoteLetter <|> doubleQuoteEscape)
@@ -40,7 +37,7 @@ doubleQuoteEscape = do
 --------------------------------------------------------
 
 word :: Parser Atom
-word = WordAtom <$> (identifier <|> operators)
+word = WordAtom <$> (identifier <|> operator)
 
 strLiteral :: Parser Atom
 strLiteral = StringAtom <$> doubleQuoteLiteral
@@ -90,7 +87,7 @@ parseContent = do
 function :: Parser (Map Text (Maybe DocString, Expr))
 function = do
   lexeme $ reserved "def"
-  name <- lexeme $ (:) <$> (letter <|> char '_') <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))
+  name <- lexeme $ ((:) <$> letter <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))) <|> (string "%" <|> string "!=") <* (spaces >> string "=")
   contentFunction <- (lexeme $ braces $ parseContent)
   let (doc, content) = contentFunction
   pure $ fromList [(pack name, (doc, content))]

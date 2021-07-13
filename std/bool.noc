@@ -9,7 +9,7 @@ def if = {
   if statement
   
   (example)
-  ["else"] ["then"] [True] if => ["then"]
+  ["else"] ["then"] True if => ["then"]
   ---
   [
     [[True] [swap pop unquote]]
@@ -20,7 +20,7 @@ def if = {
 def not = {
     ---
     Logical operator
-    Get False if the value is True and True if value is False
+    Get False if the value is True and True if the value is False
 
     (example)
     True not => [False]
@@ -37,8 +37,19 @@ def eq = {
     Check if 2 values are equal 
 
     (example)
-    5 6 isEqual => [False]
-    [Right "ok"] [Right "ok"] isEqual => [True]
+    5 6 eq => [False]
+    [Right "ok"] [Right "ok"] eq => [True]
     ---
     quote quote [[True]] cat quote [[[_] [False]]] cat case
 }
+
+def != = {
+  ---
+  Compare if the first value is different than the second value
+
+  (example)
+  5 6 != => [True]
+  ---
+  eq not
+}
+

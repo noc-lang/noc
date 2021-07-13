@@ -62,6 +62,13 @@ docDiv =
   \  stack: [10 2]\n\
   \  / => [5.0]"
 
+docPow :: DocString
+docPow =
+  "The exponent of a number\n\n\
+  \(example)\n\
+  \  stack: [10 2]\n\
+  \  ^ => [100]"
+
 docPrint :: DocString
 docPrint =
   "Output a value (Standard output)\n\n\
@@ -264,3 +271,33 @@ docFold =
   \quote (initial_value -> accumulator) [function] fold \n\n\
   \(example)\n\
   \ [1 2 3] 0 [+] fold => [6]"
+
+docBoolOp :: String -> DocString
+docBoolOp ">" =
+  "Compare if the first value is greater than the second value\n\n\
+  \(example)\n\
+  \  stack: [5 6]\n\
+  \  > => [False]"
+docBoolOp "<" =
+  "Compare if the first value is less than the second value\n\n\
+  \(example)\n\
+  \  stack: [5 6]\n\
+  \  < => [True]"
+docBoolOp ">=" =
+  "Compare if the first value is greater or equal than the second value\n\n\
+  \(example)\n\
+  \  stack: [5 5]\n\
+  \  >= => [True]"
+docBoolOp "<=" =
+  "Compare if the first value is less or equal than the second value\n\n\
+  \(example)\n\
+  \  stack: [4 5]\n\
+  \  <= => [True]"
+docBoolOp "and" =
+  "The 'AND' logic operator\n\n\
+  \(example)\n\
+  \  True True and => [True]"
+docBoolOp "or" =
+  "The 'OR' logic operator\n\n\
+  \(example)\n\
+  \  False False or => [False]"
