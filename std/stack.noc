@@ -61,7 +61,7 @@ def (<>) = {
     Concatenate 2 values (string and quotes)
     (example)
         [1] [2] <> => [1 2]
-        "Hello, " "World!" <> => "Hello, World!
+        "Hello, " "World!" <> => "Hello, World!"
     ---
     cat
 }
