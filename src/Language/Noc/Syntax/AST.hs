@@ -76,6 +76,12 @@ data Module = Module {imports :: [FilePath], decls :: [Map Text (Maybe DocString
 
 type DocString = String
 
+parseNameWithParens :: Parser String
+parseNameWithParens = lexeme $ (:) <$> (symbol "(" >> (noneOf "'\\")) <*> (manyTill (noneOf "\\") (whiteSpace >> (symbol ")") >> whiteSpace >> (symbol "=")))
+
+parseName :: Parser String
+parseName = lexeme $ (:) <$> (noneOf "'()\\") <*> (manyTill (noneOf "()\\") (whiteSpace >> (symbol "=")))
+
 parseContent :: Parser (Maybe DocString, Expr)
 parseContent = do
   doc <- optionMaybe $ (try $ symbol "---") >> (manyTill anyChar (try $ symbol "---"))
@@ -87,7 +93,8 @@ parseContent = do
 function :: Parser (Map Text (Maybe DocString, Expr))
 function = do
   lexeme $ reserved "def"
-  name <- lexeme $ ((:) <$> letter <*> (manyTill (alphaNum <|> char '\'' <|> char '_') (whiteSpace >> symbol "="))) <|> (string "%" <|> string "!=") <* (spaces >> string "=")
+  name <- parseNameWithParens <|> parseName
+
   contentFunction <- (lexeme $ braces $ parseContent)
   let (doc, content) = contentFunction
   pure $ fromList [(pack name, (doc, content))]

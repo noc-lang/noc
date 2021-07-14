@@ -31,7 +31,6 @@ prelude =
       (T.pack "pop", Constant $ (docPop, PrimVal builtinPop)),
       (T.pack "zap", Constant $ (docZap, PrimVal builtinZap)),
       (T.pack "cat", Constant $ (docCat, PrimVal builtinCat)),
-      (T.pack "<>", Constant $ (docCat, PrimVal builtinCat)),
       (T.pack "rotNM", Constant $ (docRotNM, PrimVal builtinRotNM)),
       -- Arithmetic operators
       (T.pack "+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
@@ -55,7 +54,6 @@ prelude =
       (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
       (T.pack "tostr", Constant $ (docToStr, PrimVal builtinToStr)),
       (T.pack "chars", Constant $ (docChars, PrimVal builtinChars)),
-      (T.pack "$", Constant $ (docChars, PrimVal builtinChars)),
       -- Char
       (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
       (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),

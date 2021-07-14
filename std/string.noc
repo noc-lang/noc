@@ -1,0 +1,12 @@
+/*
+String functions
+*/
+
+def ($) = {
+    ---
+    Convert a string to a quote of chars
+    (example)
+        "abc" $ => ['a' 'b' 'c']
+    ---
+    chars
+}

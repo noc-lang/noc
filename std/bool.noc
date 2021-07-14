@@ -43,7 +43,18 @@ def eq = {
     quote quote [[True]] cat quote [[[_] [False]]] cat case
 }
 
-def != = {
+def (==) = {
+  ---
+    Check if 2 values are equal 
+
+    (example)
+    5 6 eq => [False]
+    [Right "ok"] [Right "ok"] eq => [True]
+    ---
+    eq
+}
+
+def (!=) = {
   ---
   Compare if the first value is different than the second value
 
