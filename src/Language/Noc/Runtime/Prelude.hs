@@ -312,7 +312,7 @@ builtinStr = do
   v <- pop
   case v of
     (StringVal x) -> push $ StringVal x
-    (CharVal x) -> push $ StringVal $ T.pack $ show $ x
+    (CharVal x) -> push $ StringVal $ T.pack [x]
     (FloatVal x) -> push $ StringVal $ T.pack $ show x
     (IntVal x) -> push $ StringVal $ T.pack $ show x
     (BoolVal x) -> push $ StringVal $ T.pack $ show x
@@ -463,6 +463,7 @@ builtinCase = do
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
 
 ----------------------------------------------------
+
 builtinToStr :: Eval ()
 builtinToStr = do
   v <- pop
@@ -611,6 +612,8 @@ builtinBoolOp fname op = do
       _ -> throwError $ TypeError $ fname <> ": the second parameter has a wrong type."
     _ -> throwError $ TypeError $ fname <> ": the first parameter has a wrong type."
 
+----------------------------------------------------
+
 builtinCondBool :: String -> (Bool -> Bool -> Bool) -> Eval ()
 builtinCondBool fname op = do
   v1 <- pop
@@ -645,6 +648,8 @@ builtinCondBool fname op = do
         push $ BoolVal $ z `op` x
       _ -> throwError $ TypeError $ fname <> ": the second parameter has a wrong type."
     _ -> throwError $ TypeError $ fname <> ": the first parameter has a wrong type."
+
+----------------------------------------------------
 
 builtinPow :: Eval ()
 builtinPow = do
