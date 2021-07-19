@@ -208,6 +208,8 @@ docHelp =
   \(example)\n\
   \ [pop] help \n\
   \ Output: \n\
+  \ docstring for 'pop' function: \n\
+  \ ------------ \n\
   \ Remove the top-stack element\n\
   \ (example)\n\
   \   stack: [1 2]\n\

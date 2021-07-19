@@ -409,10 +409,10 @@ builtinHelp = do
   case quote of
     (QuoteVal n) -> case n of
       [WordAtom n'] -> case M.lookup (T.pack n') env of
-        (Just (Constant (d, _))) -> liftIO $ liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
+        (Just (Constant (d, _))) -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
         (Just (Function (d, _))) -> case d of
-          (Just d') -> liftIO $ putStrLn $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
-          Nothing -> liftIO $ putStrLn $ "help: no documentation entry for '" <> n' <> "' function."
+          (Just d') -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
+          Nothing -> push $ StringVal $ T.pack $ "help: no documentation entry for '" <> n' <> "' function."
         Nothing -> throwError $ NameError $ "help: the '" <> n' <> "' function does not exists."
       _ -> throwError $ ValueError $ "help: bad expression in the quote (required: function)."
     _ -> throwError $ TypeError "help: cannot help without a quote parameter."
