@@ -206,11 +206,11 @@ docHelp :: DocString
 docHelp =
   "Get a function's doc-string\n\n\
   \(example)\n\
-  \ [pop] help \n\
+  \ [pop] help putstr \n\
   \ Output: \n\
   \ docstring for 'pop' function: \n\
   \ ------------ \n\
-  \ Remove the top-stack element\n\
+  \ Remove the top-stack element\n\n\
   \ (example)\n\
   \   stack: [1 2]\n\
   \   pop => [1]"
