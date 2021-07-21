@@ -2,7 +2,7 @@
 List functions
 */
 
-load stack.noc
+load std:stack
 
 def len' = {
     [

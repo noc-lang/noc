@@ -2,7 +2,7 @@
 Dict functions
 */
 
-load stack.noc
+load std:stack
 
 def keys = {
     ---

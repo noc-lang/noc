@@ -20,7 +20,7 @@ type Expr = [Atom]
 sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
----- Escape char for single quote strings
+---- Escape char for double quote strings
 doubleQuoteLiteral :: Parser String
 doubleQuoteLiteral = between (char '"') (char '"') (many $ doubleQuoteLetter <|> doubleQuoteEscape)
 

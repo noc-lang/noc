@@ -2,7 +2,7 @@
 Math functions
 */
 
-load stack.noc
+load std:stack
 
 def pi = {
     ---
