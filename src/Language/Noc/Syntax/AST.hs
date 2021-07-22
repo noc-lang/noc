@@ -27,7 +27,7 @@ number' base baseDigit = do
   let n = foldl (\x d -> base * x + toInteger (digitToInt d)) 0 digits
   seq n (return n)
 
----- Escape char for double quote strings
+---- Escape char for double quote chars
 doubleQuoteLiteral :: Parser String
 doubleQuoteLiteral = between (char '"') (char '"') (many $ doubleQuoteLetter <|> doubleQuoteEscape)
 

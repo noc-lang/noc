@@ -46,7 +46,7 @@ readMultiline l = do
   inp <- prompt "noc|"
   case inp of
     [":}"] -> return l
-    content -> readMultiline (l <> content)
+    content -> readMultiline (l <> content <> ["\n"])
 
 nocREPL :: Stack -> Env -> IO ()
 nocREPL stack env = (prompt "noc>") >>= repl stack env

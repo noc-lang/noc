@@ -58,6 +58,23 @@ commands args stack env repl =
     ("debug", debug args stack env repl)
   ]
 
+-------- Utils -------------------------------------
+
+hasDoubleQuoteChars :: [String] -> Bool
+hasDoubleQuoteChars [] = False
+hasDoubleQuoteChars arg = (head $ unwords arg) == '"' && (last $ unwords arg) == '"'
+
+filename :: [String] -> String
+filename [] = []
+filename arg = case hasDoubleQuoteChars arg of
+  True -> tail $ init $ unwords arg
+  False -> unwords arg
+
+isFunction :: (T.Text, EnvEntry) -> Bool
+isFunction (_, x) = case x of
+  (Function (_, expr)) -> True
+  _ -> False
+
 ----------------------------------------------------
 
 quit :: [String] -> Stack -> Env -> (Stack -> Env -> IO ()) -> REPLCommands
@@ -140,7 +157,7 @@ env' arg stack env repl =
     { name = "env",
       args = arg,
       action = do
-        let environment = foldl (\acc (name, Function (_, expr)) -> (displayEnv name expr) <> acc) "" (M.toList env)
+        let environment = foldl (\acc (name, Function (_, expr)) -> (displayEnv name expr) <> acc) "" (filter isFunction $ M.toList env)
         case environment == [] of
           True -> putStrLn "[]" >> repl stack env
           False -> putStrLn environment >> repl stack env
