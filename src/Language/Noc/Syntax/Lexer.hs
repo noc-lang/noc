@@ -64,3 +64,6 @@ charLiteral = P.charLiteral lexer
 
 operator :: Stream s m Char => ParsecT s u m String
 operator = P.operator lexer
+
+decimal :: Stream s m Char => ParsecT s u m Integer
+decimal = P.decimal lexer

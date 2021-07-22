@@ -4,6 +4,7 @@ module Language.Noc.Syntax.AST where
 
 ----------------------- Modules ------------------------
 
+import Data.Char (digitToInt)
 import Data.Map (Map, fromList, keys)
 import Data.Text (Text, empty, pack, strip, unpack)
 import Language.Noc.Syntax.Lexer
@@ -20,6 +21,12 @@ type Expr = [Atom]
 sign :: Num a => Parser (a -> a)
 sign = (char '-' >> return negate) <|> return id
 
+number' :: Integer -> Parser Char -> Parser Integer
+number' base baseDigit = do
+  digits <- many1 baseDigit
+  let n = foldl (\x d -> base * x + toInteger (digitToInt d)) 0 digits
+  seq n (return n)
+
 ---- Escape char for double quote strings
 doubleQuoteLiteral :: Parser String
 doubleQuoteLiteral = between (char '"') (char '"') (many $ doubleQuoteLetter <|> doubleQuoteEscape)
@@ -30,9 +37,41 @@ doubleQuoteLetter = satisfy (\c -> (c /= '"') && (c /= '\\'))
 doubleQuoteEscape :: Parser Char
 doubleQuoteEscape = do
   char '\\'
+  esc <- escapeCode
+  return esc
+
+escapeCode :: Parser Char
+escapeCode = charEsc <|> charNum <|> charAscii <|> charControl
+
+charEsc :: Parser Char
+charEsc = do
   let codes = zip ("abfnrtv\\\"\'") ("\a\b\f\n\r\t\v\\\"\'")
   esc <- choice $ map (\(c, code) -> char c >> return code) codes
   return esc
+
+charNum :: Parser Char
+charNum = do
+  code <- decimal <|> (char 'o' >> number' 8 octDigit) <|> (char 'x' >> number' 16 hexDigit)
+  if code > 0x10FFFF
+    then fail "invalid escape sequence"
+    else return $ toEnum $ fromInteger code
+
+charAscii :: Parser Char
+charAscii = choice (map parseAscii asciiMap)
+  where
+    parseAscii (asc, code) = try (do _ <- string asc; return code)
+    -- escape code tables
+    asciiMap = zip (ascii3codes ++ ascii2codes) (ascii3 ++ ascii2)
+    ascii3codes = ["NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "SUB", "ESC", "DEL"]
+    ascii3 = ['\NUL', '\SOH', '\STX', '\ETX', '\EOT', '\ENQ', '\ACK', '\BEL', '\DLE', '\DC1', '\DC2', '\DC3', '\DC4', '\NAK', '\SYN', '\ETB', '\CAN', '\SUB', '\ESC', '\DEL']
+    ascii2codes = ["BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "EM", "FS", "GS", "RS", "US", "SP"]
+    ascii2 = ['\BS', '\HT', '\LF', '\VT', '\FF', '\CR', '\SO', '\SI', '\EM', '\FS', '\GS', '\RS', '\US', '\SP']
+
+charControl :: Parser Char
+charControl = do
+  _ <- char '^'
+  code <- upper
+  return $ toEnum $ fromEnum code - fromEnum 'A' + 1
 
 --------------------------------------------------------
 
