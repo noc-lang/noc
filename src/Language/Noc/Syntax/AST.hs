@@ -12,6 +12,7 @@ import Text.Parsec
 import Text.Parsec.String (Parser)
 
 ----------------------- Atoms --------------------------
+
 data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | CharAtom Char | BoolAtom Bool deriving (Show, Eq)
 
 type Expr = [Atom]
@@ -141,7 +142,7 @@ function = do
 load :: Parser String
 load = do
   lexeme $ reserved $ "load"
-  path <- lexeme $ (stringLiteral <|> (many $ alphaNum <|> char '/' <|> char '\\' <|> char '.'))
+  path <- lexeme $ (stringLiteral <|> (many $ noneOf "\n"))
   pure path
 
 program :: Parser Module

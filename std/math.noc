@@ -3,6 +3,7 @@ Math functions
 */
 
 load std:stack
+load seq
 
 def pi = {
     ---

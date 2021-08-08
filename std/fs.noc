@@ -2,6 +2,8 @@
 FS functions
 */
 
+load fs
+
 def write = {
     ---
     'Write' action of the open function

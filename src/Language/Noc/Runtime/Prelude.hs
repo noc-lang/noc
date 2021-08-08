@@ -2,26 +2,32 @@
 
 module Language.Noc.Runtime.Prelude where
 
-import Control.Exception (SomeException, try)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.RWS
 import Control.Monad.State
-import Data.Char (chr, ord)
-import qualified Data.Map as M (fromList, keys, lookup)
-import qualified Data.Text as T (Text, pack, replace, splitOn, unpack)
-import qualified Data.Text.IO as TIO (getLine, readFile)
+import qualified Data.Map as M (Map, fromList, lookup)
+import qualified Data.Text as T (Text, pack, unpack)
+import qualified Data.Text.IO as TIO (getLine)
 import Language.Noc.PrettyPrinter
 import Language.Noc.Runtime.Internal
+import Language.Noc.Runtime.Lib
 import Language.Noc.Runtime.PreludeDoc
 import Language.Noc.Syntax.AST
-import System.Directory (doesPathExist)
-import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitSuccess, exitWith)
 import System.IO
 import Text.Read (readMaybe)
 
 ----------------------------------------------------
+
+otherModules :: M.Map T.Text Env
+otherModules =
+  M.fromList
+    [ (T.pack "fs", fs),
+      (T.pack "char", char),
+      (T.pack "str", str),
+      (T.pack "sys", sys),
+      (T.pack "seq", seq')
+    ]
 
 prelude :: Env
 prelude =
@@ -43,20 +49,6 @@ prelude =
       (T.pack "putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
       (T.pack "putchar", Constant $ (docPutChar, PrimVal builtinPutChar)),
       (T.pack "ask", Constant $ (docAsk, PrimVal builtinAsk)),
-      (T.pack "args", Constant $ (docArgs, PrimVal builtinArgs)),
-      -- Fs
-      (T.pack "open", Constant $ (docOpen, PrimVal builtinOpen)),
-      -- Quote
-      (T.pack "unquote", Constant $ (docUnquote, PrimVal builtinUnquote)),
-      (T.pack "pushr", Constant $ (docPushr, PrimVal builtinPushr)),
-      (T.pack "popr", Constant $ (docPopr, PrimVal builtinPopr)),
-      -- String
-      (T.pack "format", Constant $ (docFormat, PrimVal builtinFormat)),
-      (T.pack "tostr", Constant $ (docToStr, PrimVal builtinToStr)),
-      (T.pack "chars", Constant $ (docChars, PrimVal builtinChars)),
-      -- Char
-      (T.pack "chr", Constant $ (docChr, PrimVal builtinChr)),
-      (T.pack "ord", Constant $ (docOrd, PrimVal builtinOrd)),
       -- Boolean
       (T.pack ">", Constant $ (docBoolOp ">", PrimVal $ builtinBoolOp ">" (>))),
       (T.pack "<", Constant $ (docBoolOp "<", PrimVal $ builtinBoolOp "<" (<))),
@@ -70,42 +62,9 @@ prelude =
       (T.pack "int", Constant $ (docInt, PrimVal builtinInt)),
       (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
       (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
-      (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
-      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
-      (T.pack "step", Constant $ (docStep, PrimVal builtinStep)),
-      (T.pack "fold", Constant $ (docFold, PrimVal builtinFold))
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
     ]
-
-----------------------------------------------------
-
-builtinOp :: (forall a. Num a => a -> a -> a) -> Eval ()
-builtinOp operator = do
-  v1 <- pop
-  v2 <- pop
-  case (v1, v2) of
-    ((FloatVal v1'), (FloatVal v2')) -> push $ FloatVal $ operator v2' v1'
-    ((IntVal v1'), (IntVal v2')) -> push $ IntVal $ operator v2' v1'
-    ((FloatVal v1'), (IntVal v2')) -> push $ FloatVal $ operator (fromIntegral v2') v1'
-    ((IntVal v1'), (FloatVal v2')) -> push $ FloatVal $ operator v2' (fromIntegral v1')
-    _ -> throwError $ TypeError "cannot operate with different types."
-
-----------------------------------------------------
-
-builtinDiv :: Eval ()
-builtinDiv = do
-  v1 <- pop
-  v2 <- pop
-  case (v1, v2) of
-    ((FloatVal v1'), (FloatVal v2')) -> operateDiv v1' v2'
-    ((IntVal v1'), (IntVal v2')) -> operateDiv (fromIntegral v1') (fromIntegral v2')
-    ((FloatVal v1'), (IntVal v2')) -> operateDiv v1' (fromIntegral v2')
-    ((IntVal v1'), (FloatVal v2')) -> operateDiv (fromIntegral v1') v2'
-    _ -> throwError $ TypeError "cannot operate with different types."
-  where
-    operateDiv v1 v2 = case v1 of
-      0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
-      _ -> push $ FloatVal $ (/) v2 v1
 
 ----------------------------------------------------
 
@@ -168,25 +127,50 @@ builtinRotNM = do
 
 ----------------------------------------------------
 
-builtinUnquote :: Eval ()
-builtinUnquote = do
+builtinOp :: (forall a. Num a => a -> a -> a) -> Eval ()
+builtinOp operator = do
   v1 <- pop
-  case v1 of
-    ((QuoteVal x)) -> evalExpr x
-    _ -> throwError $ TypeError "can only unquote with a quotation."
+  v2 <- pop
+  case (v1, v2) of
+    ((FloatVal v1'), (FloatVal v2')) -> push $ FloatVal $ operator v2' v1'
+    ((IntVal v1'), (IntVal v2')) -> push $ IntVal $ operator v2' v1'
+    ((FloatVal v1'), (IntVal v2')) -> push $ FloatVal $ operator (fromIntegral v2') v1'
+    ((IntVal v1'), (FloatVal v2')) -> push $ FloatVal $ operator v2' (fromIntegral v1')
+    _ -> throwError $ TypeError "cannot operate with different types."
 
 ----------------------------------------------------
 
-builtinPopr :: Eval ()
-builtinPopr = do
-  env <- ask
+builtinDiv :: Eval ()
+builtinDiv = do
   v1 <- pop
-  case v1 of
-    ((QuoteVal x)) -> case reverse x of
-      [] -> return ()
-      ((WordAtom y) : ys) -> (push $ QuoteVal $ reverse ys) >> (evalWord y env)
-      (y : ys) -> (push $ QuoteVal $ reverse ys) >> (push $ readValue y)
-    _ -> throwError $ TypeError "can only popr with a quotation."
+  v2 <- pop
+  case (v1, v2) of
+    ((FloatVal v1'), (FloatVal v2')) -> operateDiv v1' v2'
+    ((IntVal v1'), (IntVal v2')) -> operateDiv (fromIntegral v1') (fromIntegral v2')
+    ((FloatVal v1'), (IntVal v2')) -> operateDiv v1' (fromIntegral v2')
+    ((IntVal v1'), (FloatVal v2')) -> operateDiv (fromIntegral v1') v2'
+    _ -> throwError $ TypeError "cannot operate with different types."
+  where
+    operateDiv v1 v2 = case v1 of
+      0 -> throwError $ ZeroDivisionError $ "cannot divide by 0."
+      _ -> push $ FloatVal $ (/) v2 v1
+
+----------------------------------------------------
+
+builtinPow :: Eval ()
+builtinPow = do
+  exp' <- pop
+  n <- pop
+  case n of
+    (FloatVal n') -> case exp' of
+      (FloatVal exp'') -> push $ FloatVal $ n' ** exp''
+      (IntVal exp'') -> push $ FloatVal $ n' ** (fromIntegral exp'')
+      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
+    (IntVal n') -> case exp' of
+      (FloatVal exp'') -> push $ FloatVal $ (fromIntegral n') ** exp''
+      (IntVal exp'') -> push $ IntVal $ n' ^ exp''
+      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
+    _ -> throwError $ TypeError "^: the first parameter has a wrong type."
 
 ----------------------------------------------------
 
@@ -232,315 +216,6 @@ builtinAsk = do
       inp <- liftIO $ TIO.getLine
       push $ StringVal inp
     _ -> throwError $ TypeError "ask: the parameter is not string."
-
-----------------------------------------------------
-
-builtinArgs :: Eval ()
-builtinArgs = do
-  args <- liftIO getArgs
-  case args of
-    [('-' : '-' : _), filename] -> push $ QuoteVal []
-    (('-' : '-' : _) : _ : y : args) -> case y of
-      "--" -> push $ QuoteVal (map StringAtom args)
-      _ -> push $ QuoteVal (map StringAtom (y : args))
-    -------------------------------
-    [filename] -> push $ QuoteVal []
-    (_ : y : args) -> case y of
-      "--" -> push $ QuoteVal (map StringAtom args)
-      _ -> push $ QuoteVal (map StringAtom (y : args))
-    _ -> push $ QuoteVal (map StringAtom args)
-
-----------------------------------------------------
-
-builtinPushr :: Eval ()
-builtinPushr = do
-  v <- pop
-  l <- pop
-  case l of
-    (QuoteVal l') -> push $ QuoteVal (l' <> [readAtom v])
-    _ -> throwError $ TypeError "can only pushr with a quotation."
-
-----------------------------------------------------
-
-read' :: T.Text -> Eval ()
-read' path = do
-  isExist <- liftIO $ doesPathExist $ T.unpack path
-  case isExist of
-    True -> do
-      content' <- liftIO (try $ TIO.readFile $ T.unpack path :: IO (Either SomeException T.Text))
-      case content' of
-        (Left err) -> throwError $ FileNotFoundError $ "open: the file does not exist (no such file)"
-        (Right succ) -> push $ StringVal succ
-    False -> throwError $ FileNotFoundError $ "open: the file does not exist (no such file or directory)"
-
-write' :: T.Text -> T.Text -> Eval ()
-write' path content = liftIO $ writeFile (T.unpack path) (T.unpack content)
-
-append :: T.Text -> T.Text -> Eval ()
-append path content = liftIO $ appendFile (T.unpack path) (T.unpack content)
-
-builtinOpen :: Eval ()
-builtinOpen = do
-  mode <- pop
-  content <- pop
-  filename <- pop
-  case mode of
-    (StringVal m) -> case content of
-      (StringVal c) -> case filename of
-        (StringVal f) -> case (T.unpack m) of
-          "r" -> read' f
-          "w" -> write' f c
-          "a" -> append f c
-          "rw" -> (read' f) >> (write' f c)
-          "ra" -> (read' f) >> (append f c)
-          _ -> throwError $ ValueError "open: incorrect mode."
-        _ -> throwError $ TypeError "open: the first parameter must be a string."
-      _ -> throwError $ TypeError "oepn: the second parameter must be a string."
-    _ -> throwError $ TypeError "open: the third parameter must be a string."
-
-----------------------------------------------------
-
-builtinId :: Eval ()
-builtinId = do
-  v <- pop
-  push v
-
-----------------------------------------------------
-
-builtinStr :: Eval ()
-builtinStr = do
-  v <- pop
-  case v of
-    (StringVal x) -> push $ StringVal x
-    (CharVal x) -> push $ StringVal $ T.pack [x]
-    (FloatVal x) -> push $ StringVal $ T.pack $ show x
-    (IntVal x) -> push $ StringVal $ T.pack $ show x
-    (BoolVal x) -> push $ StringVal $ T.pack $ show x
-    (QuoteVal x) -> push $ StringVal $ T.pack $ displayQuote x
-    _ -> throwError $ TypeError "can only str with str,float,int,bool"
-
-----------------------------------------------------
-
-builtinInt :: Eval ()
-builtinInt = do
-  v <- pop
-  case v of
-    (FloatVal x) -> push $ IntVal $ floor x
-    (IntVal x) -> push $ IntVal x
-    (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
-      (Just v) -> push $ IntVal v
-      Nothing -> throwError $ ValueError "int: the value is not a integer."
-    (BoolVal x) -> case x of
-      True -> push $ IntVal 1
-      False -> push $ IntVal 0
-    _ -> throwError $ TypeError "can only int with int,str"
-
-----------------------------------------------------
-
-builtinFloat :: Eval ()
-builtinFloat = do
-  v <- pop
-  case v of
-    (IntVal x) -> push $ FloatVal $ fromIntegral x
-    (FloatVal x) -> push $ FloatVal x
-    (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Double of
-      (Just v) -> push $ FloatVal v
-      Nothing -> throwError $ ValueError "float: the value is not a integer."
-    _ -> throwError $ TypeError "can only float with int,float,str"
-
-----------------------------------------------------
-
-builtinExit :: Eval ()
-builtinExit = do
-  returncode <- pop
-  case returncode of
-    (IntVal x) -> case x of
-      0 -> liftIO exitSuccess
-      n -> liftIO $ (putStrLn $ "*** Exception: ExitFailure " <> show n) >> (exitWith $ ExitFailure $ fromIntegral n)
-    _ -> throwError $ TypeError "the exit parameter must be an integer parameter."
-
-----------------------------------------------------
-
-format' :: [T.Text] -> Expr -> [T.Text] -> Either EvalError [T.Text]
-format' [] [] res = Right res
-format' [] _ res = Right res
-format' (x : xs) (y : ys) res = case isBrace x of
-  True -> case y of
-    (StringAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack a) x : res)
-    (CharAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
-    (IntAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
-    (FloatAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
-    (BoolAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ show a) x : res)
-    (QuoteAtom a) -> format' xs ys (T.replace (T.pack "{}") (T.pack $ displayQuote a) x : res)
-    _ -> Left $ TypeError "format: cannot format with this type."
-  False -> format' xs (y : ys) (x : res)
-format' (x : xs) [] res = case isBrace x of
-  True -> Left $ ValueError "format: too many braces."
-  False -> format' xs [] (x : res)
-
-builtinFormat :: Eval ()
-builtinFormat = do
-  quote <- pop
-  str <- pop
-  case str of
-    (StringVal s) -> case quote of
-      (QuoteVal l) -> do
-        stack <- get
-        builtinZap
-        evalExpr l
-        putAllInQuote []
-        newstack <- get
-        put $ stack <> newstack
-        v <- pop
-        let (QuoteVal val) = v
-        let toFormat = format' (T.splitOn (T.pack " ") s) val []
-        case toFormat of
-          (Left err) -> throwError $ err
-          (Right succ) -> push $ StringVal $ T.pack $ initSafe $ T.unpack $ foldl (\acc x -> (x <> T.pack " ") <> acc) (T.pack "") succ
-      _ -> throwError $ TypeError "cannot format with a wrong parameter (the second parameter is a quote)."
-    _ -> throwError $ TypeError "cannot format with a wrong parameter (the first parameter is a string)."
-
-----------------------------------------------------
-
-builtinHelp :: Eval ()
-builtinHelp = do
-  env <- ask
-  quote <- pop
-  case quote of
-    (QuoteVal n) -> case n of
-      [WordAtom n'] -> case M.lookup (T.pack n') env of
-        (Just (Constant (d, _))) -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
-        (Just (Function (d, _))) -> case d of
-          (Just d') -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
-          Nothing -> push $ StringVal $ T.pack $ "help: no documentation entry for '" <> n' <> "' function."
-        Nothing -> throwError $ NameError $ "help: the '" <> n' <> "' function does not exists."
-      _ -> throwError $ ValueError $ "help: bad expression in the quote (required: function)."
-    _ -> throwError $ TypeError "help: cannot help without a quote parameter."
-
-----------------------------------------------------
-
-builtinBool :: Eval ()
-builtinBool = do
-  v <- pop
-  case v of
-    (IntVal 0) -> push $ BoolVal False
-    _ -> push $ BoolVal True
-
-----------------------------------------------------
-
-runCase :: Value -> Expr -> Eval ()
-runCase _ [] = throwError $ EmptyStackError "case: no pattern matches."
-runCase c (p : ps) = do
-  case p of
-    (QuoteAtom [QuoteAtom [WordAtom "_"], QuoteAtom expr]) -> evalExpr expr
-    (QuoteAtom [QuoteAtom p', QuoteAtom expr]) -> do
-      evalExpr p'
-      p'' <- pop
-      case eqValue c p'' of
-        True -> evalExpr expr
-        False -> runCase c ps
-    _ -> throwError $ ValueError "cannot case with bad pattern(s)."
-
-builtinCase' :: Eval ()
-builtinCase' = do
-  patterns <- pop
-  tocase <- pop
-  case tocase of
-    (QuoteVal c) -> case patterns of
-      (QuoteVal pat) -> do
-        evalExpr c
-        case' <- pop
-        case all isPattern pat of
-          True -> runCase case' pat
-          False -> throwError $ ValueError "cannot case with bad pattern(s)."
-      _ -> throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
-    _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."
-
-builtinCase :: Eval ()
-builtinCase = do
-  patterns <- pop
-  tocase <- pop
-  let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
-
-----------------------------------------------------
-
-builtinToStr :: Eval ()
-builtinToStr = do
-  v <- pop
-  case v of
-    (QuoteVal l) -> case all isChar l of
-      True -> push $ StringVal $ T.pack $ foldr (\(CharAtom x) acc -> x : acc) [] l
-      False -> throwError $ TypeError "can only sugar on a quote based on char atoms."
-    _ -> throwError $ TypeError "can only sugar with a quote."
-
-----------------------------------------------------
-
-builtinChars :: Eval ()
-builtinChars = do
-  v <- pop
-  case v of
-    (StringVal s) -> push $ QuoteVal $ map (\x -> CharAtom x) (T.unpack s)
-    _ -> throwError $ TypeError "can only desugar with a string."
-
-----------------------------------------------------
-
-builtinChr :: Eval ()
-builtinChr = do
-  n <- pop
-  case n of
-    (IntVal x) -> push $ CharVal $ chr $ fromIntegral x
-    _ -> throwError $ TypeError "can only chr with int."
-
-----------------------------------------------------
-
-builtinOrd :: Eval ()
-builtinOrd = do
-  c <- pop
-  case c of
-    (CharVal x) -> push $ IntVal $ fromIntegral $ ord x
-    _ -> throwError $ TypeError "can only ord with char."
-
-----------------------------------------------------
-
-runStep :: Expr -> Int -> Expr -> Eval ()
-runStep _ len [] = do
-  stack <- get
-  let origin = take (length stack - len) stack
-  let new = QuoteVal $ map readAtom (reverse $ take len $ reverse stack)
-  put $ origin <> [new]
-runStep f len (x : xs) = (evalExpr $ [x] <> f) >> runStep f len xs
-
-builtinStep :: Eval ()
-builtinStep = do
-  f <- pop
-  l <- pop
-  case f of
-    (QuoteVal f') -> case l of
-      (QuoteVal l') -> runStep f' (length l') l'
-      _ -> throwError $ TypeError "step: the first parameter must be a quote."
-    _ -> throwError $ TypeError "step: the second parameter must be a quote."
-
-----------------------------------------------------
-
-runFold :: Expr -> Expr -> Expr -> Eval ()
-runFold _ acc [] = evalExpr acc
-runFold f acc (x : xs) = do
-  let app = acc <> [x] <> f
-  evalExpr app
-  v <- pop
-  runFold f [readAtom v] xs
-
-builtinFold :: Eval ()
-builtinFold = do
-  f <- pop
-  acc <- pop
-  l <- pop
-  let acc' = [readAtom acc]
-  case f of
-    (QuoteVal f') -> case l of
-      (QuoteVal l') -> runFold f' acc' l'
-      _ -> throwError $ TypeError "fold: the first parameter must be a quote."
-    _ -> throwError $ TypeError "fold: the third parameter must be a quote."
 
 ----------------------------------------------------
 
@@ -651,17 +326,112 @@ builtinCondBool fname op = do
 
 ----------------------------------------------------
 
-builtinPow :: Eval ()
-builtinPow = do
-  exp' <- pop
-  n <- pop
-  case n of
-    (FloatVal n') -> case exp' of
-      (FloatVal exp'') -> push $ FloatVal $ n' ** exp''
-      (IntVal exp'') -> push $ FloatVal $ n' ** (fromIntegral exp'')
-      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
-    (IntVal n') -> case exp' of
-      (FloatVal exp'') -> push $ FloatVal $ (fromIntegral n') ** exp''
-      (IntVal exp'') -> push $ IntVal $ n' ^ exp''
-      _ -> throwError $ TypeError "^: the second parameter has a wrong type."
-    _ -> throwError $ TypeError "^: the first parameter has a wrong type."
+builtinId :: Eval ()
+builtinId = do
+  v <- pop
+  push v
+
+----------------------------------------------------
+
+builtinStr :: Eval ()
+builtinStr = do
+  v <- pop
+  case v of
+    (StringVal x) -> push $ StringVal x
+    (CharVal x) -> push $ StringVal $ T.pack [x]
+    (FloatVal x) -> push $ StringVal $ T.pack $ show x
+    (IntVal x) -> push $ StringVal $ T.pack $ show x
+    (BoolVal x) -> push $ StringVal $ T.pack $ show x
+    (QuoteVal x) -> push $ StringVal $ T.pack $ displayQuote x
+    _ -> throwError $ TypeError "can only str with str,float,int,bool"
+
+----------------------------------------------------
+
+builtinInt :: Eval ()
+builtinInt = do
+  v <- pop
+  case v of
+    (FloatVal x) -> push $ IntVal $ floor x
+    (IntVal x) -> push $ IntVal x
+    (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Integer of
+      (Just v) -> push $ IntVal v
+      Nothing -> throwError $ ValueError "int: the value is not a integer."
+    (BoolVal x) -> case x of
+      True -> push $ IntVal 1
+      False -> push $ IntVal 0
+    _ -> throwError $ TypeError "can only int with int,str"
+
+----------------------------------------------------
+
+builtinFloat :: Eval ()
+builtinFloat = do
+  v <- pop
+  case v of
+    (IntVal x) -> push $ FloatVal $ fromIntegral x
+    (FloatVal x) -> push $ FloatVal x
+    (StringVal x) -> case readMaybe (T.unpack x) :: Maybe Double of
+      (Just v) -> push $ FloatVal v
+      Nothing -> throwError $ ValueError "float: the value is not a integer."
+    _ -> throwError $ TypeError "can only float with int,float,str"
+
+----------------------------------------------------
+
+builtinBool :: Eval ()
+builtinBool = do
+  v <- pop
+  case v of
+    (IntVal 0) -> push $ BoolVal False
+    _ -> push $ BoolVal True
+
+----------------------------------------------------
+
+builtinHelp :: Eval ()
+builtinHelp = do
+  env <- ask
+  quote <- pop
+  case quote of
+    (QuoteVal n) -> case n of
+      [WordAtom n'] -> case M.lookup (T.pack n') env of
+        (Just (Constant (d, _))) -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d
+        (Just (Function (d, _))) -> case d of
+          (Just d') -> push $ StringVal $ T.pack $ "docstring for '" <> n' <> "' function:\n------------\n" <> d'
+          Nothing -> push $ StringVal $ T.pack $ "help: no documentation entry for '" <> n' <> "' function."
+        Nothing -> throwError $ NameError $ "help: the '" <> n' <> "' function does not exists."
+      _ -> throwError $ ValueError $ "help: bad expression in the quote (required: function)."
+    _ -> throwError $ TypeError "help: cannot help without a quote parameter."
+
+----------------------------------------------------
+
+runCase :: Value -> Expr -> Eval ()
+runCase _ [] = throwError $ EmptyStackError "case: no pattern matches."
+runCase c (p : ps) = do
+  case p of
+    (QuoteAtom [QuoteAtom [WordAtom "_"], QuoteAtom expr]) -> evalExpr expr
+    (QuoteAtom [QuoteAtom p', QuoteAtom expr]) -> do
+      evalExpr p'
+      p'' <- pop
+      case eqValue c p'' of
+        True -> evalExpr expr
+        False -> runCase c ps
+    _ -> throwError $ ValueError "cannot case with bad pattern(s)."
+
+builtinCase' :: Eval ()
+builtinCase' = do
+  patterns <- pop
+  tocase <- pop
+  case tocase of
+    (QuoteVal c) -> case patterns of
+      (QuoteVal pat) -> do
+        evalExpr c
+        case' <- pop
+        case all isPattern pat of
+          True -> runCase case' pat
+          False -> throwError $ ValueError "cannot case with bad pattern(s)."
+      _ -> throwError $ TypeError "cannot case with a wrong type. (the second parameter must be a quote)."
+    _ -> throwError $ TypeError "cannot case with a wrong type. (the first parameter must be a quote)."
+
+builtinCase :: Eval ()
+builtinCase = do
+  patterns <- pop
+  tocase <- pop
+  let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')

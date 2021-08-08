@@ -115,38 +115,7 @@ load arg stack env repl =
   REPLCommands
     { name = "load",
       args = arg,
-      action = do
-        parse <- try $ parseFromFile A.program (if (last $ reverse $ unwords arg) == '"' && (last $ unwords arg) == '"' then tail $ init $ unwords arg else unwords arg) :: IO (Either SomeException (Either ParseError A.Module))
-        case parse of
-          (Left errPath) -> (print errPath) >> (repl stack env)
-          ---
-          (Right succ) -> case succ of
-            (Left errParse) -> (print errParse) >> (repl stack env)
-            ---
-            (Right (A.Module imports decls)) -> case isMultipleDecls $ map (T.unwords . M.keys) decls of
-              (Just k) -> (print $ NameError $ "Cannot load '" <> (unwords arg) <> "' file, multiple function declarations for '" <> (T.unpack k) <> "' function.") >> repl stack env
-              Nothing -> do
-                let declList = M.toList $ foldr M.union M.empty decls
-                ---
-                let declMap l = M.fromList $ map (\(k, d) -> (k, Function d)) l
-                let filter' e l = filter (\(k, _) -> k `elem` M.keys e) l
-                ---
-                let fnames = map (\(k, v) -> k) declList
-                ---
-                let envFilter = filter' env declList
-                let preludeFilter = filter' prelude declList
-                ---
-                case (length preludeFilter > 0, length envFilter > 0) of
-                  (True, _) -> do
-                    let ((n, _) : xs) = preludeFilter
-                    (print $ NameError $ "cannot declare the function with '" <> (T.unpack n) <> "' name. (reserved to prelude)") >> repl stack env
-                  ---
-                  (_, True) -> do
-                    let otherFuncs = filter (\(k, v) -> not $ k `elem` M.keys env) declList
-                    putStrLn ("'" ++ (unwords arg) ++ "' is reloaded.")
-                    repl stack (declMap otherFuncs <> declMap envFilter)
-                  ---
-                  _ -> (putStrLn ("'" ++ (unwords arg) ++ "' is loaded.")) >> (repl stack (env <> declMap declList))
+      action = return () >> repl stack env
     }
 
 ----------------------------------------------------

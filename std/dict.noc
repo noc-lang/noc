@@ -3,6 +3,7 @@ Dict functions
 */
 
 load std:stack
+load seq
 
 def keys = {
     ---

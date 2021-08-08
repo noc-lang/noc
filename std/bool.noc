@@ -3,6 +3,7 @@ Bool functions
 */
 
 load std:stack
+load seq
 
 def if = {
   ---

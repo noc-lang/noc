@@ -3,6 +3,7 @@ List functions
 */
 
 load std:stack
+load seq
 
 def len' = {
     [
