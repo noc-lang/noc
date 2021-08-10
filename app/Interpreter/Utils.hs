@@ -10,6 +10,7 @@ import Language.Noc.Runtime.Prelude (otherModules, prelude)
 import Language.Noc.Syntax.AST
 import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory)
 import qualified Text.Parsec.String as P (parseFromFile)
+import System.Info (os)
 
 ----------------------------------------------
 
@@ -34,7 +35,7 @@ allMaybe f (x : xs) = case f x of
 checkPath :: FilePath -> IO FilePath
 checkPath p = case take 4 p of
   "std:" -> do
-    stdPath <- getXdgDirectory XdgData "noc/std"
+    stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
     stdFiles <- listDirectory $ stdPath
     let file = (drop 4 p) <> ".noc"
     case file `elem` stdFiles of
