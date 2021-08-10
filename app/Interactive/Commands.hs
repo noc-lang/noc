@@ -4,7 +4,6 @@ module Interactive.Commands where
 
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
-import Control.Monad.IO.Class (liftIO)
 import Control.Monad.RWS
 import Control.Monad.State (runStateT)
 import qualified Data.Map as M (Map, empty, fromList, keys, lookup, toList, union)
@@ -17,7 +16,7 @@ import Language.Noc.Runtime.Prelude (prelude)
 import qualified Language.Noc.Syntax.AST as A
 import Language.Noc.Syntax.Lexer
 import System.Console.Haskeline.History (emptyHistory, writeHistory)
-import System.Directory (XdgDirectory (..), getXdgDirectory)
+import System.Directory (XdgDirectory (..), doesFileExist, getXdgDirectory, listDirectory)
 import Text.Parsec (ParseError, eof, parse, (<|>))
 import Text.Parsec.String (Parser, parseFromFile)
 
@@ -110,12 +109,29 @@ help arg stack env repl =
 
 ----------------------------------------------------
 
+loadFile :: FilePath -> FilePath -> Stack -> Env -> (Stack -> Env -> IO ()) -> IO ()
+loadFile moduleName path stack env repl = do
+  parsed <- parseImports [path] []
+  case parsed of
+    (Left err) -> putStrLn err >> repl stack env
+    (Right succ) -> (putStrLn $ "The '" <> moduleName <> "' module is loaded.") >> repl stack (foldr M.union env succ)
+
 load :: [String] -> Stack -> Env -> (Stack -> Env -> IO ()) -> REPLCommands
 load arg stack env repl =
   REPLCommands
     { name = "load",
       args = arg,
-      action = return () >> repl stack env
+      action = do
+        let path = if (last $ reverse $ unwords arg) == '"' && (last $ unwords arg) == '"' then tail $ init $ unwords arg else unwords arg
+        isSTDModule' <- isSTDModule path
+        case ((snd $ isInternalModule path), isSTDModule') of
+          (True, _) -> loadFile path path stack env repl
+          (_, Just p) -> loadFile path p stack env repl
+          _ -> do
+            doesFileExist' <- doesFileExist path
+            case doesFileExist' of
+              True -> loadFile path path stack env repl
+              False -> (putStrLn $ "noc: '" <> path <> "' openFile: does not exist (No such file or directory)") >> repl stack env
     }
 
 ----------------------------------------------------

@@ -9,8 +9,8 @@ import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (otherModules, prelude)
 import Language.Noc.Syntax.AST
 import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory)
-import qualified Text.Parsec.String as P (parseFromFile)
 import System.Info (os)
+import qualified Text.Parsec.String as P (parseFromFile)
 
 ----------------------------------------------
 
@@ -26,6 +26,15 @@ isInternalModule p = case M.lookup (T.pack p) otherModules of
   Nothing -> (Nothing, False)
   decls -> (decls, True)
 
+isSTDModule :: FilePath -> IO (Maybe String)
+isSTDModule p = do
+  let file = (drop 4 p) <> ".noc"
+  stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
+  stdFiles <- listDirectory stdPath
+  case (take 4 p == "std:") && (file `elem` stdFiles) of
+    True -> return $ Just $ stdPath <> "/" <> file
+    False -> return Nothing
+
 allMaybe :: (a -> Maybe String) -> [a] -> Maybe String
 allMaybe f [] = Nothing
 allMaybe f (x : xs) = case f x of
@@ -33,15 +42,11 @@ allMaybe f (x : xs) = case f x of
   Nothing -> allMaybe f xs
 
 checkPath :: FilePath -> IO FilePath
-checkPath p = case take 4 p of
-  "std:" -> do
-    stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
-    stdFiles <- listDirectory $ stdPath
-    let file = (drop 4 p) <> ".noc"
-    case file `elem` stdFiles of
-      True -> return $ stdPath <> "/" <> file
-      False -> return p
-  _ -> return p
+checkPath p = do
+  isSTDModule' <- isSTDModule p
+  case isSTDModule' of
+    (Just path) -> return path
+    Nothing -> return p
 
 ------------ Scope functions ------------------
 
