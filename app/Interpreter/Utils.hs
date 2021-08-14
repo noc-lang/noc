@@ -112,7 +112,8 @@ runModule path = do
   case parsed of
     (Right succ) -> do
       let (main', other') = filterProg succ
-      evalFile' <- runExceptT $ runRWST (evalFile $ main') (prelude <> other') []
+      let mainEnv = M.fromList $ map (\(a,b) -> (a, Function b)) main'
+      evalFile' <- runExceptT $ runRWST (evalFile $ main') (prelude <> mainEnv <> other') []
       case evalFile' of
         (Left err') -> (print err') >> return Nothing
         (Right (_, s, _)) -> return $ Just s
