@@ -12,7 +12,6 @@ import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory, does
 import System.Info (os)
 import Control.Exception (try, SomeException)
 import qualified Text.Parsec.String as P (parseFromFile)
-import Control.Monad.IO.Class (liftIO) 
 
 ----------------------------------------------
 
