@@ -30,8 +30,7 @@ isInternalModule p = case M.lookup (T.pack p) otherModules of
 isSTDModule :: FilePath -> IO (Maybe String)
 isSTDModule p = do
   let file = (drop 4 p) <> ".noc"
-  let stdpath = getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
-  tryStdPath <- try stdpath :: IO (Either SomeException FilePath)
+  tryStdPath <- try (getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")) :: IO (Either SomeException FilePath)
   case tryStdPath of
     (Left err) -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
     (Right succ) -> do
