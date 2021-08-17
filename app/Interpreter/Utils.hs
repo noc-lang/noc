@@ -8,7 +8,7 @@ import Language.Noc.Runtime.Eval (evalFile)
 import Language.Noc.Runtime.Internal
 import Language.Noc.Runtime.Prelude (otherModules, prelude)
 import Language.Noc.Syntax.AST
-import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory)
+import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory, doesPathExist)
 import System.Info (os)
 import qualified Text.Parsec.String as P (parseFromFile)
 
@@ -32,7 +32,12 @@ isSTDModule p = do
   stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
   stdFiles <- listDirectory stdPath
   case (take 4 p == "std:") && (file `elem` stdFiles) of
-    True -> return $ Just $ stdPath <> "/" <> file
+    True -> do
+      let finalPath = stdPath <> "/" <> file
+      doesPathExist' <- doesPathExist finalPath
+      case doesPathExist' of
+        True -> return $ Just finalPath
+        False -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
     False -> return Nothing
 
 allMaybe :: (a -> Maybe String) -> [a] -> Maybe String
