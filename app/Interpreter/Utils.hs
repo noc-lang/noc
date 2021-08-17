@@ -10,6 +10,7 @@ import Language.Noc.Runtime.Prelude (otherModules, prelude)
 import Language.Noc.Syntax.AST
 import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory, doesPathExist)
 import System.Info (os)
+import Control.Exception (try, SomeException)
 import qualified Text.Parsec.String as P (parseFromFile)
 
 ----------------------------------------------
@@ -29,16 +30,15 @@ isInternalModule p = case M.lookup (T.pack p) otherModules of
 isSTDModule :: FilePath -> IO (Maybe String)
 isSTDModule p = do
   let file = (drop 4 p) <> ".noc"
-  stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
-  stdFiles <- listDirectory stdPath
-  case (take 4 p == "std:") && (file `elem` stdFiles) of
-    True -> do
-      let finalPath = stdPath <> "/" <> file
-      doesPathExist' <- doesPathExist finalPath
-      case doesPathExist' of
-        True -> return $ Just finalPath
-        False -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
-    False -> return Nothing
+  let stdpath = getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
+  tryStdPath <- try stdpath :: IO (Either SomeException FilePath)
+  case tryStdPath of
+    (Left err) -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
+    (Right succ) -> do
+      stdFiles <- listDirectory succ
+      case (take 4 p == "std:") && (file `elem` stdFiles) of
+        True -> return $ Just $ succ <> "/" <> file
+        False -> return Nothing
 
 allMaybe :: (a -> Maybe String) -> [a] -> Maybe String
 allMaybe f [] = Nothing
