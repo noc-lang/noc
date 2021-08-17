@@ -30,7 +30,6 @@ isInternalModule p = case M.lookup (T.pack p) otherModules of
 
 isSTDModule :: FilePath -> IO (Maybe String)
 isSTDModule p = do
-  liftIO $ print p
   let file = (drop 4 p) <> ".noc"
   stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
   tryStdFiles <- try (listDirectory stdPath) :: IO (Either SomeException [FilePath])
