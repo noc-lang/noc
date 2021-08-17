@@ -12,6 +12,7 @@ import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory, does
 import System.Info (os)
 import Control.Exception (try, SomeException)
 import qualified Text.Parsec.String as P (parseFromFile)
+import Control.Monad.IO.Class (liftIO) 
 
 ----------------------------------------------
 
@@ -29,11 +30,16 @@ isInternalModule p = case M.lookup (T.pack p) otherModules of
 
 isSTDModule :: FilePath -> IO (Maybe String)
 isSTDModule p = do
+  liftIO $ print p
   let file = (drop 4 p) <> ".noc"
   stdPath <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/std" else "noc/std")
   tryStdFiles <- try (listDirectory stdPath) :: IO (Either SomeException [FilePath])
   case tryStdFiles of
-    (Left err) -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
+    (Left err) -> do
+      isInSTD <- listDirectory "/app/std/"
+      case p `elem` isInSTD of
+        True -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
+        False -> return Nothing
     (Right succ) -> do
       case (take 4 p == "std:") && (file `elem` succ) of
         True -> return $ Just $ stdPath <> "/" <> file
