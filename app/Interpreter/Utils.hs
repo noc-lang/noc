@@ -37,7 +37,7 @@ isSTDModule p = do
   case tryStdFiles of
     (Left err) -> do
       isInSTD <- listDirectory "/app/std/"
-      case p `elem` isInSTD of
+      case file `elem` isInSTD of
         True -> return $ Just $ "/app/std/" <> file  -- STD path to host Noc in Heroku
         False -> return Nothing
     (Right succ) -> do
