@@ -20,6 +20,7 @@ To install the Noc interpreter, you can check this [Installation guide](https://
 
 ## Resources
 - [The Noc Book](https://noc-lang.github.io/book)
+- [Discord bot](https://github.com/noc-lang/bot)
 
 ## Contributing
 To contribute to The Noc Programming Language, you can add an [issue](https://github.com/noc-lang/noc/issues/) to report some bugs, ask for a new feature, questions, etc... Or you can fork this repository to evolve her with the [pull requests](https://github.com/noc-lang/noc/pulls).
