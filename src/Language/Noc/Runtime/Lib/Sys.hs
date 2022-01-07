@@ -1,6 +1,6 @@
 module Language.Noc.Runtime.Lib.Sys where
 
-import Control.Monad.Except (throwError)
+import Control.Monad.Except (catchError, throwError)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Map as M (fromList)
 import qualified Data.Text as T (pack)
@@ -15,8 +15,9 @@ import System.Exit (ExitCode (..), exitSuccess, exitWith)
 sys :: Env
 sys =
   M.fromList
-    [ (T.pack "exit", Constant $ (docExit, PrimVal builtinExit)),
-      (T.pack "args", Constant $ (docArgs, PrimVal builtinArgs))
+    [ (T.pack "exit", Constant (docExit, PrimVal builtinExit)),
+      (T.pack "args", Constant (docArgs, PrimVal builtinArgs)),
+      (T.pack "catch", Constant (docCatch, PrimVal builtinCatch))
     ]
 
 ----------------------------------------------------
@@ -46,3 +47,12 @@ builtinArgs = do
       "--" -> push $ QuoteVal (map StringAtom args)
       _ -> push $ QuoteVal (map StringAtom (y : args))
     _ -> push $ QuoteVal (map StringAtom args)
+
+builtinCatch :: Eval ()
+builtinCatch = do
+  catch <- pop
+  try <- pop
+
+  case (catch, try) of
+    (QuoteVal catch', QuoteVal try') -> evalExpr try' `catchError` (const $ evalExpr catch')
+    _ -> throwError $ TypeError "catch: the parameters are not quotes."

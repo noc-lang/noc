@@ -192,6 +192,16 @@ docExit =
   \ \"other instructions...\"\n\
   \ */"
 
+docCatch :: DocString
+docCatch = "Catch errors in a quote\n\n\
+  \(example)\n\
+  \[1 + \"2\" +] [\"An error has occured.\" putstrln] catch\n\
+  \[1 2 +] [\"Another error has occured.\" putstrln] catch\n\
+  \== Output ==\n\
+  \An error has occured.\n\
+  \=> []\n\
+  \=> [3]"
+
 docFormat :: DocString
 docFormat =
   "Format string, replace braces by corresponding value\n\n\
