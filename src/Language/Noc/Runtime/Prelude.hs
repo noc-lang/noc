@@ -63,7 +63,8 @@ prelude =
       (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
       (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
       (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
-      (T.pack "case", Constant $ (docCase, PrimVal builtinCase))
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
+      (T.pack "trace", Constant $ (docTrace, PrimVal builtinTrace))
     ]
 
 ----------------------------------------------------
@@ -435,3 +436,6 @@ builtinCase = do
   patterns <- pop
   tocase <- pop
   let c = QuoteVal [readAtom tocase] in (push c >> push patterns >> builtinCase')
+
+builtinTrace :: Eval ()
+builtinTrace = get >>= liftIO . putStrLn . displayStack

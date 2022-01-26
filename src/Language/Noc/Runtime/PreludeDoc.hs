@@ -246,6 +246,13 @@ docCase =
   \   [6 dup] fact \n\
   \ }"
 
+docTrace :: DocString
+docTrace =
+  "Trace the Noc stack\n\n\
+  \(example)\n\
+  \ 1 2 3 trace + => stack: [1 5]\n\
+  \ output: [1 2 3]"
+
 docToStr :: DocString
 docToStr =
   "Convert a quote of chars to string\n\n\
