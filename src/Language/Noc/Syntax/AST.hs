@@ -2,18 +2,16 @@
 
 module Language.Noc.Syntax.AST where
 
------------------------ Modules ------------------------
-
 import Data.Char (digitToInt)
 import Data.Map (Map, fromList, keys)
 import Data.Text (Text, empty, pack, strip, unpack)
 import Language.Noc.Syntax.Lexer
 import Text.Parsec
-import Text.Parsec.String (Parser)
+import Text.Parsec.String (Parser, parseFromFile)
 
------------------------ Atoms --------------------------
+data Constant = IntConst Integer | FloatConst Double | StringConst String | CharConst Char | BoolConst Bool deriving (Show,Eq)
 
-data Atom = QuoteAtom Expr | WordAtom String | IntAtom Integer | FloatAtom Double | StringAtom String | CharAtom Char | BoolAtom Bool deriving (Show, Eq)
+data Atom = QuoteAtom Expr | WordAtom String | ConstAtom Constant deriving (Show, Eq)
 
 type Expr = [Atom]
 
@@ -80,29 +78,29 @@ word :: Parser Atom
 word = WordAtom <$> (identifier <|> operator)
 
 strLiteral :: Parser Atom
-strLiteral = StringAtom <$> doubleQuoteLiteral
+strLiteral = ConstAtom <$> StringConst <$> doubleQuoteLiteral
 
 chrLiteral :: Parser Atom
-chrLiteral = CharAtom <$> charLiteral
+chrLiteral = ConstAtom <$> CharConst <$> charLiteral
 
 int :: Parser Atom
 int = do
   f <- sign
   n <- natural
-  pure $ IntAtom $ f n
+  pure $ ConstAtom <$> IntConst $ f n
 
 number :: Parser Atom
 number = do
   f <- sign
   n <- float
-  pure $ FloatAtom $ f n
+  pure $ ConstAtom <$> FloatConst $ f n
 
 bool :: Parser Atom
 bool = do
   v <- (string "True" <|> string "False")
   case v of
-    "True" -> pure $ BoolAtom True
-    "False" -> pure $ BoolAtom False
+    "True" -> pure $ ConstAtom $ BoolConst True
+    "False" -> pure $ ConstAtom $ BoolConst False
 
 quote :: Parser Atom
 quote = QuoteAtom <$> (brackets stack)
@@ -112,7 +110,9 @@ stack = many $ lexeme (quote <|> bool <|> (try number) <|> (try int) <|> strLite
 
 -------------------- Module -----------------
 
-data Module = Module {imports :: [FilePath], decls :: [Map Text (Maybe DocString, Expr)]}
+type Functions = Map Text (Maybe DocString, Expr)
+
+data Module = Module {main :: FilePath, imports :: [FilePath], decls :: Functions} deriving Show
 
 type DocString = String
 
@@ -130,14 +130,13 @@ parseContent = do
     (Just a) -> return (Just $ unpack $ strip $ pack a, e)
     Nothing -> return (Nothing, e)
 
-function :: Parser (Map Text (Maybe DocString, Expr))
+function :: Parser (Text, (Maybe DocString, Expr))
 function = do
   lexeme $ reserved "def"
   name <- parseNameWithParens <|> parseName
-
   contentFunction <- (lexeme $ braces $ parseContent)
   let (doc, content) = contentFunction
-  pure $ fromList [(pack name, (doc, content))]
+  pure (pack name, (doc, content))
 
 load :: Parser String
 load = do
@@ -145,12 +144,13 @@ load = do
   path <- lexeme $ (stringLiteral <|> (many $ noneOf "\n"))
   pure path
 
-program :: Parser Module
-program = do
+program :: FilePath -> Parser Module
+program path = do
   whiteSpace
   loads <- many load
   funcs <- many function
   eof
-  case funcs of
-    [] -> pure $ Module loads [fromList []]
-    v -> pure $ Module loads v
+  pure $ Module path loads (fromList funcs)
+
+parseNocFile :: FilePath -> IO (Either ParseError Module)
+parseNocFile path = parseFromFile (program path) path

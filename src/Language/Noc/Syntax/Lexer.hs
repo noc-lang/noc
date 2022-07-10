@@ -2,13 +2,9 @@
 
 module Language.Noc.Syntax.Lexer where
 
------------------------ Modules --------------------------------------------------
-
-import Text.Parsec (alphaNum, noneOf, oneOf, (<|>))
+import Text.Parsec (alphaNum, letter, noneOf, oneOf, (<|>))
 import Text.Parsec.Prim (ParsecT, Stream)
 import qualified Text.Parsec.Token as P
-
------------------ Lexer definition ------------------------------------------------
 
 lexer :: Stream s m Char => P.GenTokenParser s u m
 lexer =
@@ -18,7 +14,7 @@ lexer =
         P.commentEnd = "*/",
         P.commentLine = "#",
         P.nestedComments = False,
-        P.identStart = alphaNum <|> oneOf "_",
+        P.identStart = letter <|> oneOf "_",
         P.identLetter = alphaNum <|> oneOf "_'",
         P.opStart = noneOf "\\{}[]",
         P.opLetter = noneOf " []{}\n\r",
@@ -26,8 +22,6 @@ lexer =
         P.reservedOpNames = [],
         P.caseSensitive = True
       }
-
------------------ Lexer functions --------------------------------------------------
 
 float :: Stream s m Char => ParsecT s u m Double
 float = P.float lexer

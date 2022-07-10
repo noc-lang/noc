@@ -1,20 +1,20 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 93262f12b9a36ffc39de287dda1b211f1fb9ab054b655268525242a4403c27e5
+-- hash: fcc8051798c4834ebcf99fcdc465d043f620aa0db86fce61b646e35dbe49f1b8
 
 name:           noc
-version:        0.1.0.0
-synopsis:       A user-friendly concatenative language,
+version:        0.2.0.0
+synopsis:       A user-friendly concatenative language
 category:       Language
 homepage:       https://github.com/noc-lang/noc#readme
 bug-reports:    https://github.com/noc-lang/noc/issues
 author:         mortim
 maintainer:     aouladkarim010@gmail.com
-copyright:      2021 mortim
+copyright:      2022 mortim
 license:        BSD3
 build-type:     Simple
 extra-source-files:
@@ -26,17 +26,10 @@ source-repository head
 
 library
   exposed-modules:
-      Language.Noc.PrettyPrinter
-      Language.Noc.Runtime.Eval
-      Language.Noc.Runtime.Internal
-      Language.Noc.Runtime.Lib
-      Language.Noc.Runtime.Lib.Char
-      Language.Noc.Runtime.Lib.FS
-      Language.Noc.Runtime.Lib.Seq
-      Language.Noc.Runtime.Lib.Str
-      Language.Noc.Runtime.Lib.Sys
-      Language.Noc.Runtime.Prelude
-      Language.Noc.Runtime.PreludeDoc
+      Language.Noc.Compiler.Bytecode
+      Language.Noc.Compiler.Serialize
+      Language.Noc.Resolution.Imports
+      Language.Noc.Resolution.Name
       Language.Noc.Syntax.AST
       Language.Noc.Syntax.Lexer
   other-modules:
@@ -45,36 +38,37 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , binary
+    , bytestring
     , containers
     , directory
     , haskeline
-    , mtl
     , optparse-applicative
     , parsec
+    , pretty-simple
     , text
   default-language: Haskell2010
 
 executable noc
   main-is: Main.hs
   other-modules:
-      Interactive.Commands
-      Interactive.REPL
-      Interpreter.CLI
-      Interpreter.Commands
-      Interpreter.Utils
+      Command.CLI
+      Command.Commands
       Paths_noc
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , binary
+    , bytestring
     , containers
     , directory
     , haskeline
-    , mtl
     , noc
     , optparse-applicative
     , parsec
+    , pretty-simple
     , text
   default-language: Haskell2010
 
@@ -88,12 +82,14 @@ test-suite noc-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , binary
+    , bytestring
     , containers
     , directory
     , haskeline
-    , mtl
     , noc
     , optparse-applicative
     , parsec
+    , pretty-simple
     , text
   default-language: Haskell2010

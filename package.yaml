@@ -1,16 +1,16 @@
 name:                noc
-version:             0.1.0.0
+version:             0.2.0.0
 github:              "noc-lang/noc"
 license:             BSD3
 author:              "mortim"
 maintainer:          "aouladkarim010@gmail.com"
-copyright:           "2021 mortim"
+copyright:           "2022 mortim"
 
 extra-source-files:
 - README.md
 
 # Metadata used when publishing your package
-synopsis:            A user-friendly concatenative language,
+synopsis:            A user-friendly concatenative language
 category:            Language
 
 # To avoid duplicated efforts in documentation and dealing with the
@@ -24,9 +24,10 @@ dependencies:
 - haskeline
 - directory
 - optparse-applicative
-- mtl
 - containers
 - text
+- binary
+- bytestring
 
 library:
   source-dirs: src
