@@ -10,7 +10,7 @@ type Position = Int
 
 type Size = Int
 
-data Bytecode = Bytecode {sym :: [(String, Position)], prim :: [String], constant :: [Constant], doc :: [(Position, DocString)], opcodes :: OpCodes} deriving (Show)
+data Bytecode = Bytecode {sym :: [(String, Position)], prim :: [String], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
 
 type OpCodes = [OpCode]
 
@@ -27,7 +27,6 @@ data OpCode
   | UNQUOTE_QUOTE
   | PUSH_SYM Position
   | PUSH_PRIM Position
-  | PUSH_OPCODE OpCode
   | -- Stack-shuffler
     DUP
   | POP
@@ -104,31 +103,31 @@ setPos decl_name new_pos (name, pos) = case (decl_name == name) && (name /= "mai
   False -> (name, pos)
 
 update :: Expr -> Bytecode -> Bool -> Bytecode
-update [] (Bytecode s p c d o) _ = Bytecode s p c d o
-update (WordAtom x : xs) (Bytecode s p c d o) isQuote = case isPrim x of
-  True -> update xs (Bytecode s new c d (o <> [pushWord isQuote $ CALL_PRIM $ index x new])) isQuote
+update [] (Bytecode s p c d o n) _ = Bytecode s p c d o n
+update (WordAtom x : xs) (Bytecode s p c d o n) isQuote = case isPrim x of
+  True -> update xs (Bytecode s new c d (o <> [pushWord isQuote $ CALL_PRIM $ index x new]) n) isQuote
     where
       new = x `inTable` p
   False -> case isOpcode x of
     True -> case isQuote of
-      True -> update xs (Bytecode s p c d (o <> [PUSH_OPCODE $ toOpcode x])) isQuote
-      False -> update xs (Bytecode s p c d (o <> [toOpcode x])) isQuote
-    False -> update xs (Bytecode new p c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index x (map fst new)])) isQuote
+      True -> update xs (Bytecode s p c d (o <> [PUSH_SYM x]) n) isQuote
+      False -> update xs (Bytecode s p c d (o <> [toOpcode x]) n) isQuote
+    False -> update xs (Bytecode new p c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index x (map fst new)]) n) isQuote
       where
         new = x `inTableSym` s
-update (ConstAtom x : xs) (Bytecode s p c d o) isQuote = update xs (Bytecode s p new d (o <> [PUSH_CONST $ index x new])) isQuote
+update (ConstAtom x : xs) (Bytecode s p c d o n) isQuote = update xs (Bytecode s p new d (o <> [PUSH_CONST $ index x new]) n) isQuote
   where
     new = x `inTable` c
-update (QuoteAtom x : xs) (Bytecode s p c d o) isQuote = update xs (Bytecode s' p' c' d' (o' <> [CREATE_QUOTE $ length x])) isQuote
+update (QuoteAtom x : xs) (Bytecode s p c d o n) isQuote = update xs (Bytecode s' p' c' d' (o' <> [CREATE_QUOTE $ length x]) n') isQuote
   where
-    (Bytecode s' p' c' d' o') = update x (Bytecode s p c d o) True
+    (Bytecode s' p' c' d' o' n') = update x (Bytecode s p c d o n) True
 
 genBytecode :: [(Text, (Maybe DocString, Expr))] -> Bytecode -> IO Bytecode
 genBytecode [] bytecode = return bytecode
-genBytecode ((name, (docstring, expr)) : xs) (Bytecode s p c d o) = do
+genBytecode ((name, (docstring, expr)) : xs) (Bytecode s p c d o n) = do
   -- (unpack name) `inTable` s => check if function declaration's name exists in the table
-  let (Bytecode s' p' c' d' o') = update expr (Bytecode ((unpack name) `inTableSym` s) p c d o) False
+  let (Bytecode s' p' c' d' o' n') = update expr (Bytecode ((unpack name) `inTableSym` s) p c d o n) False
   let new_s = map (setPos (unpack name) (length o)) s'
   case docstring of
-    (Just doc') -> genBytecode xs $ Bytecode new_s p' c' (d' <> [(index (unpack name) (map fst s), doc')]) (o' <> [RETURN])
-    Nothing -> genBytecode xs (Bytecode new_s p' c' d' (o' <> [RETURN]))
+    (Just doc') -> genBytecode xs $ Bytecode new_s p' c' (d' <> [(doc', index (unpack name) (map fst s'))]) (o' <> [RETURN]) (n+1)
+    Nothing -> genBytecode xs $ Bytecode new_s p' c' d' (o' <> [RETURN]) (n+1) 

@@ -49,12 +49,12 @@ encodeConst (BoolConst True) = putWord8 0x08 >> putWord8 0x01
 encodeConst (BoolConst False) = putWord8 0x08 >> putWord8 0x00
 
 encode' :: Bytecode -> Put
-encode' (Bytecode sym prim constant doc opcodes) = do
+encode' (Bytecode sym prim constant doc opcodes nb_functions) = do
     (encodeInteger $ length sym) >> mapM_ (\(x,pos) -> (encodeInteger $ length x) >> putStringUtf8 x >> encodeInteger pos) sym
     (encodeInteger $ length prim) >> mapM_ (\x -> (encodeInteger $ length x) >> putStringUtf8 x) prim
     (encodeInteger $ length constant) >> mapM_ encodeConst constant
-    (encodeInteger $ length doc) >> mapM_ (\(pos, d) -> (encodeInteger pos) >> (encodeInteger $ length d) >> putStringUtf8 d) doc
-    (encodeInteger $ length opcodes) >> mapM_ encodeOpCode opcodes
+    (encodeInteger $ length doc) >> mapM_ (\(d, pos) -> (encodeInteger $ length d) >> putStringUtf8 d >> (encodeInteger pos)) doc
+    (encodeInteger nb_functions) >> (encodeInteger $ length opcodes) >> mapM_ encodeOpCode opcodes
 
 serializeBytecode :: FilePath -> Bytecode -> IO ()
 serializeBytecode filepath bytecode = do

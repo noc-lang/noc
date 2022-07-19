@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fcc8051798c4834ebcf99fcdc465d043f620aa0db86fce61b646e35dbe49f1b8
+-- hash: 53935007094002d20f68e1d6c73ad474a857d0194c1e51737d35a488f819d61f
 
 name:           noc
 version:        0.2.0.0
@@ -45,7 +45,6 @@ library
     , haskeline
     , optparse-applicative
     , parsec
-    , pretty-simple
     , text
   default-language: Haskell2010
 
@@ -68,7 +67,6 @@ executable noc
     , noc
     , optparse-applicative
     , parsec
-    , pretty-simple
     , text
   default-language: Haskell2010
 
@@ -90,6 +88,5 @@ test-suite noc-test
     , noc
     , optparse-applicative
     , parsec
-    , pretty-simple
     , text
   default-language: Haskell2010
