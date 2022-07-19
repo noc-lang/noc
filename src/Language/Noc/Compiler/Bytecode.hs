@@ -10,7 +10,9 @@ type Position = Int
 
 type Size = Int
 
-data Bytecode = Bytecode {sym :: [(String, Position)], prim :: [String], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
+data Bytecode = Bytecode {sym :: [SymbolDef], prim :: [String], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
+
+data SymbolDef = FuncSym String Position | OpcodeSym OpCode deriving (Show)
 
 type OpCodes = [OpCode]
 
@@ -77,30 +79,43 @@ isPrim w = w `elem` prelude || (any (\(_, funcs) -> any (== w) funcs) internal)
 isOpcode :: String -> Bool
 isOpcode w = w `elem` opcodes'
 
-inTable :: Eq a => a -> [a] -> [a]
-inTable v l = case v `elem` l of
-  True -> l
-  False -> l <> [v]
-
-inTableSym :: String -> [(String, Position)] -> [(String, Position)]
-inTableSym v l = case v `elem` (map fst l) of
-  True -> l
-  False -> case v of
-    "main" -> l <> [(v, 0)]
-    _ -> l <> [(v, (-1))]
 
 pushWord :: Bool -> OpCode -> OpCode
 pushWord True (CALL_PRIM i) = PUSH_PRIM i
 pushWord True (CALL_SYMBOL i) = PUSH_SYM i
 pushWord False opcode = opcode
 
-index :: Eq a => a -> [a] -> Int
+inTable :: Eq a => a -> [a] -> [a]
+inTable v l = case v `elem` l of
+  True -> l
+  False -> l <> [v]
+
+index :: Eq a => a -> [a] -> Position
 index v l = maybe (-1) id $ findIndex (== v) l
 
-setPos :: String -> Int -> (String, Position) -> (String, Position)
-setPos decl_name new_pos (name, pos) = case (decl_name == name) && (name /= "main") of
-  True -> (name, new_pos)
-  False -> (name, pos)
+check :: String -> SymbolDef -> Bool
+check v (FuncSym w _) = if v == w then True else False
+check v (OpcodeSym w) =  if (toOpcode v) == w then True else False
+
+inTableSym :: String -> Bool -> [SymbolDef] -> [SymbolDef]
+inTableSym v isOpcode l = case any (check v) l of
+  True -> l
+  False -> case isOpcode of
+    True -> l <> [OpcodeSym $ toOpcode v]
+    False -> l <> [FuncSym v (-1)]
+
+indexSym :: String -> [SymbolDef] -> Position
+indexSym w s = maybe (-1) id $ findIndex check s
+  where check (FuncSym x _) = w == x
+        check (OpcodeSym x) = (toOpcode w) == x
+
+setPos :: String -> Int -> SymbolDef -> SymbolDef
+setPos decl_name new_pos (FuncSym name pos) = case decl_name of
+  "main" -> FuncSym name 0
+  _ -> case decl_name == name of
+    True -> FuncSym name new_pos
+    False -> FuncSym name pos
+setPos decl_name new_pos s = s 
 
 update :: Expr -> Bytecode -> Bool -> Bytecode
 update [] (Bytecode s p c d o n) _ = Bytecode s p c d o n
@@ -110,11 +125,12 @@ update (WordAtom x : xs) (Bytecode s p c d o n) isQuote = case isPrim x of
       new = x `inTable` p
   False -> case isOpcode x of
     True -> case isQuote of
-      True -> update xs (Bytecode s p c d (o <> [PUSH_SYM x]) n) isQuote
+      True -> update xs (Bytecode new p c d (o <> [PUSH_SYM $ indexSym x new]) n) isQuote
+        where new = inTableSym x True s
       False -> update xs (Bytecode s p c d (o <> [toOpcode x]) n) isQuote
-    False -> update xs (Bytecode new p c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index x (map fst new)]) n) isQuote
+    False -> update xs (Bytecode new p c d (o <> [pushWord isQuote $ CALL_SYMBOL $ indexSym x new]) n) isQuote
       where
-        new = x `inTableSym` s
+        new = inTableSym x False s
 update (ConstAtom x : xs) (Bytecode s p c d o n) isQuote = update xs (Bytecode s p new d (o <> [PUSH_CONST $ index x new]) n) isQuote
   where
     new = x `inTable` c
@@ -126,8 +142,8 @@ genBytecode :: [(Text, (Maybe DocString, Expr))] -> Bytecode -> IO Bytecode
 genBytecode [] bytecode = return bytecode
 genBytecode ((name, (docstring, expr)) : xs) (Bytecode s p c d o n) = do
   -- (unpack name) `inTable` s => check if function declaration's name exists in the table
-  let (Bytecode s' p' c' d' o' n') = update expr (Bytecode ((unpack name) `inTableSym` s) p c d o n) False
+  let (Bytecode s' p' c' d' o' n') = update expr (Bytecode (inTableSym (unpack name) False s) p c d o n) False
   let new_s = map (setPos (unpack name) (length o)) s'
   case docstring of
-    (Just doc') -> genBytecode xs $ Bytecode new_s p' c' (d' <> [(doc', index (unpack name) (map fst s'))]) (o' <> [RETURN]) (n+1)
+    (Just doc') -> genBytecode xs $ Bytecode new_s p' c' (d' <> [(doc', indexSym (unpack name) s')]) (o' <> [RETURN]) (n+1)
     Nothing -> genBytecode xs $ Bytecode new_s p' c' d' (o' <> [RETURN]) (n+1) 
