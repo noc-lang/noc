@@ -10,15 +10,14 @@ type Position = Int
 
 type Size = Int
 
-data Bytecode = Bytecode {sym :: [SymbolDef], prim :: [String], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
+data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
 
-data SymbolDef = FuncSym String Position | OpcodeSym OpCode deriving (Show)
+data SymbolDef = FuncSym String Position | FuncPrim String | OpcodeSym OpCode deriving (Show,Eq)
 
 type OpCodes = [OpCode]
 
 data OpCode
   = CALL_SYMBOL Position
-  | CALL_PRIM Position
   | PUSH_CONST Position
   | -- Function
     RETURN
@@ -28,7 +27,6 @@ data OpCode
   | PUSHR_QUOTE
   | UNQUOTE_QUOTE
   | PUSH_SYM Position
-  | PUSH_PRIM Position
   | -- Stack-shuffler
     DUP
   | POP
@@ -79,71 +77,60 @@ isPrim w = w `elem` prelude || (any (\(_, funcs) -> any (== w) funcs) internal)
 isOpcode :: String -> Bool
 isOpcode w = w `elem` opcodes'
 
-
 pushWord :: Bool -> OpCode -> OpCode
-pushWord True (CALL_PRIM i) = PUSH_PRIM i
 pushWord True (CALL_SYMBOL i) = PUSH_SYM i
 pushWord False opcode = opcode
-
-inTable :: Eq a => a -> [a] -> [a]
-inTable v l = case v `elem` l of
-  True -> l
-  False -> l <> [v]
 
 index :: Eq a => a -> [a] -> Position
 index v l = maybe (-1) id $ findIndex (== v) l
 
-check :: String -> SymbolDef -> Bool
-check v (FuncSym w _) = if v == w then True else False
-check v (OpcodeSym w) =  if (toOpcode v) == w then True else False
+set :: Eq a => a -> [a] -> [a]
+set v l = if v `elem` l then l else l <> [v]
 
-inTableSym :: String -> Bool -> [SymbolDef] -> [SymbolDef]
-inTableSym v isOpcode l = case any (check v) l of
-  True -> l
-  False -> case isOpcode of
-    True -> l <> [OpcodeSym $ toOpcode v]
-    False -> l <> [FuncSym v (-1)]
-
-indexSym :: String -> [SymbolDef] -> Position
-indexSym w s = maybe (-1) id $ findIndex check s
-  where check (FuncSym x _) = w == x
-        check (OpcodeSym x) = (toOpcode w) == x
-
-setPos :: String -> Int -> SymbolDef -> SymbolDef
-setPos decl_name new_pos (FuncSym name pos) = case decl_name of
+updatePos :: String -> Int -> SymbolDef -> SymbolDef
+updatePos decl_name new_pos (FuncSym name pos) = case name of
   "main" -> FuncSym name 0
-  _ -> case decl_name == name of
-    True -> FuncSym name new_pos
-    False -> FuncSym name pos
-setPos decl_name new_pos s = s 
+  _ -> if decl_name == name then FuncSym name new_pos else FuncSym name pos
+updatePos decl_name new_pos s = s 
+
+isSymbolDecl :: String -> SymbolDef -> Bool
+isSymbolDecl name (FuncSym w _) = name == w
+isSymbolDecl name _ = False
 
 update :: Expr -> Bytecode -> Bool -> Bytecode
-update [] (Bytecode s p c d o n) _ = Bytecode s p c d o n
-update (WordAtom x : xs) (Bytecode s p c d o n) isQuote = case isPrim x of
-  True -> update xs (Bytecode s new c d (o <> [pushWord isQuote $ CALL_PRIM $ index x new]) n) isQuote
+update [] (Bytecode s c d o n) _ = Bytecode s c d o n
+update (WordAtom x : xs) (Bytecode s c d o n) isQuote = case isPrim x of
+  True -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new]) n) isQuote
     where
-      new = x `inTable` p
+      elem = FuncPrim x
+      new = elem `set` s
   False -> case isOpcode x of
     True -> case isQuote of
-      True -> update xs (Bytecode new p c d (o <> [PUSH_SYM $ indexSym x new]) n) isQuote
-        where new = inTableSym x True s
-      False -> update xs (Bytecode s p c d (o <> [toOpcode x]) n) isQuote
-    False -> update xs (Bytecode new p c d (o <> [pushWord isQuote $ CALL_SYMBOL $ indexSym x new]) n) isQuote
+      True -> update xs (Bytecode new c d (o <> [PUSH_SYM $ index elem new]) n) isQuote
+        where
+          elem = OpcodeSym $ toOpcode x 
+          new = elem `set` s
+      False -> update xs (Bytecode new c d (o <> [toOpcode x]) n) isQuote
+        where
+          new = (OpcodeSym $ toOpcode x) `set` s
+    False -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new]) n) isQuote
       where
-        new = inTableSym x False s
-update (ConstAtom x : xs) (Bytecode s p c d o n) isQuote = update xs (Bytecode s p new d (o <> [PUSH_CONST $ index x new]) n) isQuote
+        elem = FuncSym x (-1)
+        new = elem `set` s
+update (ConstAtom x : xs) (Bytecode s c d o n) isQuote = update xs (Bytecode s new d (o <> [PUSH_CONST $ index x new]) n) isQuote
   where
-    new = x `inTable` c
-update (QuoteAtom x : xs) (Bytecode s p c d o n) isQuote = update xs (Bytecode s' p' c' d' (o' <> [CREATE_QUOTE $ length x]) n') isQuote
+    new = x `set` c
+update (QuoteAtom x : xs) (Bytecode s c d o n) isQuote = update xs (Bytecode s' c' d' (o' <> [CREATE_QUOTE $ length x]) n') isQuote
   where
-    (Bytecode s' p' c' d' o' n') = update x (Bytecode s p c d o n) True
+    (Bytecode s' c' d' o' n') = update x (Bytecode s c d o n) True
 
 genBytecode :: [(Text, (Maybe DocString, Expr))] -> Bytecode -> IO Bytecode
 genBytecode [] bytecode = return bytecode
-genBytecode ((name, (docstring, expr)) : xs) (Bytecode s p c d o n) = do
+genBytecode ((name, (docstring, expr)) : xs) (Bytecode s c d o n) = do
   -- (unpack name) `inTable` s => check if function declaration's name exists in the table
-  let (Bytecode s' p' c' d' o' n') = update expr (Bytecode (inTableSym (unpack name) False s) p c d o n) False
-  let new_s = map (setPos (unpack name) (length o)) s'
+  let (Bytecode s' c' d' o' n') = update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o n) False
+  let new_s = map (updatePos (unpack name) (length o)) s'
+  let symbol_decl = head $ filter (isSymbolDecl (unpack name)) new_s
   case docstring of
-    (Just doc') -> genBytecode xs $ Bytecode new_s p' c' (d' <> [(doc', indexSym (unpack name) s')]) (o' <> [RETURN]) (n+1)
-    Nothing -> genBytecode xs $ Bytecode new_s p' c' d' (o' <> [RETURN]) (n+1) 
+    (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(doc', index symbol_decl new_s)]) (o' <> [RETURN]) (n+1)
+    Nothing -> genBytecode xs $ Bytecode new_s c' d' (o' <> [RETURN]) (n+1)
