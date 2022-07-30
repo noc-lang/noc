@@ -24,6 +24,9 @@ opcodes' =
     "unquote"
   ]
 
+internalFuncs :: [String]
+internalFuncs = prelude <> foldl (\acc (_,funcs) -> acc <> funcs) [] internal
+
 prelude :: [String]
 prelude =
   [ "id",

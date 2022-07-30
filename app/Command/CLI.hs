@@ -23,7 +23,7 @@ run (Exec (path : _)) = do
       case imp of
         (Left err) -> print err
         (Right funcs) -> do
-          bytecode <- genBytecode funcs (Bytecode {sym = [], constant = [], doc = [], opcodes = [], nb_functions = 0})
+          bytecode <- genBytecode funcs (Bytecode {sym = [], constant = [], doc = [], opcodes = []})
           serializeBytecode ".bytecode.o" bytecode
 
 cmd :: Parser Command

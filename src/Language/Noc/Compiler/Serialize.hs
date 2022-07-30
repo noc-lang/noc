@@ -49,16 +49,16 @@ encodeString :: String -> Put
 encodeString w = (encodeInteger $ length w) >> putStringUtf8 w
 
 encodeSym :: SymbolDef -> Put
-encodeSym (FuncSym w p) = putWord8 0x01 >> encodeString w >> encodeInteger p
-encodeSym (FuncPrim w) = putWord8 0x02 >> encodeString w
+encodeSym (FuncSym _ p) = putWord8 0x01 >> encodeInteger p
+encodeSym (FuncPrim p) = putWord8 0x02 >> encodeInteger p
 encodeSym (OpcodeSym w) = putWord8 0x03 >> encodeOpCode w
 
 encode' :: Bytecode -> Put
-encode' (Bytecode sym constant doc opcodes nb_functions) = do
+encode' (Bytecode sym constant doc opcodes) = do
     (encodeInteger $ length sym) >> mapM_ encodeSym sym
     (encodeInteger $ length constant) >> mapM_ encodeConst constant
     (encodeInteger $ length doc) >> mapM_ (\(d, pos) -> encodeString d >> (encodeInteger pos)) doc
-    (encodeInteger nb_functions) >> (encodeInteger $ length opcodes) >> mapM_ encodeOpCode opcodes
+    (encodeInteger $ length opcodes) >> mapM_ encodeOpCode opcodes
 
 serializeBytecode :: FilePath -> Bytecode -> IO ()
 serializeBytecode filepath bytecode = do

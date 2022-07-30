@@ -10,9 +10,9 @@ type Position = Int
 
 type Size = Int
 
-data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes, nb_functions :: Int} deriving (Show)
+data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes} deriving (Show)
 
-data SymbolDef = FuncSym String Position | FuncPrim String | OpcodeSym OpCode deriving (Show,Eq)
+data SymbolDef = FuncSym String Position | FuncPrim Position | OpcodeSym OpCode deriving (Show,Eq)
 
 type OpCodes = [OpCode]
 
@@ -72,7 +72,7 @@ toOpcode "popr" = POPR_QUOTE
 toOpcode "unquote" = UNQUOTE_QUOTE
 
 isPrim :: String -> Bool
-isPrim w = w `elem` prelude || (any (\(_, funcs) -> any (== w) funcs) internal)
+isPrim w = any (== w) internalFuncs
 
 isOpcode :: String -> Bool
 isOpcode w = w `elem` opcodes'
@@ -98,39 +98,39 @@ isSymbolDecl name (FuncSym w _) = name == w
 isSymbolDecl name _ = False
 
 update :: Expr -> Bytecode -> Bool -> Bytecode
-update [] (Bytecode s c d o n) _ = Bytecode s c d o n
-update (WordAtom x : xs) (Bytecode s c d o n) isQuote = case isPrim x of
-  True -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new]) n) isQuote
+update [] (Bytecode s c d o) _ = Bytecode s c d o
+update (WordAtom x : xs) (Bytecode s c d o) isQuote = case isPrim x of
+  True -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new])) isQuote
     where
-      elem = FuncPrim x
+      elem = FuncPrim $ index x internalFuncs
       new = elem `set` s
   False -> case isOpcode x of
     True -> case isQuote of
-      True -> update xs (Bytecode new c d (o <> [PUSH_SYM $ index elem new]) n) isQuote
+      True -> update xs (Bytecode new c d (o <> [PUSH_SYM $ index elem new])) isQuote
         where
           elem = OpcodeSym $ toOpcode x 
           new = elem `set` s
-      False -> update xs (Bytecode new c d (o <> [toOpcode x]) n) isQuote
+      False -> update xs (Bytecode new c d (o <> [toOpcode x])) isQuote
         where
           new = (OpcodeSym $ toOpcode x) `set` s
-    False -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new]) n) isQuote
+    False -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new])) isQuote
       where
         elem = FuncSym x (-1)
         new = elem `set` s
-update (ConstAtom x : xs) (Bytecode s c d o n) isQuote = update xs (Bytecode s new d (o <> [PUSH_CONST $ index x new]) n) isQuote
+update (ConstAtom x : xs) (Bytecode s c d o) isQuote = update xs (Bytecode s new d (o <> [PUSH_CONST $ index x new])) isQuote
   where
     new = x `set` c
-update (QuoteAtom x : xs) (Bytecode s c d o n) isQuote = update xs (Bytecode s' c' d' (o' <> [CREATE_QUOTE $ length x]) n') isQuote
+update (QuoteAtom x : xs) (Bytecode s c d o) isQuote = update xs (Bytecode s' c' d' (o' <> [CREATE_QUOTE $ length x])) isQuote
   where
-    (Bytecode s' c' d' o' n') = update x (Bytecode s c d o n) True
+    (Bytecode s' c' d' o') = update x (Bytecode s c d o) True
 
 genBytecode :: [(Text, (Maybe DocString, Expr))] -> Bytecode -> IO Bytecode
 genBytecode [] bytecode = return bytecode
-genBytecode ((name, (docstring, expr)) : xs) (Bytecode s c d o n) = do
+genBytecode ((name, (docstring, expr)) : xs) (Bytecode s c d o) = do
   -- (unpack name) `inTable` s => check if function declaration's name exists in the table
-  let (Bytecode s' c' d' o' n') = update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o n) False
+  let (Bytecode s' c' d' o') = update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o) False
   let new_s = map (updatePos (unpack name) (length o)) s'
   let symbol_decl = head $ filter (isSymbolDecl (unpack name)) new_s
   case docstring of
-    (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(doc', index symbol_decl new_s)]) (o' <> [RETURN]) (n+1)
-    Nothing -> genBytecode xs $ Bytecode new_s c' d' (o' <> [RETURN]) (n+1)
+    (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(doc', index symbol_decl new_s)]) (o' <> [RETURN])
+    Nothing -> genBytecode xs $ Bytecode new_s c' d' (o' <> [RETURN])
