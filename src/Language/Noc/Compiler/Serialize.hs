@@ -11,47 +11,47 @@ encodeInteger :: Integral a => a -> Put
 encodeInteger i = putInt64le (fromIntegral i :: Int64)
 
 encodeOpCode :: OpCode -> Put
-encodeOpCode (CALL_SYMBOL i) = putWord8 0x01 >> encodeInteger i
-encodeOpCode (PUSH_CONST i) = putWord8 0x02 >> encodeInteger i
-encodeOpCode RETURN = putWord8 0x03
-encodeOpCode (CREATE_QUOTE s) = putWord8 0x04 >> encodeInteger s
-encodeOpCode POPR_QUOTE = putWord8 0x05
-encodeOpCode PUSHR_QUOTE = putWord8 0x6
-encodeOpCode UNQUOTE_QUOTE = putWord8 0x7
-encodeOpCode (PUSH_SYM i) = putWord8 0x8 >> encodeInteger i
-encodeOpCode DUP = putWord8 0x9
-encodeOpCode POP = putWord8 0x10
-encodeOpCode CLEAR_STACK = putWord8 0x11
-encodeOpCode CONCAT = putWord8 0x12
-encodeOpCode ROT = putWord8 0x13
-encodeOpCode ADD_OP = putWord8 0x14
-encodeOpCode MINUS_OP = putWord8 0x15
-encodeOpCode MUL_OP = putWord8 0x16
-encodeOpCode DIV_OP = putWord8 0x17
-encodeOpCode EXP_OP = putWord8 0x18
-encodeOpCode GREATER_CMP = putWord8 0x19
-encodeOpCode LESS_CMP = putWord8 0x20
-encodeOpCode GREATER_OR_EQ_CMP = putWord8 0x21
-encodeOpCode LESS_OR_EQ_CMP = putWord8 0x22
-encodeOpCode EQUAL = putWord8 0x23
-encodeOpCode AND_BOOL = putWord8 0x24
-encodeOpCode OR_BOOL = putWord8 0x25
+encodeOpCode (CALL_SYMBOL i) = putWord8 0 >> encodeInteger i
+encodeOpCode (PUSH_CONST i) = putWord8 1 >> encodeInteger i
+encodeOpCode RETURN = putWord8 2
+encodeOpCode (CREATE_QUOTE s) = putWord8 3 >> encodeInteger s
+encodeOpCode POPR_QUOTE = putWord8 4
+encodeOpCode PUSHR_QUOTE = putWord8 5
+encodeOpCode UNQUOTE_QUOTE = putWord8 6
+encodeOpCode (PUSH_SYM i) = putWord8 7 >> encodeInteger i
+encodeOpCode DUP = putWord8 8
+encodeOpCode POP = putWord8 9
+encodeOpCode CLEAR_STACK = putWord8 10
+encodeOpCode CONCAT = putWord8 11
+encodeOpCode ROT = putWord8 12
+encodeOpCode ADD_OP = putWord8 13
+encodeOpCode MINUS_OP = putWord8 14
+encodeOpCode MUL_OP = putWord8 15
+encodeOpCode DIV_OP = putWord8 16
+encodeOpCode EXP_OP = putWord8 17
+encodeOpCode GREATER_CMP = putWord8 18
+encodeOpCode LESS_CMP = putWord8 19
+encodeOpCode GREATER_OR_EQ_CMP = putWord8 20
+encodeOpCode LESS_OR_EQ_CMP = putWord8 21
+encodeOpCode EQUAL = putWord8 22
+encodeOpCode AND_BOOL = putWord8 23
+encodeOpCode OR_BOOL = putWord8 24
 
 encodeConst :: Constant -> Put
-encodeConst (IntConst n) = putWord8 0x04 >> (encodeInteger n)
-encodeConst (FloatConst n) = putWord8 0x05 >> putDoublele n
-encodeConst (StringConst s) = putWord8 0x06 >> (encodeInteger $ length s) >> putStringUtf8 s
-encodeConst (CharConst c) = putWord8 0x07 >> putCharUtf8 c
-encodeConst (BoolConst True) = putWord8 0x08 >> putWord8 0x01
-encodeConst (BoolConst False) = putWord8 0x08 >> putWord8 0x00
+encodeConst (IntConst n) = putWord8 4 >> (encodeInteger n)
+encodeConst (FloatConst n) = putWord8 5 >> putDoublele n
+encodeConst (StringConst s) = putWord8 6 >> (encodeInteger $ length s) >> putStringUtf8 s
+encodeConst (CharConst c) = putWord8 7 >> putCharUtf8 c
+encodeConst (BoolConst True) = putWord8 8 >> putWord8 1
+encodeConst (BoolConst False) = putWord8 8 >> putWord8 0
 
 encodeString :: String -> Put
 encodeString w = (encodeInteger $ length w) >> putStringUtf8 w
 
 encodeSym :: SymbolDef -> Put
-encodeSym (FuncSym _ p) = putWord8 0x01 >> encodeInteger p
-encodeSym (FuncPrim p) = putWord8 0x02 >> encodeInteger p
-encodeSym (OpcodeSym w) = putWord8 0x03 >> encodeOpCode w
+encodeSym (FuncSym _ p) = putWord8 0 >> encodeInteger p
+encodeSym (FuncPrim p) = putWord8 1 >> encodeInteger p
+encodeSym (OpcodeSym w) = putWord8 2 >> encodeOpCode w
 
 encode' :: Bytecode -> Put
 encode' (Bytecode sym constant doc opcodes) = do

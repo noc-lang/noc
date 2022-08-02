@@ -28,6 +28,7 @@ dependencies:
 - text
 - binary
 - bytestring
+- process
 
 library:
   source-dirs: src

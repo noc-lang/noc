@@ -8,6 +8,9 @@ import Language.Noc.Compiler.Bytecode
 import Language.Noc.Compiler.Serialize (serializeBytecode)
 import Language.Noc.Syntax.AST
 import Language.Noc.Resolution.Imports (parseImports)
+import System.Directory (XdgDirectory (..), getXdgDirectory)
+import System.Info (os)
+import System.Process (system)
 
 opts :: ParserInfo Command
 opts = info (helper <*> cmd) (fullDesc <> header "noc - A user-friendly concatenative language.")
@@ -24,7 +27,11 @@ run (Exec (path : _)) = do
         (Left err) -> print err
         (Right funcs) -> do
           bytecode <- genBytecode funcs (Bytecode {sym = [], constant = [], doc = [], opcodes = []})
-          serializeBytecode ".bytecode.o" bytecode
+          bytecode_path <- getXdgDirectory XdgCache ".bytecode"
+          serializeBytecode bytecode_path bytecode
+          noc_vm_path <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/noc_vm" else "noc/noc_vm")
+          system $ noc_vm_path <> " " <> bytecode_path
+          return ()
 
 cmd :: Parser Command
 cmd = foldl (<|>) empty cmdFuncs
