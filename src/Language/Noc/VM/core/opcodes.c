@@ -1,7 +1,8 @@
-#include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "types.h"
+#include "errors.h"
 
 extern NocVM vm;
 
@@ -101,6 +102,8 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
             }
         }
         push_stack(&vm.stack, result);
+    } else {
+        throw_noc_error(TYPE_ERROR, "cannot operate %s value with %s value", 2, noc_value_to_str(v2.label), noc_value_to_str(v1.label));
     }
 }
 

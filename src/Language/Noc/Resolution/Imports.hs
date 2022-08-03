@@ -9,7 +9,7 @@ import System.Directory (XdgDirectory (..), getXdgDirectory, listDirectory)
 import System.Info (os)
 import Text.Parsec (ParseError)
 
-data ImportError = ImportError String deriving (Show)
+data ImportError = ImportError String | MainNotFoundError String deriving (Show)
 
 instance Exception ImportError
 
@@ -23,8 +23,10 @@ spanInternal (path : paths) (int, noc) = case path `elem` (map fst internal) of
       (Just v) -> spanInternal paths (int, noc <> [v])
       Nothing -> spanInternal paths (int, noc <> [path])
 
-putMainFirst :: [(Text,(Maybe DocString, Expr))] -> ([(Text,(Maybe DocString, Expr))], [(Text,(Maybe DocString, Expr))]) -> [(Text,(Maybe DocString, Expr))]
-putMainFirst [] (m,o) = m <> o
+putMainFirst :: [(Text,(Maybe DocString, Expr))] -> ([(Text,(Maybe DocString, Expr))], [(Text,(Maybe DocString, Expr))]) -> IO [(Text,(Maybe DocString, Expr))]
+putMainFirst [] (m,o) = case m of
+  [] -> throwIO $ MainNotFoundError "main function is not declared."
+  _ -> return $ m <> o
 putMainFirst (x:xs) (m,o) = case unpack $ fst x of
   "main" -> putMainFirst xs ([x], o)
   _ -> putMainFirst xs (m, o <> [x])
@@ -82,7 +84,7 @@ scope m int impFuncs = traverse output $ runScope m int impFuncs
       Nothing -> Right ()
 
 parseImports :: [Module] -> Functions -> IO (Either ParseError [(Text,(Maybe DocString, Expr))])
-parseImports [] funcs = return $ Right $ putMainFirst (toList funcs) ([],[])
+parseImports [] funcs = (putMainFirst (toList funcs) ([],[])) >>= (return . Right)
 parseImports (m : ms) funcs = do
   (int, nocFiles) <- spanInternal (imports m) ([], [])
   p <- traverse parseNocFile nocFiles

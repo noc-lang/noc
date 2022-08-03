@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "core/opcodes.h"
 #include "core/deserializer.h"
-#include <math.h>
 
 NocVM vm;
 
@@ -16,12 +15,7 @@ void run(NocBytecode b) {
 int main(char* arg, char* argv[]) {
     create_stack(&vm.stack);
     create_stack(&vm.callstack);
-
-    // argv[1] => bytecode path
-    NocBytecode bytecode = deserialize(argv[1]);
+    NocBytecode bytecode = deserialize(argv[1]); // argv[1] => bytecode path
     run(bytecode);
-    
-    //list_array(&vm.stack);
-
-    return 0;
+    return EXIT_SUCCESS;
 }

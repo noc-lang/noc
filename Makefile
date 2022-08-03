@@ -8,7 +8,7 @@ install_noc:
 install_vm:
 	@echo "Building/Copying Noc VM binary ..."
 	@gcc $(shell find ./src/Language/Noc/VM -name '*.c') -o noc_vm -lm
-	mv noc_vm $(LOCAL_LIB_PATH)/noc
+	@mv noc_vm $(LOCAL_LIB_PATH)/noc
 
 install_std:
 	@echo "Copying Noc library ..."

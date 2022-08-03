@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "types.h"
 #include "../modules/modules.h"
+#include "errors.h"
 
 // Utils
 int64_t decode_integer(FILE *file, int64_t* size) {
@@ -18,8 +19,10 @@ char* decode_string(FILE *file) {
     fread(&size_elem, sizeof(int64_t), 1, file);
 
     char *elem_name = malloc(sizeof(char) * size_elem);
-    // check malloc()
-    assert(elem_name != NULL);
+
+    if(elem_name == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_string)", 0);
+ 
     char c;
     for(int k = 0; k < size_elem; k++) {
         fread(&c, sizeof(char), 1, file);
@@ -52,8 +55,9 @@ Table decode_sym_table(FILE *file) {
 
     Table result;
     result.sym = malloc(sizeof(SymTable) * size);
-    // check malloc()
-    assert(result.sym != NULL);
+
+    if(result.sym == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_sym_table)", 0);
 
     int64_t pos;
 
@@ -85,8 +89,9 @@ Table decode_constant_table(FILE *file) {
 
     Table result;
     result.constant = malloc(sizeof(NocValue) * size);
-    // check malloc()
-    assert(result.constant != NULL);
+
+    if(result.constant == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_constant_table)", 0);
 
     uint8_t const_type;
 
@@ -144,9 +149,10 @@ Table decode_doc_table(FILE *file) {
     Table result;
     result.label = DOC;
     result.doc = malloc(sizeof(DocTable) * size);
-    // check malloc()
-    assert(result.doc != NULL);
 
+    if(result.doc == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_doc_table)", 0);
+    
     for(int i = 0; i < size; i++) {
         result.doc[i].docstring = decode_string(file);
         int64_t pos;
@@ -160,8 +166,9 @@ Table decode_opcode_table(FILE *file, int64_t* size_opcodes) {
     Table result;
     result.label = OPCODE;
     result.opcode = malloc(sizeof(NocOp) * (*size_opcodes));
-    // check malloc()
-    assert(result.opcode != NULL);
+    
+    if(result.opcode == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_opcode_table)", 0);
 
     for(int i = 0; i < (*size_opcodes); i++) {
         result.opcode[i] = decode_opcode(file);
@@ -171,7 +178,9 @@ Table decode_opcode_table(FILE *file, int64_t* size_opcodes) {
 
 NocBytecode deserialize(char* filename) {
     FILE *bytecode_file = fopen(filename, "rb");
-    assert(bytecode_file != NULL);
+
+    if(bytecode_file == NULL)
+        throw_noc_error(FILE_NOT_FOUND_ERROR, "no such '%s' file", 1, filename);
 
     // Decode sym table
     Table sym = decode_sym_table(bytecode_file);
