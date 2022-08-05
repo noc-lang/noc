@@ -4,13 +4,19 @@
 #include <assert.h>
 #include "errors.h"
 #include "types.h"
+#include "stack.h"
+
+void free_stack(NocVM *vm) {
+    free(vm->stack.array);
+    free(vm->callstack.array);
+}
 
 bool isFull(NocStack* stack) {
     return stack->cursor >= (stack->capacity - 1);
 }
 
 void create_stack(NocStack* stack) {
-    stack->capacity = 5;
+    stack->capacity = 10000;
     stack->array = malloc(sizeof(NocValue) * stack->capacity);
     if(stack->array == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/stack.c => create_stack)", 0);

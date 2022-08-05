@@ -42,7 +42,6 @@ char* noc_err_to_str(NocError err) {
 
 void throw_noc_error(NocError err, char* fmt, int num, ...) {
     va_list args;
-    char* err_type = noc_err_to_str(err);
 
     va_start(args, num);
     // Size of the formatted string
@@ -62,6 +61,9 @@ void throw_noc_error(NocError err, char* fmt, int num, ...) {
 
     va_end(args);
 
-    fprintf(stderr, "[%s] %s.\n", err_type, msg_formatted);
+    fprintf(stderr, "[%s] %s.\n", noc_err_to_str(err), msg_formatted);
+
+    free(msg_formatted);
+
     exit(EXIT_FAILURE);
 }

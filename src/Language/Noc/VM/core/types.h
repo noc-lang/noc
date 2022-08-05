@@ -78,7 +78,6 @@ typedef struct Table {
     };
 } Table;
 
-// ----------------
 typedef struct OpCodes {
     int64_t size;
     Table elems;
@@ -90,25 +89,5 @@ typedef struct NocBytecode {
     Table doc;
     OpCodes opcodes;
 } NocBytecode;
-// ----------------
-
-typedef struct NocStack {
-    NocValue *array;
-    int capacity;
-    int cursor;
-    int size;
-} NocStack;
-
-bool isFull(NocStack* stack);
-void create_stack(NocStack* s);
-void push_stack(NocStack* stack, NocValue val);
-NocValue pop_stack(NocStack* stack);
-NocValue peek_stack(NocStack* stack);
-void list_array(NocStack *stack);
-
-typedef struct NocVM {
-    NocStack stack;
-    NocStack callstack;
-} NocVM;
 
 #endif

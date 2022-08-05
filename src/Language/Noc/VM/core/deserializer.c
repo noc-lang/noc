@@ -8,6 +8,13 @@
 #include "errors.h"
 
 // Utils
+void free_bytecode(NocBytecode *b) {
+    free(b->sym.sym);
+    free(b->consts.constant);
+    free(b->doc.doc);
+    free(b->opcodes.elems.opcode);
+}
+
 int64_t decode_integer(FILE *file, int64_t* size) {
     fread(size, sizeof(int64_t), 1, file);
     return (*size);
@@ -176,29 +183,21 @@ Table decode_opcode_table(FILE *file, int64_t* size_opcodes) {
     return result;
 }
 
-NocBytecode deserialize(char* filename) {
+void deserialize(NocBytecode *b, char* filename) {
     FILE *bytecode_file = fopen(filename, "rb");
 
     if(bytecode_file == NULL)
         throw_noc_error(FILE_NOT_FOUND_ERROR, "no such '%s' file", 1, filename);
 
-    // Decode sym table
-    Table sym = decode_sym_table(bytecode_file);
+    b->sym = decode_sym_table(bytecode_file); // Decode sym table
+    b->consts = decode_constant_table(bytecode_file); // Decode consts table
+    b->doc = decode_doc_table(bytecode_file); // Decode doc table
 
-    // Decode consts table
-    Table consts = decode_constant_table(bytecode_file);
-
-    // Decode doc table
-    Table doc = decode_doc_table(bytecode_file);
-    
     // Decode opcode table
     int64_t size_opcodes;
     Table opcode = decode_opcode_table(bytecode_file, &size_opcodes);
-
-    fclose(bytecode_file);
-
     OpCodes opcodes = {size_opcodes, opcode};
-    NocBytecode program = {sym, consts, doc, opcodes};
-    
-    return program;
+    b->opcodes = opcodes;
+
+    fclose(bytecode_file); 
 }

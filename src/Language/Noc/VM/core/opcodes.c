@@ -3,6 +3,7 @@
 #include <math.h>
 #include "types.h"
 #include "errors.h"
+#include "stack.h"
 
 extern NocVM vm;
 

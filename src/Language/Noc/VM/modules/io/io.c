@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "../../core/types.h"
 #include "io.h"
+#include "../../core/stack.h"
 
 extern NocVM vm;
 
