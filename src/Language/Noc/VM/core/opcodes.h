@@ -10,6 +10,10 @@ void noc_call_symbol(NocBytecode b, NocOp opcode);
 void noc_dup(NocBytecode b, NocOp opcode);
 void noc_pop(NocBytecode b, NocOp opcode);
 void noc_zap(NocBytecode b, NocOp opcode);
+void noc_cat(NocBytecode b, NocOp opcode);
+void noc_rotnm(NocBytecode b, NocOp opcode);
+void noc_opcode_cmp(NocBytecode b, NocOp opcode);
+void noc_opcode_bool(NocBytecode b, NocOp opcode);
 
 void* OPCODES_FUNCS[] = {
     &noc_call_symbol, // call_symbol
@@ -23,20 +27,20 @@ void* OPCODES_FUNCS[] = {
     &noc_dup, // dup
     &noc_pop, // pop
     &noc_zap, // zap
-    NULL, // cat
-    NULL, // rotNM
+    &noc_cat, // cat
+    &noc_rotnm, // rotNM
     &noc_opcode_operator, // +
     &noc_opcode_operator, // -
     &noc_opcode_operator, // *
     &noc_opcode_operator, // /
     &noc_opcode_operator, // ^
-    NULL, // >
-    NULL, // <
-    NULL, // <=
-    NULL, // <=
-    NULL, // ==
-    NULL, // and
-    NULL, // or
+    &noc_opcode_operator, // >
+    &noc_opcode_operator, // <
+    &noc_opcode_operator, // >=
+    &noc_opcode_operator, // <=
+    &noc_opcode_cmp, // ==
+    &noc_opcode_bool, // and
+    &noc_opcode_bool, // or
 };
 
 #endif

@@ -13,6 +13,14 @@ void run(NocBytecode b) {
     }
 }
 
+// void listArray(NocStack s) {
+//     printf("cursor = %d\n", s.cursor);
+//     for(int i = 0; i < 5; i++) {
+//         printf("%d - ", s.array[i].b);
+//     }
+//     printf("\n");
+// }
+
 int main(char* arg, char* argv[]) {
     NocBytecode bytecode;
 
