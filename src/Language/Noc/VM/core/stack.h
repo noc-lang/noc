@@ -7,7 +7,6 @@ typedef struct NocStack {
     NocValue *array;
     int capacity;
     int cursor;
-    int size;
 } NocStack;
 
 typedef struct NocVM {

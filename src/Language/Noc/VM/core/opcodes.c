@@ -218,19 +218,6 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
     }
 }
 
-void noc_return(NocBytecode b, NocOp opcode) {
-    if(vm.callstack.size > 0) {
-        pop_stack(&vm.callstack);
-    }
-}
-
-void noc_call_symbol(NocBytecode b, NocOp opcode) {
-    if(b.sym.sym[opcode.operand].label == PRIM) {
-        void (*f)() = b.sym.sym[opcode.operand].func;
-        f();
-    }
-}
-
 void noc_dup(NocBytecode b, NocOp opcode) {
     push_stack(&vm.stack, peek_stack(&vm.stack));
 }

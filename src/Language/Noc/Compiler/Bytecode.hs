@@ -87,6 +87,12 @@ index v l = maybe (-1) id $ findIndex (== v) l
 set :: Eq a => a -> [a] -> [a]
 set v l = if v `elem` l then l else l <> [v]
 
+setSymDecl :: SymbolDef -> [SymbolDef] -> [SymbolDef]
+setSymDecl (FuncSym n p) l = if any matchSym l then l else l <> [FuncSym n p]
+  where match (FuncSym x _) = x == n
+        matchSym _ = False  
+setSymDecl _ l = l
+
 updatePos :: String -> Int -> SymbolDef -> SymbolDef
 updatePos decl_name new_pos (FuncSym name pos) = case name of
   "main" -> FuncSym name 0
@@ -116,7 +122,7 @@ update (WordAtom x : xs) (Bytecode s c d o) isQuote = case isPrim x of
     False -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem new])) isQuote
       where
         elem = FuncSym x (-1)
-        new = elem `set` s
+        new = elem `setSymDecl` s
 update (ConstAtom x : xs) (Bytecode s c d o) isQuote = update xs (Bytecode s new d (o <> [PUSH_CONST $ index x new])) isQuote
   where
     new = x `set` c

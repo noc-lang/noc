@@ -3,10 +3,9 @@
 
 #include "types.h"
 
+char* noc_opcode_operator_to_str(NocOpLabel label);
 void noc_push_const(NocBytecode b, NocOp opcode);
 void noc_opcode_operator(NocBytecode b, NocOp opcode);
-void noc_return(NocBytecode b, NocOp opcode);
-void noc_call_symbol(NocBytecode b, NocOp opcode);
 void noc_dup(NocBytecode b, NocOp opcode);
 void noc_pop(NocBytecode b, NocOp opcode);
 void noc_zap(NocBytecode b, NocOp opcode);
@@ -16,9 +15,9 @@ void noc_opcode_cmp(NocBytecode b, NocOp opcode);
 void noc_opcode_bool(NocBytecode b, NocOp opcode);
 
 void* OPCODES_FUNCS[] = {
-    &noc_call_symbol, // call_symbol
+    NULL, // call_symbol
     &noc_push_const, // push_const
-    &noc_return, // return
+    NULL, // return
     NULL, // create_quote
     NULL, // popr
     NULL, // pushr
