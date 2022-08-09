@@ -1,0 +1,73 @@
+/*
+List functions
+*/
+
+load std:stack
+load seq
+load std:bool
+
+def len' = {
+    [
+        [[[]] [pop 0]]
+        [[_] [1 swap popr pop dup len' +]]
+    ] case
+}
+
+def len = {
+    ---
+    Get a list's length
+
+    (example)
+    [1 2 3] len => [3]
+    ---
+    dup len'
+}
+
+def findByIndex = {
+    ---
+    Find a element in a list with his index.
+
+    (example)
+    2 [[0 "A"] [1 "B"] [2 "C"]] findByIndex
+    => ["C"]
+
+    (or with the 'enumerate' function)
+    2 ["A" "B" "C"] enumerate findByIndex
+    ---
+    swap dup 3 -1 rotNM
+    [
+        unquote 4 1 rotNM ==
+        [
+            [[True] [dup]]
+            [[False] [swap pop dup]]
+        ] case
+    ] step
+    popr pop popr pop
+    unquote
+}
+
+def enumerate = { 
+    ---
+    Listing a list with a successive indexes
+
+    (example)
+    ["A" "B" "C"] enumerate
+    => [[0 "A"] [1 "B"] [2 "C"]]
+    ---
+    -1 swap 
+    [swap 1 + dup 3 1 rotNM quote swap quote cat swap] step 
+    popr pop swap quote swap cat 
+}
+
+def filter = {
+    ---
+    Filter a list following a predicat.
+
+    (example)
+    [1 2 3] [2 >] filter
+    => [3]
+    ---
+    [dup] swap <>
+    [[pop] [] 3 -1 rotNM if] <>
+    step
+}

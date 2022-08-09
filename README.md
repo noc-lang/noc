@@ -1,8 +1,6 @@
 # The Noc Programming Language
 
-This repository contains the Noc interpreter and the Noc Standard Library. For more informations, you can check the [Noc website](https://noc-lang.github.io).
-
-<img src="https://raw.githubusercontent.com/noc-lang/noc-lang.github.io/master/assets/icon.png" alt="Noc icon" align=right width="170" />
+This repository contains the Noc interpreter and the Noc Standard Library.
 
 ## Features
 - Stack-based language
@@ -16,11 +14,10 @@ This repository contains the Noc interpreter and the Noc Standard Library. For m
 
 ## Get Noc
 
-To install the Noc interpreter, you can check this [Installation guide](https://noc-lang.github.io/book/installation.html).
+To install the Noc interpreter, you can check this [Installation guide](https://github.com/mortim/noc/wiki/Installation).
 
 ## Resources
-- [The Noc Book](https://noc-lang.github.io/book)
-- [Discord bot](https://github.com/noc-lang/bot)
+- [The Noc Book](https://github.com/mortim/noc/wiki)
 
 ## Contributing
-To contribute to The Noc Programming Language, you can add an [issue](https://github.com/noc-lang/noc/issues/) to report some bugs, ask for a new feature, questions, etc... Or you can fork this repository to evolve her with the [pull requests](https://github.com/noc-lang/noc/pulls).
+To contribute to The Noc Programming Language, you can add an [issue](https://github.com/mortim/noc/issues/) to report some bugs, ask for a new feature, questions, etc... Or you can fork this repository to evolve her with the [pull requests](https://github.com/mortim/noc/pulls).
