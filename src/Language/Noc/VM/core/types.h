@@ -49,45 +49,45 @@ typedef enum NocOpLabel {
 typedef struct NocOp {
     NocOpLabel label;
     int64_t operand;
-} NocOp;  
+} NocOp;
 
 // Noc tables type
-typedef enum SymTableLabel { NOC_FUNC, PRIM, OP } SymTableLabel;
-typedef struct SymTable {
-    SymTableLabel label;
+typedef enum SymLabel { NOC_FUNC, PRIM, OP } SymLabel;
+typedef struct Sym {
+    SymLabel label;
     union {
         int p; // noc_func
         void (*func)(); // for prim
         NocOp opcode; // for opcode
     };
-} SymTable;
+} Sym;
 
-typedef struct DocTable {
+typedef struct Doc {
     char* docstring;
     int pos;
-} DocTable;
+} Doc;
+
+typedef struct OpCodes {
+    size_t size;
+    NocOp* elems;
+} OpCodes;
 
 typedef enum NocTableLabel { SYMBOL, CONSTANT, DOC, OPCODE } NocTableLabel;
 typedef struct Table {
     NocTableLabel label;
     union {
-        SymTable* sym;
+        Sym* sym;
         NocValue* constant;
-        DocTable* doc;
-        NocOp* opcode;
+        Doc* doc;
+        OpCodes opcodes;
     };
 } Table;
-
-typedef struct OpCodes {
-    int64_t size;
-    Table elems;
-} OpCodes;
 
 typedef struct NocBytecode {
     Table sym;
     Table consts;
     Table doc;
-    OpCodes opcodes;
+    Table opcodes;
 } NocBytecode;
 
 #endif

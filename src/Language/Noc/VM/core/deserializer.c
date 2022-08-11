@@ -12,10 +12,10 @@ void free_bytecode(NocBytecode *b) {
     free(b->sym.sym);
     free(b->consts.constant);
     free(b->doc.doc);
-    free(b->opcodes.elems.opcode);
+    free(b->opcodes.opcodes.elems);
 }
 
-int64_t decode_integer(FILE *file, int64_t* size) {
+int64_t decode_integer(FILE *file, size_t* size) {
     fread(size, sizeof(int64_t), 1, file);
     return (*size);
 }
@@ -61,7 +61,7 @@ Table decode_sym_table(FILE *file) {
     decode_integer(file, &size);
 
     Table result;
-    result.sym = malloc(sizeof(SymTable) * size);
+    result.sym = malloc(sizeof(Sym) * size);
 
     if(result.sym == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_sym_table)", 0);
@@ -71,7 +71,7 @@ Table decode_sym_table(FILE *file) {
     for(int i = 0; i < size; i++) {
         uint8_t constructor;
         fread(&constructor, sizeof(uint8_t), 1, file);
-        result.sym[i].label = (SymTableLabel)constructor;
+        result.sym[i].label = (SymLabel)constructor;
 
         // noc_func constructor
         if(constructor == 0) {
@@ -155,7 +155,7 @@ Table decode_doc_table(FILE *file) {
     decode_integer(file, &size);
     Table result;
     result.label = DOC;
-    result.doc = malloc(sizeof(DocTable) * size);
+    result.doc = malloc(sizeof(Doc) * size);
 
     if(result.doc == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_doc_table)", 0);
@@ -168,17 +168,19 @@ Table decode_doc_table(FILE *file) {
     return result;
 }
 
-Table decode_opcode_table(FILE *file, int64_t* size_opcodes) {
-    fread(size_opcodes, sizeof(int64_t), 1, file);
+Table decode_opcode_table(FILE *file) {
+    size_t size_opcodes;
+    fread(&size_opcodes, sizeof(int64_t), 1, file);
     Table result;
     result.label = OPCODE;
-    result.opcode = malloc(sizeof(NocOp) * (*size_opcodes));
+    result.opcodes.size = size_opcodes;
+    result.opcodes.elems = malloc(sizeof(NocOp) * size_opcodes);
     
-    if(result.opcode == NULL)
+    if(result.opcodes.elems == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_opcode_table)", 0);
 
-    for(int i = 0; i < (*size_opcodes); i++) {
-        result.opcode[i] = decode_opcode(file);
+    for(int i = 0; i < size_opcodes; i++) {
+        result.opcodes.elems[i] = decode_opcode(file);
     }
     return result;
 }
@@ -192,12 +194,7 @@ void deserialize(NocBytecode *b, char* filename) {
     b->sym = decode_sym_table(bytecode_file); // Decode sym table
     b->consts = decode_constant_table(bytecode_file); // Decode consts table
     b->doc = decode_doc_table(bytecode_file); // Decode doc table
-
-    // Decode opcode table
-    int64_t size_opcodes;
-    Table opcode = decode_opcode_table(bytecode_file, &size_opcodes);
-    OpCodes opcodes = {size_opcodes, opcode};
-    b->opcodes = opcodes;
+    b->opcodes = decode_opcode_table(bytecode_file); // Decode opcodes table
 
     fclose(bytecode_file); 
 }

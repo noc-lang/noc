@@ -14,8 +14,9 @@ typedef struct NocVM {
     NocStack callstack;
 } NocVM;
 
+extern NocVM vm;
+
 void free_stack(NocVM *vm);
-bool isFull(NocStack* stack);
 void create_stack(NocStack* s);
 void push_stack(NocStack* stack, NocValue val);
 NocValue pop_stack(NocStack* stack);

@@ -14,6 +14,7 @@ typedef enum NocError {
 } NocError;
 
 char* noc_value_to_str(NocValueLabel label);
+char* noc_opcode_operator_to_str(NocOpLabel label);
 char* noc_err_to_str(NocError err);
 void throw_noc_error(NocError err, char* fmt, int num, ...);
 

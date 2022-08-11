@@ -3,8 +3,6 @@
 #include "io.h"
 #include "../../core/stack.h"
 
-extern NocVM vm;
-
 void noc_print() {
    NocValue v = pop_stack(&vm.stack);
    switch(v.label) {

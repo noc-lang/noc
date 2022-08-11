@@ -1,10 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <assert.h>
 #include "errors.h"
 #include "types.h"
 #include "stack.h"
+
+NocVM vm;
 
 void free_stack(NocVM *vm) {
     free(vm->stack.array);

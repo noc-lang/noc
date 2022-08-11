@@ -21,6 +21,34 @@ char* noc_value_to_str(NocValueLabel label) {
     }
 }
 
+char* noc_opcode_operator_to_str(NocOpLabel label) {
+    switch(label) {
+        case ADD_OP:
+            return "+";
+        case MINUS_OP:
+            return "-";
+        case MUL_OP:
+            return "*";
+        case DIV_OP:    
+            return "/";
+        case EXP_OP:
+            return "^";
+        case GREATER_CMP:
+            return ">";
+        case LESS_CMP:
+            return "<";
+        case GREATER_OR_EQ_CMP:
+            return ">=";
+        case LESS_OR_EQ_CMP:
+            return "<=";
+        case EQUAL:
+            return "==";
+        case AND_BOOL:
+            return "and";
+        case OR_BOOL:
+            return "or";
+    }
+}
 char* noc_err_to_str(NocError err) {
     switch(err) {
         case ZERO_DIVISION_ERROR:

@@ -1,41 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "types.h"
 #include "errors.h"
 #include "stack.h"
-
-extern NocVM vm;
-
-char* noc_opcode_operator_to_str(NocOpLabel label) {
-    switch(label) {
-        case ADD_OP:
-            return "+";
-        case MINUS_OP:
-            return "-";
-        case MUL_OP:
-            return "*";
-        case DIV_OP:    
-            return "/";
-        case EXP_OP:
-            return "^";
-        case GREATER_CMP:
-            return ">";
-        case LESS_CMP:
-            return "<";
-        case GREATER_OR_EQ_CMP:
-            return ">=";
-        case LESS_OR_EQ_CMP:
-            return "<=";
-        case EQUAL:
-            return "==";
-        case AND_BOOL:
-            return "and";
-        case OR_BOOL:
-            return "or";
-    }
-}
 
 void noc_push_const(NocBytecode b, NocOp opcode) {    
     push_stack(&vm.stack, b.consts.constant[opcode.operand]);
@@ -339,3 +307,32 @@ void noc_opcode_bool(NocBytecode b, NocOp opcode) {
         throw_noc_error(TYPE_ERROR, "cannot call '%s' function with the %s value and %s value", 3, noc_opcode_operator_to_str(opcode.label), noc_value_to_str(v2.label), noc_value_to_str(v1.label));
     }
 }
+
+// Memory adresses of opcodes
+void* OPCODES_FUNCS[] = {
+    NULL, // call_symbol
+    &noc_push_const, // push_const
+    NULL, // return
+    NULL, // create_quote
+    NULL, // popr
+    NULL, // pushr
+    NULL, // unquote
+    NULL, // push_sym
+    &noc_dup, // dup
+    &noc_pop, // pop
+    &noc_zap, // zap
+    &noc_cat, // cat
+    &noc_rotnm, // rotNM
+    &noc_opcode_operator, // +
+    &noc_opcode_operator, // -
+    &noc_opcode_operator, // *
+    &noc_opcode_operator, // /
+    &noc_opcode_operator, // ^
+    &noc_opcode_operator, // >
+    &noc_opcode_operator, // <
+    &noc_opcode_operator, // >=
+    &noc_opcode_operator, // <=
+    &noc_opcode_cmp, // ==
+    &noc_opcode_bool, // and
+    &noc_opcode_bool, // or
+};
