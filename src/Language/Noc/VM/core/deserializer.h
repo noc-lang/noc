@@ -1,6 +1,7 @@
 #ifndef DESERIALIZER_H
 #define DESERIALIZER_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include "types.h"
 

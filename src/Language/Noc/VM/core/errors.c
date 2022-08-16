@@ -18,6 +18,10 @@ char* noc_value_to_str(NocValueLabel label) {
             return "CHAR_VAL";
         case BOOL_VAL:
             return "BOOL_VAL";
+        case SYMBOL_VAL:
+            return "SYMBOL_VAL";
+        case QUOTE_VAL:
+            return "QUOTE_VAL";
     }
 }
 

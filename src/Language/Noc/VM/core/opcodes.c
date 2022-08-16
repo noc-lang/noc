@@ -4,6 +4,9 @@
 #include "types.h"
 #include "errors.h"
 #include "stack.h"
+#include "runtime.h"
+
+extern void* OPCODES_FUNCS[];
 
 void noc_push_const(NocBytecode b, NocOp opcode) {    
     push_stack(&vm.stack, b.consts.constant[opcode.operand]);
@@ -308,16 +311,60 @@ void noc_opcode_bool(NocBytecode b, NocOp opcode) {
     }
 }
 
+void noc_create_quote(NocBytecode b, NocOp opcode) {
+    NocValue v;
+    v.label = QUOTE_VAL;
+    v.q.size_quote = opcode.operand;
+    v.q.quote = malloc(sizeof(NocValue) * opcode.operand);
+
+    vm.stack.cursor -= (opcode.operand - 1);
+    
+    if(v.q.quote == NULL)
+        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/opcodes.c => noc_create_quote)", 0);
+
+    for(int i = 0; i < opcode.operand; i++) {
+        v.q.quote[i] = peek_stack(&vm.stack);
+        vm.stack.cursor += 1;
+    }
+    vm.stack.cursor -= (opcode.operand - 1);
+    push_stack(&vm.stack, v);
+}
+
+void noc_unquote(NocBytecode b, NocOp opcode) {
+    NocValue v = pop_stack(&vm.stack);
+    if(v.label == QUOTE_VAL) {
+        for(int i = 0; i < v.q.size_quote; i++) {
+            if(v.q.quote[i].label == SYMBOL_VAL) {
+                if(v.q.quote[i].symbol->label == OP)
+                    call_opcode(b, v.q.quote[i].symbol->opcode);
+                else if(v.q.quote[i].symbol->label == NOC_FUNC)
+                    run(b, v.q.quote[i].symbol->p);
+                else if(v.q.quote[i].symbol->label == PRIM)
+                    call_prim(v.q.quote[i].symbol);
+            } else
+                push_stack(&vm.stack, v.q.quote[i]);
+        }
+    } else
+        throw_noc_error(TYPE_ERROR, "cannot unquote a %s value", 1, noc_value_to_str(v.label));
+}
+
+void noc_push_sym(NocBytecode b, NocOp opcode) {
+    Sym *s = malloc(sizeof(Sym));
+    s = &b.sym.sym[opcode.operand];
+    NocValue v = {.label = SYMBOL_VAL, .symbol = s};
+    push_stack(&vm.stack, v);
+}
+
 // Memory adresses of opcodes
 void* OPCODES_FUNCS[] = {
     NULL, // call_symbol
     &noc_push_const, // push_const
     NULL, // return
-    NULL, // create_quote
+    &noc_create_quote, // create_quote
     NULL, // popr
     NULL, // pushr
-    NULL, // unquote
-    NULL, // push_sym
+    &noc_unquote, // unquote
+    &noc_push_sym, // push_sym
     &noc_dup, // dup
     &noc_pop, // pop
     &noc_zap, // zap

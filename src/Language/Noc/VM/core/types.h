@@ -5,8 +5,11 @@
 #include <stdint.h>
 
 // NocValue type
-typedef enum NocValueLabel { FLOAT_VAL, INT_VAL, STRING_VAL, CHAR_VAL, BOOL_VAL } NocValueLabel;
-typedef struct NocValue {
+typedef struct NocValue NocValue;
+typedef struct Sym Sym;
+
+typedef enum NocValueLabel { FLOAT_VAL, INT_VAL, STRING_VAL, CHAR_VAL, BOOL_VAL, SYMBOL_VAL, QUOTE_VAL } NocValueLabel;
+struct NocValue {
     NocValueLabel label;
     union {
         double f;
@@ -14,8 +17,14 @@ typedef struct NocValue {
         char *s;
         char c;
         bool b;
+        Sym* symbol;
+        struct {
+            size_t size_quote;
+            NocValue* quote;
+        } q;
+        
     };
-} NocValue;
+};
 
 // NocOp type
 typedef enum NocOpLabel { 
@@ -53,14 +62,14 @@ typedef struct NocOp {
 
 // Noc tables type
 typedef enum SymLabel { NOC_FUNC, PRIM, OP } SymLabel;
-typedef struct Sym {
+struct Sym {
     SymLabel label;
     union {
         int p; // noc_func
         void (*func)(); // for prim
         NocOp opcode; // for opcode
     };
-} Sym;
+};
 
 typedef struct Doc {
     char* docstring;
