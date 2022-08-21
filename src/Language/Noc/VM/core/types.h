@@ -8,6 +8,12 @@
 typedef struct NocValue NocValue;
 typedef struct Sym Sym;
 
+typedef struct NocStack {
+    NocValue *array;
+    int capacity;
+    int cursor;
+} NocStack;
+
 typedef enum NocValueLabel { FLOAT_VAL, INT_VAL, STRING_VAL, CHAR_VAL, BOOL_VAL, SYMBOL_VAL, QUOTE_VAL } NocValueLabel;
 struct NocValue {
     NocValueLabel label;
@@ -18,11 +24,7 @@ struct NocValue {
         char c;
         bool b;
         Sym* symbol;
-        struct {
-            size_t size_quote;
-            NocValue* quote;
-        } q;
-        
+        NocStack quote;
     };
 };
 

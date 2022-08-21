@@ -14,8 +14,8 @@ bool isFull(NocStack* stack) {
     return stack->cursor >= (stack->capacity - 1);
 }
 
-void create_stack(NocStack* stack) {
-    stack->capacity = 10000;
+void create_stack(NocStack* stack, int capacity) {
+    stack->capacity = capacity;
     stack->array = malloc(sizeof(NocValue) * stack->capacity);
     if(stack->array == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/stack.c => create_stack)", 0);

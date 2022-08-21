@@ -7,8 +7,8 @@ int main(char* arg, char* argv[]) {
     NocBytecode bytecode;
 
     // Initializing stacks
-    create_stack(&vm.stack);
-    create_stack(&vm.callstack);
+    create_stack(&vm.stack, 10000);
+    create_stack(&vm.callstack, 10000);
     
     deserialize(&bytecode, argv[1]); // argv[1] => bytecode path
     run(bytecode, 0);

@@ -3,12 +3,6 @@
 
 #include "types.h"
 
-typedef struct NocStack {
-    NocValue *array;
-    int capacity;
-    int cursor;
-} NocStack;
-
 typedef struct NocVM {
     NocStack stack;
     NocStack callstack;
@@ -17,7 +11,7 @@ typedef struct NocVM {
 extern NocVM vm;
 
 void free_stack(NocVM *vm);
-void create_stack(NocStack* s);
+void create_stack(NocStack* s, int capacity);
 void push_stack(NocStack* stack, NocValue val);
 NocValue pop_stack(NocStack* stack);
 NocValue peek_stack(NocStack* stack);

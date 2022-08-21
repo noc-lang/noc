@@ -314,35 +314,36 @@ void noc_opcode_bool(NocBytecode b, NocOp opcode) {
 void noc_create_quote(NocBytecode b, NocOp opcode) {
     NocValue v;
     v.label = QUOTE_VAL;
-    v.q.size_quote = opcode.operand;
-    v.q.quote = malloc(sizeof(NocValue) * opcode.operand);
+    create_stack(&v.quote, opcode.operand);
 
-    vm.stack.cursor -= (opcode.operand - 1);
-    
-    if(v.q.quote == NULL)
-        throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/opcodes.c => noc_create_quote)", 0);
+    vm.stack.cursor -= opcode.operand;
 
     for(int i = 0; i < opcode.operand; i++) {
-        v.q.quote[i] = peek_stack(&vm.stack);
-        vm.stack.cursor += 1;
+        vm.stack.cursor++;
+        push_stack(&v.quote, peek_stack(&vm.stack));
     }
-    vm.stack.cursor -= (opcode.operand - 1);
+
+    vm.stack.cursor -= opcode.operand;
     push_stack(&vm.stack, v);
 }
 
 void noc_unquote(NocBytecode b, NocOp opcode) {
     NocValue v = pop_stack(&vm.stack);
     if(v.label == QUOTE_VAL) {
-        for(int i = 0; i < v.q.size_quote; i++) {
-            if(v.q.quote[i].label == SYMBOL_VAL) {
-                if(v.q.quote[i].symbol->label == OP)
-                    call_opcode(b, v.q.quote[i].symbol->opcode);
-                else if(v.q.quote[i].symbol->label == NOC_FUNC)
-                    run(b, v.q.quote[i].symbol->p);
-                else if(v.q.quote[i].symbol->label == PRIM)
-                    call_prim(v.q.quote[i].symbol);
+        int tmp = v.quote.cursor;
+        v.quote.cursor = 1;
+        for(int i = 0; i < tmp; i++) {
+            NocValue elem = peek_stack(&v.quote);
+            if(elem.label == SYMBOL_VAL) {
+                if(elem.symbol->label == OP)
+                    call_opcode(b, elem.symbol->opcode);
+                else if(elem.symbol->label == NOC_FUNC)
+                    run(b, elem.symbol->p);
+                else if(elem.symbol->label == PRIM)
+                    call_prim(elem.symbol);
             } else
-                push_stack(&vm.stack, v.q.quote[i]);
+                push_stack(&vm.stack, elem);
+            v.quote.cursor++;
         }
     } else
         throw_noc_error(TYPE_ERROR, "cannot unquote a %s value", 1, noc_value_to_str(v.label));
