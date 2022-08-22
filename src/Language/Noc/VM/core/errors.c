@@ -27,6 +27,24 @@ char* noc_value_to_str(NocValueLabel label) {
 
 char* noc_opcode_operator_to_str(NocOpLabel label) {
     switch(label) {
+        case POPR_QUOTE:
+            return "popr";
+        case PUSHR_QUOTE:
+            return "pushr";
+        case UNQUOTE_QUOTE:
+            return "unquote";
+        case PUSH_SYM:
+            return "push_sym";
+        case DUP:
+            return "dup";
+        case POP:
+            return "pop";
+        case CLEAR_STACK:
+            return "zap";
+        case CONCAT:
+            return "cat";
+        case ROT:
+            return "rotNM";
         case ADD_OP:
             return "+";
         case MINUS_OP:

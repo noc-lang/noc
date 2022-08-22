@@ -6,8 +6,6 @@
 #include "stack.h"
 #include "runtime.h"
 
-extern void* OPCODES_FUNCS[];
-
 void noc_push_const(NocBytecode b, NocOp opcode) {    
     push_stack(&vm.stack, b.consts.constant[opcode.operand]);
 }
@@ -212,6 +210,24 @@ void noc_cat(NocBytecode b, NocOp opcode) {
         strcat(result, v1.s);
         NocValue res = {STRING_VAL, .s = result};
         push_stack(&vm.stack, res);
+    } else if(v1.label == QUOTE_VAL && v2.label == QUOTE_VAL) {
+        NocValue new_quote;
+        new_quote.label = QUOTE_VAL;
+        create_stack(&new_quote.quote, v1.quote.capacity  + v2.quote.capacity - 2);
+        
+        v2.quote.cursor = 0;
+        for(int i = 0; i < v2.quote.capacity-1; i++) {
+            v2.quote.cursor++;
+            push_stack(&new_quote.quote, peek_stack(&v2.quote));
+        }
+
+        v1.quote.cursor = 0;
+        for(int i = 0; i < v1.quote.capacity-1; i++) {
+            v1.quote.cursor++;
+            push_stack(&new_quote.quote, peek_stack(&v1.quote));
+        }
+        
+        push_stack(&vm.stack, new_quote);
     } else {
         throw_noc_error(TYPE_ERROR, "cannot concatenate %s value with %s value", 2, noc_value_to_str(v2.label), noc_value_to_str(v1.label));
     }
@@ -314,6 +330,7 @@ void noc_opcode_bool(NocBytecode b, NocOp opcode) {
 void noc_create_quote(NocBytecode b, NocOp opcode) {
     NocValue v;
     v.label = QUOTE_VAL;
+   
     create_stack(&v.quote, opcode.operand);
 
     vm.stack.cursor -= opcode.operand;
@@ -356,14 +373,34 @@ void noc_push_sym(NocBytecode b, NocOp opcode) {
     push_stack(&vm.stack, v);
 }
 
+void noc_pushr(NocBytecode b, NocOp opcode) {
+    NocValue v = pop_stack(&vm.stack);
+    NocValue v2 = pop_stack(&vm.stack);
+    if(v2.label == QUOTE_VAL) {
+        push_stack(&v2.quote, v);
+        push_stack(&vm.stack, v2);
+    } else
+        throw_noc_error(TYPE_ERROR, "cannot pushr a %s value", 1, noc_value_to_str(v2.label));
+}
+
+void noc_popr(NocBytecode b, NocOp opcode) {
+    NocValue v = pop_stack(&vm.stack);
+    if(v.label == QUOTE_VAL) {
+        NocValue elem = pop_stack(&v.quote);
+        push_stack(&vm.stack, v);
+        push_stack(&vm.stack, elem);
+    } else
+        throw_noc_error(TYPE_ERROR, "cannot popr a %s value", 1, noc_value_to_str(v.label));
+}
+
 // Memory adresses of opcodes
 void* OPCODES_FUNCS[] = {
     NULL, // call_symbol
     &noc_push_const, // push_const
     NULL, // return
     &noc_create_quote, // create_quote
-    NULL, // popr
-    NULL, // pushr
+    &noc_popr, // popr
+    &noc_pushr, // pushr
     &noc_unquote, // unquote
     &noc_push_sym, // push_sym
     &noc_dup, // dup
