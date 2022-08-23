@@ -75,10 +75,12 @@ Table decode_sym_table(FILE *file) {
 
         // noc_func constructor
         if(constructor == 0) {
+            result.sym[i].name = decode_string(file);
             decode_integer(file, &pos);
             result.sym[i].p = pos;
         // prim constructor
         } else if(constructor == 1) {
+            result.sym[i].name = decode_string(file);
             decode_integer(file, &pos);
             result.sym[i].func = PRIM_FUNCS[pos];
         // opcode constructor

@@ -12,7 +12,7 @@ type Size = Int
 
 data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes} deriving (Show)
 
-data SymbolDef = FuncSym String Position | FuncPrim Position | OpcodeSym OpCode deriving (Show,Eq)
+data SymbolDef = FuncSym String Position | FuncPrim String Position | OpcodeSym OpCode deriving (Show,Eq)
 
 type OpCodes = [OpCode]
 
@@ -102,7 +102,7 @@ update [] (Bytecode s c d o) _ = Bytecode s c d o
 update (WordAtom x : xs) (Bytecode s c d o) isQuote = case isPrim x of
   True -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem (==) new])) isQuote
     where
-      elem = FuncPrim $ index x (==) internalFuncs
+      elem = FuncPrim x $ index x (==) internalFuncs
       new = elem `set` s
   False -> case isOpcode x of
     True -> case isQuote of

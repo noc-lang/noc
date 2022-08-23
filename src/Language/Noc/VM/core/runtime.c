@@ -21,6 +21,8 @@ void call_opcode(NocBytecode b, NocOp op) {
 
 void run(NocBytecode b, int pos) {
     while(pos < b.opcodes.opcodes.size) {
+        print_stack(vm.stack);
+        printf("\n");
         if(b.opcodes.opcodes.elems[pos].label == RETURN) {
             if(vm.callstack.cursor > 0)
                 pos = pop_stack(&vm.callstack).i;

@@ -49,8 +49,8 @@ encodeString :: String -> Put
 encodeString w = (encodeInteger $ length w) >> putStringUtf8 w
 
 encodeSym :: SymbolDef -> Put
-encodeSym (FuncSym _ p) = putWord8 0 >> encodeInteger p
-encodeSym (FuncPrim p) = putWord8 1 >> encodeInteger p
+encodeSym (FuncSym n p) = putWord8 0 >> (encodeString n) >> encodeInteger p
+encodeSym (FuncPrim n p) = putWord8 1 >> (encodeString n) >> encodeInteger p
 encodeSym (OpcodeSym w) = putWord8 2 >> encodeOpCode w
 
 encode' :: Bytecode -> Put

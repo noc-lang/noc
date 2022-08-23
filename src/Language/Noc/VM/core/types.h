@@ -66,6 +66,7 @@ typedef struct NocOp {
 typedef enum SymLabel { NOC_FUNC, PRIM, OP } SymLabel;
 struct Sym {
     SymLabel label;
+    char* name;
     union {
         int p; // noc_func
         void (*func)(); // for prim

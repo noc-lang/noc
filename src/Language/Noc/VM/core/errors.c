@@ -9,19 +9,19 @@
 char* noc_value_to_str(NocValueLabel label) {
     switch(label) {
         case FLOAT_VAL:
-            return "FLOAT_VAL";
+            return "float";
         case INT_VAL:
-            return "INT_VAL";
+            return "int";
         case STRING_VAL:
-            return "STRING_VAL";
+            return "string";
         case CHAR_VAL:
-            return "CHAR_VAL";
+            return "char";
         case BOOL_VAL:
-            return "BOOL_VAL";
+            return "bool";
         case SYMBOL_VAL:
-            return "SYMBOL_VAL";
+            return "symbol";
         case QUOTE_VAL:
-            return "QUOTE_VAL";
+            return "quote";
     }
 }
 
