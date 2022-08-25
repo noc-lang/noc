@@ -57,7 +57,7 @@ encode' :: Bytecode -> Put
 encode' (Bytecode sym constant doc opcodes) = do
     (encodeInteger $ length sym) >> mapM_ encodeSym sym
     (encodeInteger $ length constant) >> mapM_ encodeConst constant
-    (encodeInteger $ length doc) >> mapM_ (\(d, pos) -> encodeString d >> (encodeInteger pos)) doc
+    (encodeInteger $ length doc) >> mapM_ (\(name, d) -> encodeString name >> encodeString d) doc
     (encodeInteger $ length opcodes) >> mapM_ encodeOpCode opcodes
 
 serializeBytecode :: FilePath -> Bytecode -> IO ()

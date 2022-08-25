@@ -11,7 +11,7 @@
 void free_bytecode(NocBytecode *b) {
     free(b->sym.sym);
     free(b->consts.constant);
-    free(b->doc.doc);
+    free(b->doc.doc.doc);
     free(b->opcodes.opcodes.elems);
 }
 
@@ -157,15 +157,15 @@ Table decode_doc_table(FILE *file) {
     decode_integer(file, &size);
     Table result;
     result.label = DOC;
-    result.doc = malloc(sizeof(Doc) * size);
+    result.doc.doc = malloc(sizeof(Doc) * size);
+    result.doc.size_doc = size;
 
-    if(result.doc == NULL)
+    if(result.doc.doc == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_doc_table)", 0);
     
     for(int i = 0; i < size; i++) {
-        result.doc[i].docstring = decode_string(file);
-        int64_t pos;
-        result.doc[i].pos = decode_integer(file, &pos);
+        result.doc.doc[i].name = decode_string(file);
+        result.doc.doc[i].docstring = decode_string(file);
     }
     return result;
 }

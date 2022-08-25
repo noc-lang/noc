@@ -1,7 +1,7 @@
 #ifndef MODULES_H
 #define MODULES_H
 
-#include "io/io.h"
+#include "prelude.h"
 
 extern void* PRIM_FUNCS[];
 

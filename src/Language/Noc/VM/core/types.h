@@ -7,6 +7,7 @@
 // NocValue type
 typedef struct NocValue NocValue;
 typedef struct Sym Sym;
+typedef struct NocBytecode NocBytecode;
 
 typedef struct NocStack {
     NocValue *array;
@@ -69,15 +70,20 @@ struct Sym {
     char* name;
     union {
         int p; // noc_func
-        void (*func)(); // for prim
+        void (*func)(NocBytecode); // for prim
         NocOp opcode; // for opcode
     };
 };
 
 typedef struct Doc {
+    char* name;
     char* docstring;
-    int pos;
 } Doc;
+
+typedef struct Docs {
+    size_t size_doc;
+    Doc* doc;
+} Docs;
 
 typedef struct OpCodes {
     size_t size;
@@ -90,16 +96,16 @@ typedef struct Table {
     union {
         Sym* sym;
         NocValue* constant;
-        Doc* doc;
+        Docs doc;
         OpCodes opcodes;
     };
 } Table;
 
-typedef struct NocBytecode {
+struct NocBytecode {
     Table sym;
     Table consts;
     Table doc;
     Table opcodes;
-} NocBytecode;
+};
 
 #endif

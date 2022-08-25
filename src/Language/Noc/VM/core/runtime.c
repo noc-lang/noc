@@ -4,9 +4,9 @@
 #include "types.h"
 #include "stack.h"
 
-void call_prim(Sym *s) {
-    void (*f)() = s->func;
-    f();
+void call_prim(Sym *s, NocBytecode b) {
+    void (*f)(NocBytecode) = s->func;
+    f(b);
 }
 
 void call_noc_func(int pos) {
@@ -21,8 +21,6 @@ void call_opcode(NocBytecode b, NocOp op) {
 
 void run(NocBytecode b, int pos) {
     while(pos < b.opcodes.opcodes.size) {
-        print_stack(vm.stack);
-        printf("\n");
         if(b.opcodes.opcodes.elems[pos].label == RETURN) {
             if(vm.callstack.cursor > 0)
                 pos = pop_stack(&vm.callstack).i;
@@ -31,7 +29,7 @@ void run(NocBytecode b, int pos) {
         } else if(b.opcodes.opcodes.elems[pos].label == CALL_SYMBOL) {
             Sym sym_elem = b.sym.sym[b.opcodes.opcodes.elems[pos].operand];
             if(sym_elem.label == PRIM) {
-                call_prim(&sym_elem);
+                call_prim(&sym_elem, b);
                 pos++;
             } else {
                 call_noc_func(pos);

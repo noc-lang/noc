@@ -10,7 +10,7 @@ type Position = Int
 
 type Size = Int
 
-data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(DocString, Position)], opcodes :: OpCodes} deriving (Show)
+data Bytecode = Bytecode {sym :: [SymbolDef], constant :: [Constant], doc :: [(String, DocString)], opcodes :: OpCodes} deriving (Show)
 
 data SymbolDef = FuncSym String Position | FuncPrim String Position | OpcodeSym OpCode deriving (Show,Eq)
 
@@ -133,7 +133,6 @@ genBytecode [] bytecode = return bytecode
 genBytecode ((name, (docstring, expr)) : xs) (Bytecode s c d o) = do
   let (Bytecode s' c' d' o') = update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o) False
   let new_s = map (updatePos (unpack name) (length o)) s'
-  let symbol_decl = head $ filter (isSameSymbolDecl (unpack name)) new_s
   case docstring of
-    (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(doc', index symbol_decl (==) new_s)]) (o' <> [RETURN])
+    (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(unpack name, doc')]) (o' <> [RETURN])
     Nothing -> genBytecode xs $ Bytecode new_s c' d' (o' <> [RETURN])
