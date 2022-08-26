@@ -2,8 +2,6 @@
 Stack functions
 */
 
-load seq
-
 def quote = { 
     ---
     Put value in a quote

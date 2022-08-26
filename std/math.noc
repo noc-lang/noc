@@ -4,7 +4,6 @@ Math functions
 
 load std:bool
 load std:stack
-load seq
 
 def pi = {
     ---
