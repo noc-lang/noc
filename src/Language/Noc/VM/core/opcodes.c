@@ -203,12 +203,12 @@ void noc_cat(NocBytecode b, NocOp opcode) {
     NocValue v1 = pop_stack(&vm.stack);
     NocValue v2 = pop_stack(&vm.stack);
     if(v1.label == STRING_VAL && v2.label == STRING_VAL) {
-        char* result = malloc(sizeof(char) * (strlen(v1.s) + strlen(v2.s)));
+        char* result = calloc((strlen(v1.s) + strlen(v2.s)) + 1, sizeof(char));
         if(result == NULL)
             throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/opcodes.c => noc_cat)", 0);
         strcat(result, v2.s);
         strcat(result, v1.s);
-        NocValue res = {STRING_VAL, .s = result};
+        NocValue res = {.label = STRING_VAL, .s = result};
         push_stack(&vm.stack, res);
     } else if(v1.label == QUOTE_VAL && v2.label == QUOTE_VAL) {
         NocValue new_quote;

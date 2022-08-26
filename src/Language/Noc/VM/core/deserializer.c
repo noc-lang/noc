@@ -25,16 +25,14 @@ char* decode_string(FILE *file) {
     int64_t size_elem;
     fread(&size_elem, sizeof(int64_t), 1, file);
 
-    char *elem_name = malloc(sizeof(char) * size_elem);
+    char *elem_name = malloc(sizeof(char) * (size_elem+1));
 
     if(elem_name == NULL)
         throw_noc_error(OUT_OF_MEMORY_ERROR, "malloc cannot allocate more memory. (source: VM/core/deserializer.c => decode_string)", 0);
  
-    char c;
-    for(int k = 0; k < size_elem; k++) {
-        fread(&c, sizeof(char), 1, file);
-        elem_name[k] = c;
-    }
+    fread(elem_name, sizeof(char), size_elem, file);
+    elem_name[size_elem] = '\0';
+    
     return elem_name;
 }
 

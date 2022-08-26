@@ -5,6 +5,7 @@
 #include "../core/types.h"
 #include "../core/stack.h"
 #include "../core/errors.h"
+#include "docstring.h"
 
 void noc_id(NocBytecode b) {
     push_stack(&vm.stack, pop_stack(&vm.stack));
@@ -90,14 +91,20 @@ void noc_help(NocBytecode b) {
                 NocValue v2;
                 v2.label = STRING_VAL;
                 if(v.quote.array[1].symbol->label == NOC_FUNC) {
-                    for(int i = 0; i < b.doc.doc.size_doc; i++) {
-                        if(strcmp(b.doc.doc.doc[i].name, v.quote.array[1].symbol->name)== 0) {
-                            v2.s = b.doc.doc.doc[i].docstring;
-                            break;
+                    if(v.quote.array[1].symbol->p == (-1)) {
+                        v2.s = "(help) No doc entry for this function.";
+                    } else {
+                        for(int i = 0; i < b.doc.doc.size_doc; i++) {
+                            if(strcmp(b.doc.doc.doc[i].name, v.quote.array[1].symbol->name) == 0) {
+                                v2.s = b.doc.doc.doc[i].docstring;
+                                break;
+                            }
                         }
                     }
+                } else if(v.quote.array[1].symbol->label == OP) {
+                    v2.s = render_op_doc(v.quote.array[1].symbol->opcode.label);
                 } else {
-                    // Bytecode {sym = [FuncSym "main" 0,FuncPrim "print" 10,FuncSym "square" 3], constant = [IntConst 5], doc = [("square", "square number\n    \n    (example)\n    5 2 ^ = 25")], opcodes = [PUSH_CONST 0,CALL_SYMBOL 1,RETURN,RETURN]}
+                    v2.s = render_prim_doc(v.quote.array[1].symbol->name);
                 }
                 push_stack(&vm.stack, v2);
             }
