@@ -66,9 +66,7 @@ str =
 
 sys :: [String]
 sys =
-  [ "exit",
-    "args",
-    "catch"
+  [ "exit"
   ]
 
 seq' :: [String]

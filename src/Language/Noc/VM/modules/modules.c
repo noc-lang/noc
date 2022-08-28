@@ -19,9 +19,7 @@ void* PRIM_FUNCS[] = {
     NULL,
     &noc_tostr,
     &noc_chars,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    &noc_exit,
+    &noc_step,
+    &noc_fold,
 };
