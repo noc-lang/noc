@@ -40,6 +40,7 @@ prelude =
     "chr",
     "ord",
     "print",
+    "ask",
     "putstr"
   ]
 

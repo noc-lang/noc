@@ -5,6 +5,7 @@
 #include "../core/types.h"
 #include "../core/stack.h"
 #include "../core/errors.h"
+#include "../core/runtime.h"
 #include "docstring.h"
 
 void noc_id(NocBytecode b) {
@@ -148,7 +149,7 @@ void noc_print(NocBytecode b) {
    NocValue v = pop_stack(&vm.stack);
    switch(v.label) {
       case FLOAT_VAL:
-         printf("%f\n", v.f);
+         printf("%.10f\n", v.f);
          break;
       case INT_VAL:
          printf("%ld\n", v.i);
@@ -166,4 +167,51 @@ void noc_print(NocBytecode b) {
          print_stack(v.quote);
          printf("\n");
    }  
+}
+
+void noc_ask(NocBytecode b) {
+    NocValue v = pop_stack(&vm.stack);
+    if(v.label == STRING_VAL) {
+        printf("%s", v.s);
+        char *line = NULL;
+        size_t size = 0;
+        ssize_t line_size = getline(&line, &size, stdin);
+        if (line[line_size - 1] == '\n')  { line[line_size - 1] = '\0';}
+        v.s = line;
+        push_stack(&vm.stack, v);
+    } else
+        throw_noc_error(TYPE_ERROR, "cannot ask with %s value", 1, noc_value_to_str(v.label));
+}
+
+void noc_case(NocBytecode b) {
+    NocValue v = pop_stack(&vm.stack);
+    NocValue v2 = pop_stack(&vm.stack);
+    if(v.label == QUOTE_VAL) {
+        NocOp op;
+        op.operand = -1;
+        for(int i = 1; i < v.quote.cursor+1; i++) {
+            if(v.quote.array[i].quote.cursor != 2)
+                throw_noc_error(BAD_ARGUMENT, "bad quote structure in the pattern matching", 0);
+
+            push_stack(&vm.stack, v.quote.array[i].quote.array[1].quote.array[1]);
+            push_stack(&vm.stack, v2);
+            op.label = EQUAL;
+            call_opcode(b, op);
+
+            if(pop_stack(&vm.stack).b) {
+                push_stack(&vm.stack, v.quote.array[i].quote.array[2]);
+                op.label = UNQUOTE_QUOTE;
+                call_opcode(b, op);
+                return;
+            };
+        }
+
+        if(strcmp(v.quote.array[v.quote.cursor].quote.array[1].quote.array[1].symbol->name, "_") != 0)
+            throw_noc_error(BAD_ARGUMENT, "not having otherwise case [_]", 0);
+
+        push_stack(&vm.stack, v.quote.array[v.quote.cursor].quote.array[2]);
+        op.label = UNQUOTE_QUOTE;
+        call_opcode(b, op);
+    } else
+        throw_noc_error(TYPE_ERROR, "cannot case with %s value", 1, noc_value_to_str(v.label));
 }

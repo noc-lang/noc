@@ -122,8 +122,7 @@ char* render_prim_doc(char* funcname) {
     pop \"filename\" \"content\" \"w\" open => []\n\
     \"filename\" \"\\ncontent2\" \"a\" open => []\n\n\
     Modes combined: \n\
-    \"filename\" \"This is a new content\" \"rw\" open => [\"content\\ncontent2\"]\n\
-    pop \"filename\" \"This is a new content\" \"ra\" open => [\"This is a new content\"]";
+    pop \"filename\" \"This is a new content\" \"r+\" open => [\"This is a new content\"]";
     } else if(strcmp(funcname, "format") == 0) {
         return "Format string, replace braces by corresponding value\n\
 (example)\n\

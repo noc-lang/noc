@@ -25,7 +25,11 @@ void print_stack(NocStack stack) {
         } else if(stack.array[i].label == STRING_VAL) {
             printf("\"%s\"", stack.array[i].s);
         } else if(stack.array[i].label == CHAR_VAL) {
-            printf("'%c'", stack.array[i].c);
+            if(stack.array[i].c == '\n') {
+                printf("'\\n'");
+            } else {
+                printf("'%c'", stack.array[i].c);
+            }
         } else if(stack.array[i].label == BOOL_VAL) {
             printf("%s", stack.array[i].b ? "True" : "False");
         } else if(stack.array[i].label == SYMBOL_VAL) {

@@ -29,7 +29,8 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
                     result.i = v2.i * v1.i;
                     break;
                 case DIV_OP:
-                    result.i = v2.i / v1.i;
+                    result.label = FLOAT_VAL;
+                    result.f = (double)v2.i / (double)v1.i;
                     break;
                 case EXP_OP:
                     result.i = pow(v2.i,v1.i);
@@ -354,9 +355,9 @@ void noc_unquote(NocBytecode b, NocOp opcode) {
             if(elem.label == SYMBOL_VAL) {
                 if(elem.symbol->label == OP)
                     call_opcode(b, elem.symbol->opcode);
-                else if(elem.symbol->label == NOC_FUNC)
+                else if(elem.symbol->label == NOC_FUNC) {
                     run(b, elem.symbol->p);
-                else if(elem.symbol->label == PRIM)
+                } else if(elem.symbol->label == PRIM)
                     call_prim(elem.symbol);
             } else
                 push_stack(&vm.stack, elem);
