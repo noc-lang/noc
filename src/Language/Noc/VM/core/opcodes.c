@@ -332,7 +332,7 @@ void noc_create_quote(NocBytecode b, NocOp opcode) {
     NocValue v;
     v.label = QUOTE_VAL;
    
-    create_stack(&v.quote, opcode.operand);
+    create_stack(&v.quote, opcode.operand+1);
 
     vm.stack.cursor -= opcode.operand;
 

@@ -5,5 +5,6 @@
 
 void noc_tostr(NocBytecode b);
 void noc_chars(NocBytecode b);
+void noc_format(NocBytecode b);
 
 #endif

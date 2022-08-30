@@ -16,7 +16,7 @@ void* PRIM_FUNCS[] = {
     &noc_ask,
     &noc_putstr,
     &noc_open,
-    NULL,
+    &noc_format,
     &noc_tostr,
     &noc_chars,
     &noc_exit,
