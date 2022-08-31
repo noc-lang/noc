@@ -1,0 +1,30 @@
+<<<<<<< HEAD
+/*
+String functions
+*/
+
+load str
+
+def ($) = {
+    ---
+    Convert a string to a quote of chars
+    (example)
+        "abc" $ => ['a' 'b' 'c']
+    ---
+    chars
+=======
+/*
+String functions
+*/
+
+load str
+
+def ($) = {
+    ---
+    Convert a string to a quote of chars
+    (example)
+        "abc" $ => ['a' 'b' 'c']
+    ---
+    chars
+>>>>>>> master
+}

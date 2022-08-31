@@ -1,0 +1,32 @@
+<<<<<<< HEAD
+/*
+I/O functions
+*/
+
+def putstrln = {
+    ---
+    putstr function with newline
+
+    (example)
+    "Hello, World!" putstrln
+    Output:
+    Hello, World
+    ---
+    "\n" cat putstr
+=======
+/*
+I/O functions
+*/
+
+def putstrln = {
+    ---
+    putstr function with newline
+
+    (example)
+    "Hello, World!" putstrln
+    Output:
+    Hello, World
+    ---
+    "\n" cat putstr
+>>>>>>> master
+}

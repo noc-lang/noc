@@ -1,0 +1,110 @@
+<<<<<<< HEAD
+/*
+Math functions
+*/
+
+load std:bool
+load std:stack
+
+def pi = {
+    ---
+    The pi number
+    ---
+    3.1415926535
+}
+
+def mod = {
+    ---
+    Modulo operation
+
+    (example)
+    10 6 mod => [4]
+    ---
+    quote swap quote swap
+    cat
+    dup
+    popr pop unquote swap
+    unquote dup 3 rotNR
+    / int * -
+}
+
+def (%) = {
+    ---
+    Modulo operation
+
+    (example)
+    10 6 mod => [4]
+    ---
+    mod
+}
+
+def sqrt = {
+    ---
+    Square root of a number
+
+    (example)
+    25 sqrt => [5.0]
+    ---
+    0.5 ^
+}
+
+def round = {
+    ---
+    Round a number to the nearest integer
+
+    (example)
+    25.5 round => [26]
+    ---
+    dup dup int - 
+    0.5 >= [int] [int 1 +] 
+    3 -1 rotNM if
+=======
+/*
+Math functions
+*/
+
+load std:stack
+load seq
+
+def pi = {
+    ---
+    The pi number
+    ---
+    3.141592653589793
+}
+
+def mod = {
+    ---
+    Modulo operation
+
+    (example)
+    10 6 mod => [4]
+    ---
+    quote swap quote swap
+    cat
+    dup
+    popr pop unquote swap
+    unquote dup 3 rotNR
+    / int * -
+}
+
+def (%) = {
+    ---
+    Modulo operation
+
+    (example)
+    10 6 mod => [4]
+    ---
+    mod
+}
+
+def sqrt = {
+    ---
+    Square root of a number
+
+    (example)
+    25 sqrt => [5.0]
+    ---
+    0.5 ^
+>>>>>>> master
+}

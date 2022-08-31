@@ -1,0 +1,113 @@
+<<<<<<< HEAD
+/*
+Bool functions
+*/
+
+load std:stack
+
+def if = {
+  ---
+  if statement
+  
+  (example)
+  ["else"] ["then"] True if => ["then"]
+  ---
+  [
+    [[True] [swap pop unquote]]
+    [[False] [pop unquote]]
+  ] case
+}
+
+def not = {
+    ---
+    Logical operator
+    Get False if the value is True and True if the value is False
+
+    (example)
+    True not => [False]
+    False not => [True]
+    ---
+    [
+        [[True] [False]]
+        [[False] [True]]
+    ] case
+}
+
+def (!=) = {
+  ---
+  Compare if the first value is different than the second value
+
+  (example)
+  5 6 != => [True]
+  ---
+  == not
+}
+=======
+/*
+Bool functions
+*/
+
+load std:stack
+load seq
+
+def if = {
+  ---
+  if statement
+  
+  (example)
+  ["else"] ["then"] True if => ["then"]
+  ---
+  [
+    [[True] [swap pop unquote]]
+    [[False] [pop unquote]]
+  ] case
+}
+
+def not = {
+    ---
+    Logical operator
+    Get False if the value is True and True if the value is False
+
+    (example)
+    True not => [False]
+    False not => [True]
+    ---
+    [
+        [[True] [False]]
+        [[False] [True]]
+    ] case
+}
+
+def eq = {
+    ---
+    Check if 2 values are equal 
+
+    (example)
+    5 6 eq => [False]
+    [Right "ok"] [Right "ok"] eq => [True]
+    ---
+    quote quote [[True]] cat quote [[[_] [False]]] cat case
+}
+
+def (==) = {
+  ---
+    Check if 2 values are equal 
+
+    (example)
+    5 6 eq => [False]
+    [Right "ok"] [Right "ok"] eq => [True]
+    ---
+    eq
+}
+
+def (!=) = {
+  ---
+  Compare if the first value is different than the second value
+
+  (example)
+  5 6 != => [True]
+  ---
+  eq not
+}
+
+>>>>>>> master
