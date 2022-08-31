@@ -1,5 +1,4 @@
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Language.Noc.Runtime.Prelude where
 
@@ -23,49 +22,49 @@ import Text.Read (readMaybe)
 otherModules :: M.Map T.Text Env
 otherModules =
   M.fromList
-    [ ("fs", fs),
-      ("char", char),
-      ("str", str),
-      ("sys", sys),
-      ("seq", seq')
+    [ (T.pack "fs", fs),
+      (T.pack "char", char),
+      (T.pack "str", str),
+      (T.pack "sys", sys),
+      (T.pack "seq", seq')
     ]
 
 prelude :: Env
 prelude =
   M.fromList
     [ -- Stack-shuffler
-      ("dup", Constant $ (docDup, PrimVal builtinDup)),
-      ("pop", Constant $ (docPop, PrimVal builtinPop)),
-      ("zap", Constant $ (docZap, PrimVal builtinZap)),
-      ("cat", Constant $ (docCat, PrimVal builtinCat)),
-      ("rotNM", Constant $ (docRotNM, PrimVal builtinRotNM)),
+      (T.pack "dup", Constant $ (docDup, PrimVal builtinDup)),
+      (T.pack "pop", Constant $ (docPop, PrimVal builtinPop)),
+      (T.pack "zap", Constant $ (docZap, PrimVal builtinZap)),
+      (T.pack "cat", Constant $ (docCat, PrimVal builtinCat)),
+      (T.pack "rotNM", Constant $ (docRotNM, PrimVal builtinRotNM)),
       -- Arithmetic operators
-      ("+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
-      ("-", Constant $ (docOp "-", PrimVal $ builtinOp (-))),
-      ("*", Constant $ (docOp "*", PrimVal $ builtinOp (*))),
-      ("/", Constant $ (docDiv, PrimVal $ builtinDiv)),
-      ("^", Constant $ (docPow, PrimVal $ builtinPow)),
+      (T.pack "+", Constant $ (docOp "+", PrimVal $ builtinOp (+))),
+      (T.pack "-", Constant $ (docOp "-", PrimVal $ builtinOp (-))),
+      (T.pack "*", Constant $ (docOp "*", PrimVal $ builtinOp (*))),
+      (T.pack "/", Constant $ (docDiv, PrimVal $ builtinDiv)),
+      (T.pack "^", Constant $ (docPow, PrimVal $ builtinPow)),
       -- I/O
-      ("print", Constant $ (docPrint, PrimVal builtinPrint)),
-      ("putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
-      ("putchar", Constant $ (docPutChar, PrimVal builtinPutChar)),
-      ("ask", Constant $ (docAsk, PrimVal builtinAsk)),
+      (T.pack "print", Constant $ (docPrint, PrimVal builtinPrint)),
+      (T.pack "putstr", Constant $ (docPutStr, PrimVal builtinPutStr)),
+      (T.pack "putchar", Constant $ (docPutChar, PrimVal builtinPutChar)),
+      (T.pack "ask", Constant $ (docAsk, PrimVal builtinAsk)),
       -- Boolean
-      (">", Constant $ (docBoolOp ">", PrimVal $ builtinBoolOp ">" (>))),
-      ("<", Constant $ (docBoolOp "<", PrimVal $ builtinBoolOp "<" (<))),
-      (">=", Constant $ (docBoolOp ">=", PrimVal $ builtinBoolOp ">=" (>=))),
-      ("<=", Constant $ (docBoolOp "<=", PrimVal $ builtinBoolOp "<=" (<=))),
-      ("and", Constant $ (docBoolOp "and", PrimVal $ builtinCondBool "and" (&&))),
-      ("or", Constant $ (docBoolOp "or", PrimVal $ builtinCondBool "or" (||))),
+      (T.pack ">", Constant $ (docBoolOp ">", PrimVal $ builtinBoolOp ">" (>))),
+      (T.pack "<", Constant $ (docBoolOp "<", PrimVal $ builtinBoolOp "<" (<))),
+      (T.pack ">=", Constant $ (docBoolOp ">=", PrimVal $ builtinBoolOp ">=" (>=))),
+      (T.pack "<=", Constant $ (docBoolOp "<=", PrimVal $ builtinBoolOp "<=" (<=))),
+      (T.pack "and", Constant $ (docBoolOp "and", PrimVal $ builtinCondBool "and" (&&))),
+      (T.pack "or", Constant $ (docBoolOp "or", PrimVal $ builtinCondBool "or" (||))),
       -- Misc
-      ("id", Constant $ (docId, PrimVal builtinId)),
-      ("str", Constant $ (docStr, PrimVal builtinStr)),
-      ("int", Constant $ (docInt, PrimVal builtinInt)),
-      ("float", Constant $ (docFloat, PrimVal builtinFloat)),
-      ("bool", Constant $ (docBool, PrimVal builtinBool)),
-      ("help", Constant $ (docHelp, PrimVal builtinHelp)),
-      ("case", Constant $ (docCase, PrimVal builtinCase)),
-      ("trace", Constant $ (docTrace, PrimVal builtinTrace))
+      (T.pack "id", Constant $ (docId, PrimVal builtinId)),
+      (T.pack "str", Constant $ (docStr, PrimVal builtinStr)),
+      (T.pack "int", Constant $ (docInt, PrimVal builtinInt)),
+      (T.pack "float", Constant $ (docFloat, PrimVal builtinFloat)),
+      (T.pack "bool", Constant $ (docBool, PrimVal builtinBool)),
+      (T.pack "help", Constant $ (docHelp, PrimVal builtinHelp)),
+      (T.pack "case", Constant $ (docCase, PrimVal builtinCase)),
+      (T.pack "trace", Constant $ (docTrace, PrimVal builtinTrace))
     ]
 
 ----------------------------------------------------
