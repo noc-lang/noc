@@ -141,7 +141,7 @@ function = do
 load :: Parser String
 load = do
   lexeme $ reserved $ "load"
-  path <- lexeme $ (stringLiteral <|> (many $ noneOf "\n"))
+  path <- lexeme $ (stringLiteral <|> (many $ noneOf "\n\r"))
   pure path
 
 program :: FilePath -> Parser Module

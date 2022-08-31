@@ -1,9 +1,7 @@
-<<<<<<< HEAD
 /*
 Dict functions
 */
 
-load std:stack
 load seq
 
 def keys = {
@@ -24,31 +22,4 @@ def values = {
     [["A" 1] ["B" 2] ["C" 3]] values => [[1 2 3]]
     ---
     [unquote swap pop] step
-=======
-/*
-Dict functions
-*/
-
-load std:stack
-load seq
-
-def keys = {
-    ---
-    Get the dictionnary keys
-
-    (example)
-    [["A" 1] ["B" 2] ["C" 3]] keys => [["A" "B" "C"]]
-    ---
-    [unquote pop] step
-}
-
-def values = {
-    ---
-    Get the dictionnary values
-
-    (example)
-    [["A" 1] ["B" 2] ["C" 3]] values => [[1 2 3]]
-    ---
-    [unquote swap pop] step
->>>>>>> master
 }
