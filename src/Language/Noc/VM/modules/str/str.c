@@ -46,6 +46,10 @@ void noc_format(NocBytecode b) {
     NocValue v2 = pop_stack(&vm.stack);
     if(v2.label == STRING_VAL) {
         if(v.label == QUOTE_VAL) {
+            if(strlen(v2.s) > 1024) {
+                throw_noc_error(BAD_ARGUMENT, "the format string exceeds 1024 characters", 0);
+            }
+
             if(v.quote.cursor == 0)
                 throw_noc_error(BAD_ARGUMENT, "cannot format with an empty quote", 0);
             

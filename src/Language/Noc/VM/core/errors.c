@@ -100,7 +100,8 @@ void throw_noc_error(NocError err, char* fmt, int num, ...) {
         size += strlen(va_arg(args, char*));
  
     va_start(args, num);
-    char* msg_formatted = malloc(sizeof(char) * size);
+    char* msg_formatted = malloc(sizeof(char) * (size+1));
+    msg_formatted[size] = '\0';
     
     if(msg_formatted == NULL) {
         fprintf(stderr, "[%s] malloc cannot allocate more memory. (source: VM/core/errors.c => throw_noc_error)\n", noc_err_to_str(OUT_OF_MEMORY_ERROR));
