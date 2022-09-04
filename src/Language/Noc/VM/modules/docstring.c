@@ -115,7 +115,69 @@ char* render_op_doc(NocOpLabel label) {
 }
 
 char* render_prim_doc(char* funcname) {
-    if(strcmp(funcname, "open") == 0) {
+    if(strcmp(funcname, "id") == 0) {
+
+    } else if(strcmp(funcname, "str") == 0) {
+        return "Type conversion\n\
+(example)\n\
+    5 str => [\"5\"]";
+    } else if(strcmp(funcname, "int") == 0) {
+        return "Type conversion\n\
+(example)\n\
+    \"10\" int => [10]";
+    } else if(strcmp(funcname, "float") == 0) {
+        return "Type conversion\n\
+(example)\n\
+    \"10.5\" float => [10.5]";
+    } else if(strcmp(funcname, "bool") == 0) {
+        return "Convert a value to boolean value\n\
+(example)\n\
+    1 Bool => [True]";
+    } else if(strcmp(funcname, "help") == 0) {
+        return "helpception ^^";
+    } else if(strcmp(funcname, "case") == 0) {
+        return "Pattern matching combinator\n\
+(example)\n\
+ def fact = { \n\
+   [\n\
+     [[1] [1]]\n\
+     [[_] [dup 1 - dup fact *]] # wildcard (match any pattern)\n\
+   ] case\n\
+ }\n\
+ \n\
+ def main = { \n\
+   6 dup fact print \n\
+ }";
+    } else if(strcmp(funcname, "trace") == 0) {
+        return "Trace the Noc stack\n\
+(example)\n\
+ 1 2 3 trace + => stack: [1 5]\n\
+ output: [1 2 3]";
+    } else if(strcmp(funcname, "chr") == 0) {
+        return "Get the character Unicode representation of the decimal number\n\
+(example)\n\
+ 97 chr => ['a']";
+    } else if(strcmp(funcname, "ord") == 0) {
+        return "Get the decimal representation of a Unicode character\n\
+(example)\n\
+ 'A' ord => [65]";
+    } else if(strcmp(funcname, "print") == 0) {
+        return "Output a value (Standard output)\n\
+(example)\n\
+  \"Hello, World!\" print => \"Hello, World!\"\n\
+  => []";
+    } else if(strcmp(funcname, "ask") == 0) {
+        return "Read line from the standard input\n\
+(example)\n\
+  \"Your name: \" ask\n\
+  Your name: john\n\
+  => [\"john\"]";
+    } else if(strcmp(funcname, "putstr") == 0) {
+        return "Output a string value (Standard output)\n\
+(example)\n\
+  \"Hello!\" putstr => Hello!\n\
+  => []";
+    } else if(strcmp(funcname, "open") == 0) {
         return "Proceed to 'read', 'write', 'append' actions to files\n\
 (example)\n\
     \"filename\" \"\" \"r\" open => [\"This is a content.\\n\"]\n\
@@ -161,29 +223,6 @@ char* render_prim_doc(char* funcname) {
     Output: \n\
     \"other instructions...\"\n\
     */";
-    } else if(strcmp(funcname, "args") == 0) {
-        return "Get the program's command line arguments\n\
-(example)\n\
-  def main = {\n\
-    args print\n\
-  }\n\
- /*\n\
- noc file.noc a b\n\
- Output:\n\
- [\"a\", \"b\"]\n\
- -----\n\
- noc file.noc -- a b --arg c\n\
- [\"a\" \"b\" \"--arg\" \"c\"]\n\
- */";
-    } else if(strcmp(funcname, "catch") == 0) {
-        return "Catch errors in a quote\n\
-(example)\n\
-    [1 + \"2\" +] [\"An error has occured.\" putstrln] catch\n\
-    [1 2 +] [\"Another error has occured.\" putstrln] catch\n\
-    == Output ==\n\
-    An error has occured.\n\
-    => []\n\
-    => [3]";
     } else if(strcmp(funcname, "step") == 0) {
         return "Execute a specific function for each element of a quote\n\
 quote [function] step \n\n\
