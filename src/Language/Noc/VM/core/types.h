@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // NocValue type
 typedef struct NocValue NocValue;
@@ -11,8 +12,8 @@ typedef struct NocBytecode NocBytecode;
 
 typedef struct NocStack {
     NocValue *array;
-    int capacity;
-    int cursor;
+    size_t capacity;
+    size_t cursor;
 } NocStack;
 
 typedef enum NocValueLabel { FLOAT_VAL, INT_VAL, STRING_VAL, CHAR_VAL, BOOL_VAL, SYMBOL_VAL, QUOTE_VAL } NocValueLabel;

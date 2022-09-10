@@ -32,6 +32,7 @@ run (Exec (path : _)) = do
           noc_vm_path <- getXdgDirectory XdgData (if os == "mingw32" then "local/noc/noc_vm" else "noc/noc_vm")
           system $ noc_vm_path <> " " <> bytecode_path
           return ()
+run _ = putStrLn "noc: no input file"
 
 cmd :: Parser Command
 cmd = foldl (<|>) empty cmdFuncs
