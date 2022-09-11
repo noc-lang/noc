@@ -2,10 +2,13 @@ module Language.Noc.Compiler.Serialize where
 
 import Data.Binary
 import Data.Binary.Put
+import qualified Data.ByteString as BS (length)
+import qualified Data.ByteString.Lazy as BSL (writeFile)
+import Data.Text (pack)
+import Data.Text.Encoding (encodeUtf8)
 import Language.Noc.Compiler.Bytecode
 import Language.Noc.Syntax.AST (Atom(WordAtom), Constant(..))
 import Data.Int (Int64)
-import qualified Data.ByteString.Lazy as BS (writeFile)
 
 encodeInteger :: Integral a => a -> Put
 encodeInteger i = putInt64le (fromIntegral i :: Int64)
@@ -37,16 +40,17 @@ encodeOpCode EQUAL = putWord8 22
 encodeOpCode AND_BOOL = putWord8 23
 encodeOpCode OR_BOOL = putWord8 24
 
+encodeString :: String -> Put
+encodeString w = (encodeInteger $ BS.length encoded) >> (putByteString encoded)
+    where encoded = encodeUtf8 $ pack w
+
 encodeConst :: Constant -> Put
 encodeConst (IntConst n) = putWord8 4 >> (encodeInteger n)
 encodeConst (FloatConst n) = putWord8 5 >> putDoublele n
-encodeConst (StringConst s) = putWord8 6 >> (encodeInteger $ length s) >> putStringUtf8 s
+encodeConst (StringConst s) = putWord8 6 >> (encodeString s)
 encodeConst (CharConst c) = putWord8 7 >> putCharUtf8 c
 encodeConst (BoolConst True) = putWord8 8 >> putWord8 1
 encodeConst (BoolConst False) = putWord8 8 >> putWord8 0
-
-encodeString :: String -> Put
-encodeString w = (encodeInteger $ length w) >> putStringUtf8 w
 
 encodeSym :: SymbolDef -> Put
 encodeSym (FuncSym n p) = putWord8 0 >> (encodeString n) >> encodeInteger p
@@ -63,4 +67,4 @@ encode' (Bytecode sym constant doc opcodes) = do
 serializeBytecode :: FilePath -> Bytecode -> IO ()
 serializeBytecode filepath bytecode = do
     let res = runPut $ encode' bytecode
-    BS.writeFile filepath res
+    BSL.writeFile filepath res

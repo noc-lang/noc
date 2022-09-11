@@ -87,6 +87,8 @@ char* noc_err_to_str(NocError err) {
             return "FILE_NOT_FOUND_ERROR";
         case OUT_OF_MEMORY_ERROR:
             return "OUT_OF_MEMORY_ERROR";
+        case UTF8_ERROR:
+            return "UTF8_ERROR";
     }
 }
 

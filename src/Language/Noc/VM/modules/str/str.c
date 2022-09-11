@@ -33,6 +33,10 @@ void noc_chars(NocBytecode b) {
         NocValue v2;
         v2.label = CHAR_VAL;
         for(int i = 0; i < strlen(v.s); i++) {
+            int num = (int)v.s[i];
+            if(num < 0 || num > 127) {
+                throw_noc_error(UTF8_ERROR, "cannot encode utf8 in a char type", 0);
+            }
             v2.c = v.s[i];
             push_stack(&q.quote, v2);
         }

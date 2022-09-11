@@ -1,10 +1,16 @@
 module Language.Noc.Compiler.Bytecode where
 
+import Control.Exception (Exception, SomeException, throwIO)
+import Data.Char (ord)
 import Data.List (findIndex)
 import Data.Map (Map, toList)
 import Data.Text (Text, empty, pack, unpack)
 import Language.Noc.Resolution.Name
 import Language.Noc.Syntax.AST
+
+data NocError = UTF8Error String deriving (Show)
+
+instance Exception NocError
 
 type Position = Int
 
@@ -97,8 +103,8 @@ isSameSymbolDecl :: String -> SymbolDef -> Bool
 isSameSymbolDecl name (FuncSym w _) = name == w
 isSameSymbolDecl name _ = False
 
-update :: Expr -> Bytecode -> Bool -> Bytecode
-update [] (Bytecode s c d o) _ = Bytecode s c d o
+update :: Expr -> Bytecode -> Bool -> IO Bytecode
+update [] (Bytecode s c d o) _ = return $ Bytecode s c d o
 update (WordAtom x : xs) (Bytecode s c d o) isQuote = case isPrim x of
   True -> update xs (Bytecode new c d (o <> [pushWord isQuote $ CALL_SYMBOL $ index elem (==) new])) isQuote
     where
@@ -121,17 +127,21 @@ update (WordAtom x : xs) (Bytecode s c d o) isQuote = case isPrim x of
         setSymDecl _ l = l
         ---
         new = elem `setSymDecl` s
-update (ConstAtom x : xs) (Bytecode s c d o) isQuote = update xs (Bytecode s new d (o <> [PUSH_CONST $ index x (==) new])) isQuote
-  where
-    new = x `set` c
-update (QuoteAtom x : xs) (Bytecode s c d o) isQuote = update xs (Bytecode s' c' d' (o' <> [CREATE_QUOTE $ length x])) isQuote
-  where
-    (Bytecode s' c' d' o') = update x (Bytecode s c d o) True
+update (ConstAtom x : xs) (Bytecode s c d o) isQuote = do
+  let new = x `set` c
+  case x of
+    (CharConst y) -> case ord y > 127 of
+      True -> throwIO $ UTF8Error "cannot encode utf8 in a char type"
+      False -> update xs (Bytecode s new d (o <> [PUSH_CONST $ index x (==) new])) isQuote
+    _ -> update xs (Bytecode s new d (o <> [PUSH_CONST $ index x (==) new])) isQuote
+update (QuoteAtom x : xs) (Bytecode s c d o) isQuote = do
+  (Bytecode s' c' d' o') <- update x (Bytecode s c d o) True
+  update xs (Bytecode s' c' d' (o' <> [CREATE_QUOTE $ length x])) isQuote
 
 genBytecode :: [(Text, (Maybe DocString, Expr))] -> Bytecode -> IO Bytecode
 genBytecode [] bytecode = return bytecode
 genBytecode ((name, (docstring, expr)) : xs) (Bytecode s c d o) = do
-  let (Bytecode s' c' d' o') = update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o) False
+  (Bytecode s' c' d' o') <- update expr (Bytecode ((FuncSym (unpack name) (-1)) `set` s) c d o) False
   let new_s = map (updatePos (unpack name) (length o)) s'
   case docstring of
     (Just doc') -> genBytecode xs $ Bytecode new_s c' (d' <> [(unpack name, doc')]) (o' <> [RETURN])

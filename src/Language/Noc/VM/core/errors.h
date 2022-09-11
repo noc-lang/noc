@@ -10,7 +10,8 @@ typedef enum NocError {
     NAME_ERROR,
     BAD_ARGUMENT,
     FILE_NOT_FOUND_ERROR,
-    OUT_OF_MEMORY_ERROR
+    OUT_OF_MEMORY_ERROR,
+    UTF8_ERROR
 } NocError;
 
 char* noc_value_to_str(NocValueLabel label);
