@@ -4,17 +4,15 @@ This repository contains the Noc interpreter and the Noc Standard Library.
 
 ## Noc versions
 
-#### Get the Noc latest version
+To get Noc, check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
+
+#### The Noc latest version
 
 > This version was rewritten partially (check this [section](https://github.com/mortim/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained , there are still some bugs (the callstack not works with recursive function calls).
 
-To install the latest version, you can check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
-
-#### Get the Noc v0.1.0.0 version
+#### The Noc v0.1.0.0
 
 > This version is more operational but slower than the latest version because it's fully interpreted.
-
-You have to check the releases [here](https://github.com/mortim/noc/releases/tag/v0.1.0.0).
 
 ### Some examples
 
