@@ -188,12 +188,20 @@ void noc_case(NocBytecode b) {
     NocValue v2 = pop_stack(&vm.stack);
     if(v.label == QUOTE_VAL) {
         NocOp op;
+        NocValue case_val;
         op.operand = -1;
-        for(int i = 1; i < v.quote.cursor+1; i++) {
+        for(int i = 1; i < v.quote.cursor; i++) {
             if(v.quote.array[i].quote.cursor != 2)
                 throw_noc_error(BAD_ARGUMENT, "bad quote structure in the pattern matching", 0);
 
-            push_stack(&vm.stack, v.quote.array[i].quote.array[1].quote.array[1]);
+            case_val = v.quote.array[i].quote.array[1].quote.array[1];
+
+            if(case_val.label == SYMBOL_VAL) {
+                run(b, case_val.symbol->p);
+            } else {
+                push_stack(&vm.stack, case_val);
+            }
+
             push_stack(&vm.stack, v2);
             op.label = EQUAL;
             call_opcode(b, op);
