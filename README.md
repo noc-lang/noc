@@ -2,19 +2,30 @@
 
 This repository contains the Noc interpreter and the Noc Standard Library.
 
+## Noc versions
+
+#### Get the Noc latest version
+
+> This version was rewritten partially (check this [section](https://github.com/mortim/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained , there are still some bugs (the callstack not works with recursive function calls)
+
+To install the latest version, you can check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
+
+#### Get the Noc v0.1.0.0 version
+
+> This version is more operational but slower than the latest version because it's fully interpreted.
+
+You have to check the releases [here](https://github.com/mortim/noc/releases/tag/v0.1.0.0) before to check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
+
 ## Features
 - Stack-based language
-- Running in VM
+- An embbeded REPL **(only v0.1.0.0)**
+- Running in VM **(only the latest version)**
 - A list of combinators for the stack manipulation
 - Typed dynamically
 - Homoiconic (quotes)
 - Provides a module system
 - Includes a STD (Standard Library)
 - Pattern matching
-
-## Get Noc
-
-To install the Noc interpreter, you can check this [Installation guide](https://github.com/mortim/noc/wiki/Installation).
 
 ## Resources
 - [The Noc Book](https://github.com/mortim/noc/wiki)
