@@ -16,6 +16,85 @@ To install the latest version, you can check the [Installation guide](https://gi
 
 You have to check the releases [here](https://github.com/mortim/noc/releases/tag/v0.1.0.0) before to check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
 
+### Some examples
+
+fact.noc
+```scala
+def fact = {
+   [
+     [[1] []]
+     [[_] [dup 1 - dup fact *]]
+   ] case
+}
+
+def main = {
+   6 dup fact print
+}
+```
+
+greater-or-less.noc
+```scala
+load std:stack
+load std:bool
+
+def readInput = {"Choose a number: " ask}
+
+def mysteryNumber = { 45 }
+
+def greaterOrLess = {
+    dup
+    [
+        [[mysteryNumber] ["You won !" print]]
+        [[_] [
+            ["Less!" print readInput int greaterOrLess] ["Greater!" print readInput int greaterOrLess] 3 -1 rotNM mysteryNumber < if 
+        ]]
+    ] case
+}
+
+def main = {
+    readInput int greaterOrLess
+}
+```
+
+caesar.noc
+```scala
+load seq
+load std:string
+/* in the latest version the functions of the 'char' module are integrated in the Noc Prelude */
+load char
+load std:stack
+load std:io
+load sys
+
+def caesar = {
+    [
+        [[[cipher]] [
+                [ord swap dup 3 -1 rotNM + chr swap] step
+            ]]
+        [[[decipher]] [
+                [ord swap dup 3 -1 rotNM swap - chr swap] step
+            ]]
+        [[_] ["error." putstrln 1 exit]]
+    ] case
+
+    popr pop swap quote swap <> tostr
+}
+
+def encrypt = {
+    [cipher] caesar
+}
+
+def decrypt = {
+    [decipher] caesar
+}
+
+def main = {
+    /* [offset] [msg in array of chars] [encrypt/decrypt] */
+    3 "Hello"$ encrypt print
+    3 "Khoor"$ decrypt print
+}
+```
+
 ## Features
 - Stack-based language
 - An embbeded REPL **(only v0.1.0.0)**
