@@ -44,7 +44,7 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
                     result.b = v2.i > v1.i;
                     break;
                 case LESS_CMP:
-                    result.label == BOOL_VAL;
+                    result.label = BOOL_VAL;
                     result.b = v2.i < v1.i;
                     break;
                 case GREATER_OR_EQ_CMP:
@@ -86,7 +86,7 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
                     result.b = v2.f > v1.i;
                     break;
                 case LESS_CMP:
-                    result.label == BOOL_VAL;
+                    result.label = BOOL_VAL;
                     result.b = v2.f < v1.i;
                     break;
                 case GREATER_OR_EQ_CMP:
@@ -128,7 +128,7 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
                     result.b = v2.f > v1.f;
                     break;
                 case LESS_CMP:
-                    result.label == BOOL_VAL;
+                    result.label = BOOL_VAL;
                     result.b = v2.f < v1.f;
                     break;
                 case GREATER_OR_EQ_CMP:
@@ -169,7 +169,7 @@ void noc_opcode_operator(NocBytecode b, NocOp opcode) {
                     result.b = v2.i > v1.f;
                     break;
                 case LESS_CMP:
-                    result.label == BOOL_VAL;
+                    result.label = BOOL_VAL;
                     result.b = v2.i < v1.f;
                     break;
                 case GREATER_OR_EQ_CMP:
