@@ -8,7 +8,10 @@ To get Noc, check the [Installation guide](https://github.com/mortim/noc/wiki/In
 
 #### The Noc latest version
 
-> This version was rewritten partially (check this [section](https://github.com/mortim/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained , there are still some bugs (the callstack not works with recursive function calls).
+> This version was rewritten partially (check this [section](https://github.com/mortim/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained , there are still some bugs:
+> - callstack not works with recursive functions calls
+> - cannot format quotes
+> - cannot operate big ints (Arbitrary precision integers)
 
 #### The Noc v0.1.0.0
 
