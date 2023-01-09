@@ -108,7 +108,9 @@ def main = {
 - Pattern matching
 
 ## Resources
-- [The Noc Book](https://github.com/mortim/noc/wiki)
+- [The Noc Wiki](https://github.com/mortim/noc/wiki)
+- [vscode-noc](https://github.com/mortim/vscode-noc)
+- [nocdoc](https://github.com/mortim/nocdoc)
 
 ## Contributing
 To contribute to The Noc Programming Language, you can add an [issue](https://github.com/mortim/noc/issues/) to report some bugs, ask for a new feature, questions, etc... Or you can fork this repository to evolve her with the [pull requests](https://github.com/mortim/noc/pulls).
