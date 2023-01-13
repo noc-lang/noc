@@ -1,7 +1,5 @@
 name: CI Noc Documentation
-on:
-  release:
-    types: [edited]
+on: [push]
 
 jobs:
   noc:
