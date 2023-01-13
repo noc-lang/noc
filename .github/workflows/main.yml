@@ -2,7 +2,7 @@ name: CI Noc Documentation
 on:
   push:
     branches:
-      - main
+      - master
   release:
     types: [edited]
   
