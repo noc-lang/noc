@@ -29,5 +29,4 @@ jobs:
     - uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{secrets.GITHUB_TOKEN}}
-        publish_dir: ./noc_documentation
-        working-directory: noc-v0.1.0.0-patch
+        publish_dir: ./noc-v0.1.0.0-patch/noc_documentation
