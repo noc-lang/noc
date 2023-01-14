@@ -3,9 +3,7 @@ on:
   push:
     branches:
       - master
-  release:
-    types: [edited]
-  
+      
 jobs:
   noc:
     name: Generate the Noc documentation with nocdoc tool
