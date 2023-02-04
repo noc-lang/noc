@@ -4,11 +4,11 @@ This repository contains the Noc interpreter and the Noc Standard Library.
 
 ## Noc versions
 
-To get Noc, check the [Installation guide](https://github.com/mortim/noc/wiki/Installation).
+To get Noc, check the [Installation guide](https://github.com/noc-lang/noc/wiki/Installation).
 
 #### The Noc latest version
 
-> This version was rewritten partially (check this [section](https://github.com/mortim/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained, there are still some bugs or lack of features:
+> This version was rewritten partially (check this [section](https://github.com/noc-lang/noc/wiki/Optimizations)) in C to embark a VM and it's not longer maintained, there are still some bugs or lack of features:
 > - callstack not works with recursive functions calls
 > - cannot format quotes
 > - cannot operate big ints (Arbitrary precision integers)
@@ -108,9 +108,9 @@ def main = {
 - Pattern matching
 
 ## Resources
-- [The Noc Wiki](https://github.com/mortim/noc/wiki)
-- [vscode-noc](https://github.com/mortim/vscode-noc)
-- [nocdoc](https://github.com/mortim/nocdoc)
+- [The Noc Wiki](https://github.com/noc-lang/noc/wiki)
+- [vscode-noc](https://github.com/noc-lang/vscode-noc)
+- [nocdoc](https://github.com/noc-lang/nocdoc)
 
 ## Contributing
 To contribute to The Noc Programming Language, you can add an [issue](https://github.com/mortim/noc/issues/) to report some bugs, ask for a new feature, questions, etc... Or you can fork this repository to evolve her with the [pull requests](https://github.com/mortim/noc/pulls).
