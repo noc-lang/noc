@@ -108,7 +108,7 @@ def main = {
 - Pattern matching
 
 ## Resources
-- [The Noc Wiki](https://github.com/noc-lang/noc/wiki)
+- [The Noc Wiki](https://noc-lang.github.io/docs/noc-wiki.html)
 - [vscode-noc](https://github.com/noc-lang/vscode-noc)
 - [nocdoc](https://github.com/noc-lang/nocdoc)
 
