@@ -4,11 +4,11 @@ This repository contains the Noc interpreter and the Noc Standard Library.
 
 ## Noc versions
 
-To get Noc, check the [Installation guide](https://noc-lang.github.io/docs/installation.html).
+To get Noc, check the [Installation guide](https://noc-lang.github.io/manual/installation.html).
 
 #### The Noc latest version
 
-> This version was rewritten partially (check this [section](https://noc-lang.github.io/docs/optimizations.html)) in C to embark a VM and it's not longer maintained, there are still some bugs or lack of features:
+> This version was rewritten partially (check this [section](https://noc-lang.github.io/manual/optimizations.html)) in C to embark a VM and it's not longer maintained, there are still some bugs or lack of features:
 > - callstack not works with recursive functions calls
 > - cannot format quotes
 > - cannot operate big ints (Arbitrary precision integers)
@@ -108,7 +108,6 @@ def main = {
 - Pattern matching
 
 ## Resources
-- [The Noc Wiki](https://noc-lang.github.io/docs/noc-wiki.html)
 - [vscode-noc](https://github.com/noc-lang/vscode-noc)
 - [nocdoc](https://github.com/noc-lang/nocdoc)
 
