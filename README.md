@@ -17,6 +17,15 @@ To get Noc, check the [Installation guide](https://noc-lang.github.io/manual/ins
 
 > This version is more operational but slower than the latest version because it's fully interpreted.
 
+In this version, theses functions are defined in these modules:
+
+|         Module          |                                 Functions                                         |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| [prelude](https://noc-lang.github.io/manual/library/prelude.html) | [putchar](https://noc-lang.github.io/manual/library/prelude.html#[putchar]) | 
+| [seq](https://noc-lang.github.io/manual/library/seq.html)         | [pushr](https://noc-lang.github.io/manual/library/seq.html#[pushr]), [popr](https://noc-lang.github.io/manual/library/seq.html#[popr]), [unquote](https://noc-lang.github.io/manual/library/seq.html#[unquote]) | 
+| [char](https://noc-lang.github.io/manual/library/char.html)       | [chr](https://noc-lang.github.io/manual/library/char.html#[chr]), [ord](https://noc-lang.github.io/manual/library/char.html#[ord]) | 
+| [sys](https://noc-lang.github.io/manual/library/sys.html)         | [args](https://noc-lang.github.io/manual/library/sys.html#[args]), [catch](https://noc-lang.github.io/manual/library/sys.html#[catch]) |
+
 ### Some examples
 
 fact.noc
