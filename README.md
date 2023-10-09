@@ -31,14 +31,15 @@ In this version, theses functions are defined in these modules:
 fact.noc
 ```scala
 def fact = {
+  dup
    [
-     [[1] []]
-     [[_] [dup 1 - dup fact *]]
+     [[0] [pop 1]]
+     [[_] [dup 1 - fact *]]
    ] case
 }
 
 def main = {
-   6 dup fact print
+  6 fact print
 }
 ```
 
